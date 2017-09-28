@@ -1,0 +1,14 @@
+
+# Executables
+main_0_generacion
+
+# Generated
+*.o
+a.out
+.depend
+
+# Text-editor related
+*~
+.*.swp
+.*.swo
+
