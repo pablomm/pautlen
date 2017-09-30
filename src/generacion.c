@@ -252,7 +252,7 @@ UTILIZA UN JUEGO DE ETIQUETAS ÚNICO
 	_end_not_x:
 	*/
 	PUT_ASM("pop eax");
-	PUT_ASM("cmp %s, 0", es_referencia ? "[eax]" : "eax");
+	PUT_ASM("cmp dword %s, 0", es_referencia ? "[eax]" : "eax");
 	PUT_ASM("je _one_%d", cuantos_no);
 	PUT_ASM("push dword 0");
 	PUT_ASM("jmp _end_not_%d", cuantos_no);
@@ -269,7 +269,7 @@ AÑO SÓLO USAREMOS ENTERO Y BOOLEANO) DE CONSOLA LLAMANDO A LAS CORRESPONDIENTE
 FUNCIONES DE ALFALIB (scan_int Y scan_boolean)
 */
 
-	PUT_ASM("pop dword _%s",nombre);
+	PUT_ASM("push dword _%s",nombre);
 
 	/* Si tipo no es ENTERO o BOLEANO habria error, pero simplemente llama a scan_boolean */
 	PUT_ASM("call %s", (tipo == ENTERO) ? "scan_int" : "scan_boolean");
@@ -289,12 +289,14 @@ O ENTERO )
 */
 	if(es_referencia) {
 		PUT_ASM("pop eax");
-		PUT_ASM("push [eax]");
+		PUT_ASM("push dword [eax]");
 	}
 
 	/* Si tipo no es ENTERO o BOLEANO habria error, pero simplemente llama a print_boolean */
 	PUT_ASM("call %s", (tipo == ENTERO) ? "print_int" : "print_boolean");
 	PUT_ASM("add esp, 4");
+
+	PUT_ASM("call print_endofline");
 }
 
 
