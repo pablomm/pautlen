@@ -1,7 +1,3 @@
-
-# Executables
-main_0_generacion
-
 # Generated
 *.o
 a.out
@@ -11,4 +7,3 @@ a.out
 *~
 .*.swp
 .*.swo
-

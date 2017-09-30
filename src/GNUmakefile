@@ -9,7 +9,7 @@ NAS        := nasm
 NASFLAGS   := -f elf32
 
 ## Definiciones de objetivos
-EXES := main_0_generacion pruebas2
+EXES := main_0_generacion main_0_generacion2
 SRCS := $(wildcard *.c)
 OBJS := $(SRCS:.c=.o)
 
