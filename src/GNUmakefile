@@ -1,25 +1,37 @@
-.DEFAULT_GOAL = help
-.PHONY: all debug clean clobber help
+.DEFAULT_GOAL = all
+.PHONY: all debug clean help
 
-CC    	:= gcc
-CFLAGS	+= -std=c99 -pedantic -Wall -Wextra
+## Configuracion de las herramientas
+CC         := gcc
+CFLAGS     += -m32 -std=c99 -pedantic -Wall -Wextra
+LDFLAGS    += -m32
+NAS        := nasm
+NASFLAGS   := -f elf32
 
-EXES := main_0_generacion
-OBJS := generacion.o
-$(EXES): $(OBJS)
+## Definiciones de objetivos
+EXES := main_0_generacion pruebas2
+SRCS := $(wildcard *.c)
+OBJS := $(SRCS:.c=.o)
 
-all: $(EXES)
-all: CFLAGS += -O3
+## Dependencias de los ejecutables
+$(EXES): generacion.o
 
-# Para debugging
-debug: $(EXES)
-debug: CFLAGS += -g
-
+## Deteccion automatica de dependencias (_solo_ entre ficheros .c y .h)
 .depend:
 	$(CC) $(CFLAGS) -E -MM $(wildcard *.c) > .depend
 ifneq ($(MAKECMDGOALS),clean)
 include .depend
 endif
+
+# Regla implicita extra para poder compilar los .nasm
+%.o: %.nasm
+	$(NAS) $(NASFLAGS) -o $@ $^
+
+all: $(EXES)
+all: CFLAGS += -O3
+
+debug: $(EXES)
+debug: CFLAGS += -g
 
 clean:
 	$(RM) $(EXES) $(OBJS) .depend
