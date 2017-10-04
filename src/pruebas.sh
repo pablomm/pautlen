@@ -6,6 +6,16 @@ die() { >&2 echo "$@"; exit 1; }
 # Navegamos al directorio del script
 cd "$( dirname "${BASH_SOURCE[0]}" )"
 
+# './pruebas.sh clean' borra lo generado
+if [ $# -eq 1 ] && [ $1 = clean ]; then
+
+    make clean
+    rm -f prueba1 prueba2 prueba3
+    rm -f prueba1.o prueba2.o prueba3.o
+    rm -f prueba1.nasm prueba2.nasm prueba3.nasm
+    exit 0
+fi
+
 # Nos aseguramos de que exista el generador y generamos el ejecutable
 make all
 ./main_0_generacion_ejemplo1 prueba1.nasm
@@ -31,4 +41,3 @@ echo prueba3
 diff <(./prueba3 <<< $'-3\n3\n0\n') <(echo -n $'true\n3\n0\n3\n')
 diff <(./prueba3 <<< $'10\n-9\n1\n') <(echo -n $'false\n-10\n1\n-9\n')
 
-rm -f prueba.o prueba
