@@ -214,8 +214,9 @@ void no(FILE* fpasm, int es_referencia, int cuantos_no)
 	PUT_ASM("je _one_%d", cuantos_no);
 	PUT_ASM("push dword 0");
 	PUT_ASM("jmp _end_not_%d", cuantos_no);
-	PUT_ASM("_one_%d:\n\tpush dword 1", cuantos_no);
-	PUT_ASM("_end_not_%d:", cuantos_no);
+	PUT_DIRECTIVE("_one_%d:", cuantos_no);
+    PUT_ASM("push dword 1");
+	PUT_DIRECTIVE("_end_not_%d:", cuantos_no);
 }
 
 
