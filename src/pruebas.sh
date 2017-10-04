@@ -17,7 +17,7 @@ if [ $# -eq 1 ] && [ $1 = clean ]; then
 fi
 
 # Nos aseguramos de que exista el generador y generamos el ejecutable
-make all
+make test
 ./main_0_generacion_ejemplo1 prueba1.nasm
 ./main_0_generacion_ejemplo2 prueba2.nasm
 ./main_0_generacion_ejemplo3 prueba3.nasm
