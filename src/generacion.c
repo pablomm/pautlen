@@ -20,10 +20,10 @@
 /* Con esta estructura podremos controlar si el codigo ensamblador generado tendra comentarios */
 
 
-#if defined(NDEBUG) && (NDEBUG != 0)
-#	define PUT_COMMENT(...) ((void)0)
-#else
+#if !defined(NDEBUG) || NDEBUG == 0
 #	define PUT_COMMENT(...) _put_asm(fpasm, "\t; [DEBUG] ", " [/DEBUG]\n", __VA_ARGS__)
+#else
+#	define PUT_COMMENT(...) ((void)0)
 #endif
 
 /* Funcion auxiliar privada. Es necesaria porque en una macro de aridad variable,

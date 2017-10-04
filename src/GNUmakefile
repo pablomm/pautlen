@@ -21,7 +21,7 @@ include .depend
 endif
 
 all: $(EXES)
-all: CFLAGS += -O3 -DNDEBUG=1
+all: CFLAGS += -O3 -DNDEBUG
 
 debug: $(EXES)
 debug: CFLAGS += -g
