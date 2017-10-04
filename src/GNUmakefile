@@ -3,13 +3,10 @@
 
 ## Configuracion de las herramientas
 CC         := gcc
-CFLAGS     += -m32 -std=c99 -pedantic -Wall -Wextra
-LDFLAGS    += -m32
-NAS        := nasm
-NASFLAGS   := -f elf32
+CFLAGS     += -std=c99 -pedantic -Wall -Wextra
 
 ## Definiciones de objetivos
-EXES := main_0_generacion main_0_generacion2
+EXES := main_0_generacion main_0_generacion_ejemplo1 main_0_generacion_ejemplo2 main_0_generacion_ejemplo3
 SRCS := $(wildcard *.c)
 OBJS := $(SRCS:.c=.o)
 
@@ -23,12 +20,8 @@ ifneq ($(MAKECMDGOALS),clean)
 include .depend
 endif
 
-# Regla implicita extra para poder compilar los .nasm
-%.o: %.nasm
-	$(NAS) $(NASFLAGS) -o $@ $^
-
 all: $(EXES)
-all: CFLAGS += -O3
+all: CFLAGS += -O3 -DNDEBUG=1
 
 debug: $(EXES)
 debug: CFLAGS += -g
