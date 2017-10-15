@@ -8,6 +8,3 @@ a.out
 *~
 .*.swp
 .*.swo
-
-# Incluimos el alfalib por comodidad
-!alfalib.o

@@ -6,14 +6,14 @@ CC         := gcc
 CFLAGS     += -std=c99 -pedantic -Wall -Wextra
 
 ## Definiciones de objetivos
-TESTS := main_0_generacion main_0_generacion_ejemplo1 main_0_generacion_ejemplo2 main_0_generacion_ejemplo3
+TESTS := main_0_generacion main_0_generacion_ejemplo1 main_0_generacion_ejemplo2 main_0_generacion_ejemplo3 main_1_simbolos
 SRCS := $(wildcard *.c)
 OBJS := $(SRCS:.c=.o)
 
-## Dependencias de los ejecutables
+## Dependencias de los ejecutables / adicionales
 $(EXES): generacion.o
 
-$(TESTS): generacion.o
+$(TESTS): generacion.o tablaHash.o
 
 ## Deteccion automatica de dependencias (_solo_ entre ficheros .c y .h)
 .depend:
@@ -24,10 +24,6 @@ endif
 
 all: $(EXES)
 all: CFLAGS += -O3 -DNDEBUG
-
-#Requisito entrega practica 1
-all:
-	$(CC) $(CFLAGS) -o generacion.o -c generacion.c
 
 test: $(TESTS)
 test: CFLAGS += -O3 -DNDEBUG
