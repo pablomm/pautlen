@@ -7,7 +7,10 @@ SDIR := src
 IDIR := include
 TDIR := test
 ODIR := obj
-EDIR := 
+EDIR := src
+
+## Nombre compresion
+ZIP := ../BiancManuel_MarcosPablo_TABLA.zip
 
 ## Configuracion de las herramientas
 CC       := gcc
@@ -15,14 +18,17 @@ CFLAGS   := -std=c99 -Iinclude -pedantic -Wall -Wextra
 LDFLAGS  :=
 RM	     := rm -f
 
-## Definiciones de objetivos
-SRCS := $(wildcard $(SDIR)/*.c)
-SOBJ := $(patsubst $(SDIR)/%.c,$(ODIR)/%.o,$(SRCS))
-
 ## Exe para practica 2
-EXES := 
+EXES := $(EDIR)/prueba_tabla.c
 EOBJ := $(patsubst $(EDIR)/%.c,$(ODIR)/%.o,$(EXES))
 EBIN := $(patsubst $(EDIR)/%.c,$(BDIR)/%,$(EXES))
+
+## Nota: Por comodidad permitimos que los exes con main
+##       esten en la carpeta src tambien
+
+## Definiciones de objetivos
+SRCS := $(filter-out $(EXES), $(wildcard $(SDIR)/*.c))
+SOBJ := $(patsubst $(SDIR)/%.c,$(ODIR)/%.o,$(SRCS))
 
 TEST := $(wildcard $(TDIR)/*.c)
 TOBJ := $(patsubst $(TDIR)/%.c,$(ODIR)/%.o,$(TEST))
@@ -36,21 +42,21 @@ debug: CFLAGS += -g
 ## Objetivos
 all: $(EBIN)
 test: $(TBIN)
-
+debug: $(EBIN)
 
 ## Reglas de compilacion
 
 ## Compilacion de .c de src
 $(SOBJ):$(ODIR)/%.o: $(SDIR)/%.c
-	$(CC) -c -o $@ $< $(CFLAGS)
+	$(CC) $(CFLAGS) -o $@ -c $<
 
 ## Compilacion de .c de tests
 $(TOBJ):$(ODIR)/%.o: $(TDIR)/%.c
-	$(CC) -c -o $@ $< $(CFLAGS)
+	$(CC) $(CFLAGS) -o $@ -c $<
 
 ## Compilacion de .c de exes
 $(EOBJ):$(ODIR)/%.o: $(EDIR)/%.c
-	$(CC) -c -o $@ $< $(CFLAGS) 
+	$(CC) $(CFLAGS) -o $@ -c $< 
 
 ## Linkado de tests
 $(TBIN):$(BDIR)/%: $(ODIR)/%.o $(SOBJ)
@@ -65,7 +71,7 @@ clean:
 	@$(RM) $(SOBJ) $(EOBJ) $(EBIN) $(TOBJ) $(TBIN)
 
 zip: clean
-	@git archive
+	@git archive --format zip -o $(ZIP) HEAD
 
 help:
 	@echo "Posibles comandos:"
@@ -73,5 +79,5 @@ help:
 	@echo "    test     - genera ejecutables para las pruebas"
 	@echo "    debug    - compila todo usando con simbolos de depuracion"
 	@echo "    clean    - borra todos los ficheros generados"
-	@echo "    zip      - comprime el la rama local activa del repositorio de git"
+	@echo "    zip      - comprime la rama activa del repositorio"
 	@echo "    help     - muestra esta ayuda"
