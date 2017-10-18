@@ -1,7 +1,6 @@
 
 #include "tablaHash.h"
 
-#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -14,7 +13,7 @@ static void chomp(const char* str)
 static TABLA_HASH* scope_local = NULL;
 static TABLA_HASH* scope_global = NULL;
 
-static void parse_file(FILE* in)
+static void parse_file(FILE* in, FILE* out)
 {
 	char buffer[256];
 
@@ -34,16 +33,16 @@ static void parse_file(FILE* in)
 			if (scope_local) {
 				info = buscar_simbolo(scope_local, ident);
 				if (NULL != info) {
-					printf("%s\t%i\n", ident, info->adicional1);
+					fprintf(out, "%s\t%i\n", ident, info->adicional1);
 					continue;
 				}
 			}
 			info = buscar_simbolo(scope_global, ident);
 			if (NULL != info) {
-				printf("%s\t%i\n", ident, info->adicional1);
+				fprintf(out,"%s\t%i\n", ident, info->adicional1);
 			}
 			else {
-				printf("%s\t-1\n", ident);
+				fprintf(out, "%s\t-1\n", ident);
 			}
 			continue;
 		}
@@ -51,7 +50,7 @@ static void parse_file(FILE* in)
 		int num = atoi(num_str);
 
 		if (num == -999) {
-			printf("cierre\n");
+			fprintf(out, "cierre\n");
 			liberar_tabla(scope_local);
 			scope_local = NULL;
 		}
@@ -59,15 +58,15 @@ static void parse_file(FILE* in)
 			scope_local = crear_tabla(50);
 			insertar_simbolo(scope_global, ident, FUNCION, ENTERO, ESCALAR, num, 0);
 			insertar_simbolo(scope_local,  ident, FUNCION, ENTERO, ESCALAR, num, 0);
-			printf("%s\n", ident);
+			fprintf(out, "%s\n", ident);
 		}
 		else {
 			TABLA_HASH* scope = scope_local ? scope_local : scope_global;
 			if (OK == insertar_simbolo(scope, ident, VARIABLE, ENTERO, ESCALAR, num, 0)) {
-				printf("%s\n", ident);
+				fprintf(out, "%s\n", ident);
 			}
 			else {
-				printf("-1\t%s\n", ident);
+				fprintf(out, "-1\t%s\n", ident);
 			}
 		}
 	}
@@ -76,20 +75,42 @@ static void parse_file(FILE* in)
 	liberar_tabla(scope_global);
 }
 
+/*
+ * Argumentos:
+ *    - argv[1] - fichero de entrada (stdin por defecto)
+ *    - argv[2] - fichero de salida (stdout por defecto)
+ */
 int main(int argc, char** argv)
 {
+
+	FILE *in, *out;
+
+	/* Cargamos fichero de entrada o stdin por su defecto */
 	if (argc >= 2) {
-		FILE* fp = fopen(argv[1], "r");
-		if (NULL == fp) {
-			fprintf(stderr, "Unable to open file %s", argv[1]);
+		in = fopen(argv[1], "r");
+		if (NULL == in) {
+			fprintf(stderr, "Unable to open input file %s", argv[1]);
 			exit(1);
 		}
-		parse_file(fp);
-		fclose(fp);
+
+	} else {
+		in = stdin;
 	}
-	else {
-		parse_file(stdin);
+	/* Cargamos fichero de salida o stdout en su defecto */
+	if (argc >= 3) {
+		out = fopen(argv[2], "w");
+		if (NULL == out) {
+			fprintf(stderr, "Unable to open output file %s", argv[2]);
+			exit(1);
+		}
+	} else {
+		out = stdout;
 	}
+
+	parse_file(in, out);
+
+	fclose(in);
+	fclose(out);
 
 	return 0;
 }
