@@ -264,24 +264,13 @@ void restar(FILE* fpasm, int es_referencia_1, int es_referencia_2)
 	   de memoria y evitarnos un moc
 	*/
 
-	/* Caso solo es referencia el primer operando */
-	if(es_referencia_1 && !es_referencia_2) {
+	PUT_ASM("pop dword ebx");
 
-		PUT_ASM("pop dword eax");
-		PUT_ASM("pop dword ebx");
-		PUT_ASM("sub eax, [ebx]");
+	PUT_ASM("pop dword eax");
+	if(es_referencia_1)
+		PUT_ASM("mov dword eax, [eax]");
 
-	/* Caso ambos referencia, solo el segundo o ninguno */
-	} else {
-
-		PUT_ASM("pop dword ebx");
-
-		PUT_ASM("pop dword eax");
-		if(es_referencia_1)
-			PUT_ASM("mov dword eax, [eax]");
-
-		PUT_ASM("sub eax, %s", es_referencia_2 ? "[ebx]" : "ebx");
-	}
+	PUT_ASM("sub eax, %s", es_referencia_2 ? "[ebx]" : "ebx");	
 
 	PUT_ASM("push dword eax");
 
