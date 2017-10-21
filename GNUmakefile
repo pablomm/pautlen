@@ -10,7 +10,7 @@ ODIR := obj
 EDIR := src
 
 ## Nombre compresion
-ZIP := ../BiancManuel_MarcosPablo_TABLA.zip
+ZIP := ../BlancManuel_MarcosPablo_TABLA.zip
 
 ## Configuracion de las herramientas
 CC       := gcc
