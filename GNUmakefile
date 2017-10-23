@@ -1,6 +1,57 @@
 .DEFAULT_GOAL = all
 .PHONY: all test debug clean zip help
 
+##########################################################
+#                                                        #
+#  Makefile Proyecto de automatas y lenguajes            #
+#  23-oct-2017                                           #
+#                                                        #
+# Carpetas del proyecto (definidas en las variables):    #
+#                                                        #
+#  BDIR - Carpeta donde se crearan los ejecutables       #
+#         tanto del objetivo all como de test            #
+#                                                        #
+#  SDIR - Carpeta con los ficheros fuente con el         #
+#         codigo de los modulos                          #
+#                                                        #
+#  IDIR - Carpeta con todas las cabeceras de los         #
+#         modulos                                        #
+#                                                        #
+#  TDIR - Carpeta con todos los mains con tests          #
+#         Por como esta hecho el makefile no puede ser   #
+#         la misma carpeta que la de los ficheros        #
+#         fuente (SDIR). Los binarios de esta carpeta    #
+#         se compilaran al hacer make test               #
+#                                                        #
+#  ODIR - Carpeta con todos los objetos .o compilados    #
+#         y los .o adicionales (alfalib.o)               #
+#                                                        #
+#  EDIR - Carpeta con los mains que se van a generar     #
+#         al hacer make all, por comodidad se            #
+#         permite que esta carpeta sea la misma que      #
+#         la de los ficheros fuente (SDIR)               #
+#                                                        #
+#  MDIR - Carpeta con otros ficheros. Ej: entrada para   #
+#         las pruebas. (Carpeta no utilizada en el       #
+#         makefile, en el proyecto es misc)              #
+#                                                        #
+#  Tan solo hay que definir las variables de las         #
+#  carpetas y la variable EXES con los mains que         #
+#  generaran los binarios al hacer make all. El resto    #
+#  lo hace solo el makefile. Tiene en cuenta si un       #
+#  .c esta actualizado para no recompilarlo.             #
+#  Para definir alguna de las carpetas como el           #
+#  directorio raiz bastara darle el valor ' . '          #
+#  Make clean elimina exclusivamente los ficheros        #
+#  generados por el propio makefile.                     #
+#  Make zip utiliza la utilidad git archive para añadir  #
+#  a un zip la version en el commit local del branch     #
+#  activo mas reciente (HEAD). En la carpeta raiz del    #
+#  proyecto debe estar ubicado el repositorio. junto     #
+#  al makefile.                                          #
+#                                                        #
+##########################################################
+
 ## Definiciones de carpetas
 BDIR := .
 SDIR := src
@@ -9,7 +60,7 @@ TDIR := test
 ODIR := obj
 EDIR := src
 
-## Nombre compresion
+## Nombre fichero compresion
 ZIP := ../BlancManuel_MarcosPablo_TABLA.zip
 
 ## Configuracion de las herramientas
@@ -18,13 +69,12 @@ CFLAGS   := -std=c99 -Iinclude -pedantic -Wall -Wextra
 LDFLAGS  :=
 RM	     := rm -f
 
-## Exe para practica 2
-EXES := $(EDIR)/prueba_tabla.c
+## Mains objetivos de make all
+EXES := prueba_tabla.c
+
+EXES := $(patsubst %,$(EDIR)/%,$(EXES))
 EOBJ := $(patsubst $(EDIR)/%.c,$(ODIR)/%.o,$(EXES))
 EBIN := $(patsubst $(EDIR)/%.c,$(BDIR)/%,$(EXES))
-
-## Nota: Por comodidad permitimos que los exes con main
-##       esten en la carpeta src tambien
 
 ## Definiciones de objetivos
 SRCS := $(filter-out $(EXES), $(wildcard $(SDIR)/*.c))
