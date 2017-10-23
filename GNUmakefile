@@ -67,7 +67,7 @@ ZIP := ../BlancManuel_MarcosPablo_TABLA.zip
 CC       := gcc
 CFLAGS   := -std=c99 -Iinclude -pedantic -Wall -Wextra
 LDFLAGS  :=
-RM	     := rm -f
+RM       := rm -fv
 
 ## Mains objetivos de make all
 EXES := prueba_tabla.c
@@ -94,6 +94,13 @@ all: $(EBIN)
 test: $(TBIN)
 debug: $(EBIN)
 
+## Deteccion automatica de dependencias (_solo_ entre ficheros .c y .h)
+.depend:
+	$(CC) $(CFLAGS) -E -MM $(SRCS) $(TEST) > .depend
+ifneq ($(MAKECMDGOALS),clean)
+-include .depend
+endif
+
 ## Reglas de compilacion
 
 ## Compilacion de .c de src
@@ -110,18 +117,18 @@ $(EOBJ):$(ODIR)/%.o: $(EDIR)/%.c
 
 ## Linkado de tests
 $(TBIN):$(BDIR)/%: $(ODIR)/%.o $(SOBJ)
-	$(CC) -o $@ $? $(LDFLAGS) $(CFLAGS)
+	$(CC) -o $@ $^ $(LDFLAGS) $(CFLAGS)
 
 ## Linkado de exes
 $(EBIN):$(BDIR)/%: $(ODIR)/%.o $(SOBJ)
-	$(CC) -o $@ $? $(LDFLAGS)
+	$(CC) -o $@ $^ $(LDFLAGS)
 
 
 clean:
-	@$(RM) $(SOBJ) $(EOBJ) $(EBIN) $(TOBJ) $(TBIN)
+	$(RM) $(SOBJ) $(EOBJ) $(EBIN) $(TOBJ) $(TBIN)
 
 zip: clean
-	@git archive --format zip -o $(ZIP) HEAD
+	git archive --format zip -o $(ZIP) HEAD
 
 help:
 	@echo "Posibles comandos:"
