@@ -18,14 +18,13 @@ STATUS iniciar_scope(void)
 
 void liberar_scope(void)
 {
-	if (scope_local) liberar_tabla(scope_local);
-	if (scope_global) liberar_tabla(scope_global);
+	liberar_tabla(scope_local);
+	liberar_tabla(scope_global);
 }
 
 STATUS cerrar_scope_local(void)
 {
-
-	if(NULL == scope_local)
+	if (NULL == scope_local)
 		return ERR;
 
 	liberar_tabla(scope_local);
@@ -48,54 +47,32 @@ STATUS declarar_global(const char *id, TIPO tipo, CLASE clase, int valor)
 	/* Se asume que el ambito global esta inicializado */
 
 	/* Comprobamos que no existe ya el simbolo */
-	if(NULL != buscar_simbolo(scope_global, id)) {
-
-		return insertar_simbolo(scope_global, id, VARIABLE, tipo, clase, valor, 0);
-	}
-
-	return ERR;
+	return insertar_simbolo(scope_global, id, VARIABLE, tipo, clase, valor, 0);
 }
 
 
 STATUS declarar_local(const char *id, CATEGORIA categ, TIPO tipo, CLASE clase, int adic1, int adic2)
 {
-
-	if(NULL == scope_local) {
-		return ERR;
-	}
-
-	/* Error si existe un simbolo local con el mismo nombre */
-	if(NULL == buscar_simbolo(scope_local, id)) {
-		
-		return insertar_simbolo(scope_global, id, categ, tipo, clase, adic1, adic2);
-	}
-
-	return ERR;
-	
+	if (NULL == scope_local) return ERR;
+	/* No hace falta comprobar si ya esta en el ambito local porque tablaHash se encarga de eso */
+	return insertar_simbolo(scope_local, id, categ, tipo, clase, adic1, adic2);
 }
 
 STATUS declarar_funcion(const char *id, TIPO tipo, int n_params, int n_vars)
 {
-
 	/* Se asume que el ambito global esta inicializado */
 
 	/* Error si existe ambito local no pueden declararse funciones dentro de otras */
-	if(NULL != scope_local) {
-		return ERR;
-	}
-
-	/* Error si existe un simbolo global con el mismo nombre */
-	if(NULL != buscar_simbolo(scope_global, id)) {
-		return ERR;
-	}
+	if (NULL != scope_local) return ERR;
 
 	/* Asumimos todas las funciones como escalares? */
-	if(ERR == insertar_simbolo(scope_global, id, FUNCION, tipo, ESCALAR, n_params, n_vars))
+	/* Error si existe un simbolo global con el mismo nombre */
+	if (ERR == insertar_simbolo(scope_global, id, FUNCION, tipo, ESCALAR, n_params, n_vars))
 		return ERR;
 
 	/* Creamos ambito local y insertamos la funcion como simbolo */
 	scope_local = crear_tabla(TAM_SCOPE_LOCAL);
-	if(ERR == insertar_simbolo(scope_local,  id, FUNCION, tipo, ESCALAR, n_params, n_vars))
+	if (ERR == insertar_simbolo(scope_local,  id, FUNCION, tipo, ESCALAR, n_params, n_vars))
 		return ERR;
 
 	return OK;
@@ -110,11 +87,10 @@ INFO_SIMBOLO* uso_local(const char *id)
 {
 	INFO_SIMBOLO* info;
 
-	if(NULL != scope_local) {
+	if (NULL != scope_local) {
 
 		info = buscar_simbolo(scope_local, id);
-		if(info)
-			return info;		
+		if (info) return info;
 	}
 
 	return uso_global(id);

@@ -16,5 +16,5 @@ funcion1
 tres
 dos
 cuatro
-cierre 	-999
+cierre	-999
 funcion1

@@ -1,23 +1,34 @@
 
-#include "tablaHash.h"
+#include "tablaSimbolos.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-static void chomp(const char* str)
+/* Se carga */
+static void chomp(char* str)
 {
-	char* nl = strrchr(str, '\n'); if (nl) *nl = '\0';
+	while (*str != '\0' && *str != '\n') str++;
+	*str = '\0'; 
 }
 
-static TABLA_HASH* scope_local = NULL;
-static TABLA_HASH* scope_global = NULL;
+static FILE* open_file(const char* path, const char* mode)
+{
+	FILE* fp = fopen(path, mode);
+	if (NULL == fp) {
+		fprintf(stderr, "%s: No such file or directory\n", path);
+		exit(1);
+	}
+	return fp;
+}
 
 static void parse_file(FILE* in, FILE* out)
 {
 	char buffer[256];
+	int ambito_abierto = 0;
 
-	scope_global = crear_tabla(50);
+	/* Debemos inicializar y destruir la tabla de simbolos */
+	iniciar_scope();
 
 	// Leemos linea a linea
 	while (1) {
@@ -28,41 +39,45 @@ static void parse_file(FILE* in, FILE* out)
 		char* ident   = strtok(buffer, "\t");
 		char* num_str = strtok(NULL,   "\t");
 
+		/* Si no hay numero, buscamos el simbolo */
 		if (NULL == num_str) {
-			INFO_SIMBOLO* info;
-			if (scope_local) {
-				info = buscar_simbolo(scope_local, ident);
-				if (NULL != info) {
-					fprintf(out, "%s\t%i\n", ident, info->adicional1);
-					continue;
-				}
-			}
-			info = buscar_simbolo(scope_global, ident);
-			if (NULL != info) {
-				fprintf(out,"%s\t%i\n", ident, info->adicional1);
-			}
-			else {
-				fprintf(out, "%s\t-1\n", ident);
-			}
+			INFO_SIMBOLO* info = uso_local(ident);
+			int val = info ? info->adicional1 : -1;
+			fprintf(out, "%s\t%i\n", ident, val);
 			continue;
 		}
 
 		int num = atoi(num_str);
 
-		if (num == -999) {
+		/* Si hay numero, nos indica que hacer */
+
+		if (-999 == num) {
+			if (0 != strcmp(ident, "cierre")) {
+				/* Esto no deberia darse nunca */
+				fprintf(stderr, "Invalid close command\n");
+				exit(1);
+			}
+			cerrar_scope_local();
 			fprintf(out, "cierre\n");
-			liberar_tabla(scope_local);
-			scope_local = NULL;
+			ambito_abierto = 1;
 		}
 		else if (num < -1) {
-			scope_local = crear_tabla(50);
-			insertar_simbolo(scope_global, ident, FUNCION, ENTERO, ESCALAR, num, 0);
-			insertar_simbolo(scope_local,  ident, FUNCION, ENTERO, ESCALAR, num, 0);
+			declarar_funcion(ident, ENTERO, num, 0);
 			fprintf(out, "%s\n", ident);
 		}
 		else {
-			TABLA_HASH* scope = scope_local ? scope_local : scope_global;
-			if (OK == insertar_simbolo(scope, ident, VARIABLE, ENTERO, ESCALAR, num, 0)) {
+			STATUS code;
+			
+			/* Intentamos */
+			code = declarar_local(ident, VARIABLE, ENTERO, ESCALAR, num, 0);
+			
+			/* Intentamos */
+			if (ERR == code) {
+				code = declarar_global(ident, ENTERO, ESCALAR, num);
+			}
+
+			/* Si no hemos conseguido  */
+			if (OK == code) {
 				fprintf(out, "%s\n", ident);
 			}
 			else {
@@ -71,8 +86,7 @@ static void parse_file(FILE* in, FILE* out)
 		}
 	}
 
-	if (scope_local) liberar_tabla(scope_local);
-	liberar_tabla(scope_global);
+	liberar_scope();
 }
 
 /*
@@ -82,36 +96,16 @@ static void parse_file(FILE* in, FILE* out)
  */
 int main(int argc, char** argv)
 {
+	FILE *in = stdin, *out = stdout;
 
-	FILE *in, *out;
-
-	/* Cargamos fichero de entrada o stdin por su defecto */
-	if (argc >= 2) {
-		in = fopen(argv[1], "r");
-		if (NULL == in) {
-			fprintf(stderr, "Unable to open input file %s", argv[1]);
-			exit(1);
-		}
-
-	} else {
-		in = stdin;
-	}
-	/* Cargamos fichero de salida o stdout en su defecto */
-	if (argc >= 3) {
-		out = fopen(argv[2], "w");
-		if (NULL == out) {
-			fprintf(stderr, "Unable to open output file %s", argv[2]);
-			exit(1);
-		}
-	} else {
-		out = stdout;
-	}
+	if (argc >= 2) in  = open_file(argv[1], "r");
+	if (argc >= 3) out = open_file(argv[2], "w");
 
 	parse_file(in, out);
 
+	/* Puede que cerremos stdin/out pero no pasa nada porque se acaba el programa */
 	fclose(in);
 	fclose(out);
-
 	return 0;
 }
 
