@@ -1,10 +1,4 @@
-
-
 #include "tablaSimbolos.h"
-
-/* Cuando se cree el header mover alli */
-#define TAM_SCOPE_GLOBAL 50
-#define TAM_SCOPE_LOCAL 50
 
 static TABLA_HASH* scope_local = NULL;
 static TABLA_HASH* scope_global = NULL;
