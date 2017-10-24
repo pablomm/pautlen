@@ -76,7 +76,7 @@ echo -e -n $NC
 echo [Pruebas practica 2]
 echo -e -n $RED
 
-diff <($BDIR/main_1_simbolos $MDIR/entrada_simbolos.txt) <(cat $MDIR/salida_simbolos.txt)
+diff <(prueba_tabla $MDIR/entrada_simbolos.txt) <(cat $MDIR/salida_simbolos.txt)
 
 echo -e -n $NC
 

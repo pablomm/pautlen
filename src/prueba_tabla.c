@@ -1,22 +1,30 @@
 
 #include "tablaSimbolos.h"
 
+#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-/* Se carga */
+static void die(const char* msg)
+{
+	fprintf(stderr, "fatal error: %s\n", msg);
+	exit(1);
+}
+
+/* Se se carga el primer \n de una cadena. */
 static void chomp(char* str)
 {
 	while (*str != '\0' && *str != '\n') str++;
 	*str = '\0'; 
 }
 
+/* Abre un fichero, y cierra el program si no lo puede abrir */
 static FILE* open_file(const char* path, const char* mode)
 {
 	FILE* fp = fopen(path, mode);
 	if (NULL == fp) {
-		fprintf(stderr, "%s: No such file or directory\n", path);
+		fprintf(stderr, "%s: %s\n", path, strerror(errno));
 		exit(1);
 	}
 	return fp;
@@ -53,36 +61,29 @@ static void parse_file(FILE* in, FILE* out)
 
 		if (-999 == num) {
 			if (0 != strcmp(ident, "cierre")) {
-				/* Esto no deberia darse nunca */
-				fprintf(stderr, "Invalid close command\n");
-				exit(1);
+				die("El numero -999 debe ir con cierre");
 			}
 			cerrar_scope_local();
 			fprintf(out, "cierre\n");
-			ambito_abierto = 1;
+			ambito_abierto = 0;
 		}
 		else if (num < -1) {
+			if (ambito_abierto) die("No se puede abrir un ambito dentro de otro");
+			ambito_abierto = 1;
 			declarar_funcion(ident, ENTERO, num, 0);
 			fprintf(out, "%s\n", ident);
 		}
 		else {
 			STATUS code;
 			
-			/* Intentamos */
-			code = declarar_local(ident, VARIABLE, ENTERO, ESCALAR, num, 0);
-			
-			/* Intentamos */
-			if (ERR == code) {
-				code = declarar_global(ident, ENTERO, ESCALAR, num);
-			}
-
-			/* Si no hemos conseguido  */
-			if (OK == code) {
-				fprintf(out, "%s\n", ident);
+			if (ambito_abierto) {
+				code = declarar_local(ident, VARIABLE, ENTERO, ESCALAR, num, 0);
 			}
 			else {
-				fprintf(out, "-1\t%s\n", ident);
-			}
+			 	code = declarar_global(ident, ENTERO, ESCALAR, num);
+			}			
+
+			fprintf(out, (OK == code) ? "%s\n" : "-1\t%s\n", ident);
 		}
 	}
 

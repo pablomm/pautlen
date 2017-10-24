@@ -95,8 +95,15 @@ test: $(TBIN)
 debug: $(EBIN)
 
 ## Deteccion automatica de dependencias (_solo_ entre ficheros .c y .h)
+# La siguiente regla le dice a make como generar el fichero .depend
+# Solo ejecuta el cpp sobre los fuentes, y acumula las dependencias
+# (flag -MM) en un formato que puede procesar make
 .depend:
 	$(CC) $(CFLAGS) -E -MM $(SRCS) $(TEST) > .depend
+# Lo incluimos en este make solo si no estamos haciendo un clean
+# (para no crearlo y destruirlo inmediatamente)
+# y lo prefijamos con un - para que no falle aunque no se pueda incluir
+# (como la primera vez que se ejecuta este makefile)
 ifneq ($(MAKECMDGOALS),clean)
 -include .depend
 endif
@@ -125,7 +132,7 @@ $(EBIN):$(BDIR)/%: $(ODIR)/%.o $(SOBJ)
 
 
 clean:
-	$(RM) $(SOBJ) $(EOBJ) $(EBIN) $(TOBJ) $(TBIN)
+	$(RM) $(SOBJ) $(EOBJ) $(EBIN) $(TOBJ) $(TBIN) .depend
 
 zip: clean
 	git archive --format zip -o $(ZIP) HEAD
