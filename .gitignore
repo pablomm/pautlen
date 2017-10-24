@@ -10,4 +10,12 @@ a.out
 .*.swo
 
 # Incluimos el alfalib por comodidad
-!alfalib.o
+!obj/alfalib.o
+
+# Ejecutables
+main_0_generacion
+main_1_simbolos
+main_0_generacion_ejemplo1
+main_0_generacion_ejemplo2
+main_0_generacion_ejemplo3
+prueba_tabla

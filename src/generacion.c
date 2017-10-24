@@ -45,15 +45,18 @@ static void _put_asm( FILE* fpasm, char* prefix, char* suffix, char* fmt, ...)
 void escribir_cabecera_compatibilidad(FILE* fpasm)
 {
 	PUT_COMMENT("Cabecera de compatibilidad");
-	/* Aqui iria la cabecera de compatibilidad */
-	PUT_DIRECTIVE("%%ifdef TIPO_MSVC");
-	PUT_DIRECTIVE("%%define main _main");
-	PUT_DIRECTIVE("%%endif");
+
 
 	/* Pese a ser comentarios, queremos que salgan siempre */
 	PUT_DIRECTIVE(";; Paulen 2017");
 	PUT_DIRECTIVE(";; - Manuel Blanc");
 	PUT_DIRECTIVE(";; - Pablo Marcos");
+
+	fputc('\n', fpasm);
+
+	PUT_DIRECTIVE("%%ifdef TIPO_MSVC");
+	PUT_DIRECTIVE("%%define main _main");
+	PUT_DIRECTIVE("%%endif");
 
 }
 /**********************************************************************************/
@@ -261,24 +264,13 @@ void restar(FILE* fpasm, int es_referencia_1, int es_referencia_2)
 	   de memoria y evitarnos un moc
 	*/
 
-	/* Caso solo es referencia el primer operando */
-	if(es_referencia_1 && !es_referencia_2) {
+	PUT_ASM("pop dword ebx");
 
-		PUT_ASM("pop dword eax");
-		PUT_ASM("pop dword ebx");
-		PUT_ASM("sub eax, [ebx]");
+	PUT_ASM("pop dword eax");
+	if(es_referencia_1)
+		PUT_ASM("mov dword eax, [eax]");
 
-	/* Caso ambos referencia, solo el segundo o ninguno */
-	} else {
-
-		PUT_ASM("pop dword ebx");
-
-		PUT_ASM("pop dword eax");
-		if(es_referencia_1)
-			PUT_ASM("mov dword eax, [eax]");
-
-		PUT_ASM("sub eax, %s", es_referencia_2 ? "[ebx]" : "ebx");
-	}
+	PUT_ASM("sub eax, %s", es_referencia_2 ? "[ebx]" : "ebx");	
 
 	PUT_ASM("push dword eax");
 
