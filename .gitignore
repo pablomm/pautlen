@@ -1,6 +1,8 @@
 # Generated
+*.yy.c
 *.nasm
 *.o
+*.d
 a.out
 .depend
 
@@ -18,4 +20,6 @@ main_1_simbolos
 main_0_generacion_ejemplo1
 main_0_generacion_ejemplo2
 main_0_generacion_ejemplo3
+
+pruebaMorfo
 prueba_tabla

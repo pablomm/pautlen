@@ -61,24 +61,29 @@ ODIR := obj
 EDIR := src
 
 ## Nombre fichero compresion
-ZIP := ../BlancManuel_MarcosPablo_TABLA.zip
+ZIP := ../BlancManuel_MarcosPablo_morfo.zip
 
 ## Configuracion de las herramientas
-CC       := gcc
+CC       ?= gcc
 CFLAGS   := -std=c99 -Iinclude -pedantic -Wall -Wextra
 LDFLAGS  :=
+LFLAGS   :=
 RM       := rm -fv
 
 ## Mains objetivos de make all
-EXES := prueba_tabla.c
+EXES := pruebaMorfo.c
 
 EXES := $(patsubst %,$(EDIR)/%,$(EXES))
 EOBJ := $(patsubst $(EDIR)/%.c,$(ODIR)/%.o,$(EXES))
 EBIN := $(patsubst $(EDIR)/%.c,$(BDIR)/%,$(EXES))
 
+DEPEND_FILES := $(wildcard $(ODIR)/*.d)
+
 ## Definiciones de objetivos
-SRCS := $(filter-out $(EXES), $(wildcard $(SDIR)/*.c))
-SOBJ := $(patsubst $(SDIR)/%.c,$(ODIR)/%.o,$(SRCS))
+FLEX_SOURCES := $(wildcard $(SDIR)/*.l)
+FLEX_GENERATED_FILES := $(FLEX_SOURCES:.l=.yy.c)
+SRCS := $(filter-out $(EXES) $(FLEX_GENERATED_FILES), $(wildcard $(SDIR)/*.c))
+SOBJ := $(patsubst $(SDIR)/%.c,$(ODIR)/%.o,$(SRCS) $(FLEX_GENERATED_FILES))
 
 TEST := $(wildcard $(TDIR)/*.c)
 TOBJ := $(patsubst $(TDIR)/%.c,$(ODIR)/%.o,$(TEST))
@@ -92,27 +97,31 @@ debug: CFLAGS += -g
 ## Objetivos
 all: $(EBIN)
 test: $(TBIN)
+
 debug: $(EBIN)
 
 ## Deteccion automatica de dependencias (_solo_ entre ficheros .c y .h)
 # La siguiente regla le dice a make como generar el fichero .depend
 # Solo ejecuta el cpp sobre los fuentes, y acumula las dependencias
 # (flag -MM) en un formato que puede procesar make
-.depend:
-	$(CC) $(CFLAGS) -E -MM $(SRCS) $(TEST) > .depend
+#CFLAGS += -MMD
 # Lo incluimos en este make solo si no estamos haciendo un clean
 # (para no crearlo y destruirlo inmediatamente)
 # y lo prefijamos con un - para que no falle aunque no se pueda incluir
 # (como la primera vez que se ejecuta este makefile)
-ifneq ($(MAKECMDGOALS),clean)
--include .depend
-endif
+#ifneq ($(MAKECMDGOALS),clean)
+#-include $(patsubst $(wildcard $(SDIR)/*.c,$(ODIR)/%.o),:.c=.d)
+#endif
 
 ## Reglas de compilacion
 
 ## Compilacion de .c de src
 $(SOBJ):$(ODIR)/%.o: $(SDIR)/%.c
 	$(CC) $(CFLAGS) -o $@ -c $<
+
+## Generacion de .yy.c a partir de .l
+$(SDIR)/%.yy.c: $(SDIR)/%.l
+	$(LEX) $(LFLAGS) -o $@ $<
 
 ## Compilacion de .c de tests
 $(TOBJ):$(ODIR)/%.o: $(TDIR)/%.c
@@ -132,7 +141,7 @@ $(EBIN):$(BDIR)/%: $(ODIR)/%.o $(SOBJ)
 
 
 clean:
-	$(RM) $(SOBJ) $(EOBJ) $(EBIN) $(TOBJ) $(TBIN) .depend
+	$(RM) $(SOBJ) $(EOBJ) $(EBIN) $(TOBJ) $(TBIN) $(FLEX_GENERATED_FILES) $(DEPEND_FILES)
 
 zip: clean
 	git archive --format zip -o $(ZIP) HEAD
@@ -145,3 +154,8 @@ help:
 	@echo "    clean    - borra todos los ficheros generados"
 	@echo "    zip      - comprime la rama activa del repositorio"
 	@echo "    help     - muestra esta ayuda"
+
+
+## Deteccion de dependencias automatica, v2
+CFLAGS += -MMD
+-include $(DEPEND_FILES)
