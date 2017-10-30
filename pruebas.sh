@@ -39,7 +39,7 @@ echo [Compilando pruebas]
 make test
 make all
 
-echo [Pruebas practica 1]
+echo [Pruebas practica 1 - generacion]
 # Pruebas con los datos del enunciado
 echo [Prueba1]
 echo -e -n $RED
@@ -74,11 +74,29 @@ diff <(./prueba3 <<< $'-3\n3\n0\n') <(echo -n $'true\n3\n0\n3\n')
 diff <(./prueba3 <<< $'10\n-9\n1\n') <(echo -n $'false\n-10\n1\n-9\n')
 echo -e $GREEN[OK]$NC
 
-echo [Pruebas practica 2]
+echo [Pruebas practica 2 - tabla simbolos]
 echo -e -n $RED
 
-diff <($BDIR/prueba_tabla $MDIR/entrada_simbolos.txt) <(cat $MDIR/salida_simbolos.txt)
+diff <($BDIR/main_1_tabla $MDIR/p2_entrada_1.txt) <(cat $MDIR/p2_salida_1.txt)
 
+echo -e $GREEN[OK]$NC
+
+echo [Pruebas practica 3 - analizador morfologico]
+
+echo [Prueba 1]
+echo -e -n $RED
+diff <($BDIR/pruebaMorfo $MDIR/p3_entrada_1.txt) <(cat $MDIR/p3_salida_1.txt)
+echo -e $GREEN[OK]$NC
+
+echo [Prueba 2]
+echo -e -n $RED
+
+diff <($BDIR/pruebaMorfo $MDIR/p3_entrada_2.txt 2> /dev/null) <(cat $MDIR/p3_salida_2.txt)
+echo -e $GREEN[OK]$NC
+
+echo [Prueba 3]
+echo -e -n $RED
+diff <($BDIR/pruebaMorfo $MDIR/p3_entrada_3.txt 2> /dev/null) <(cat $MDIR/p3_salida_3.txt)
 echo -e $GREEN[OK]$NC
 
 echo [Borrando ficheros generados]

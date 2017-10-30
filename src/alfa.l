@@ -10,7 +10,7 @@
     void error_handler(const char* msg) {
         lexpos.column -= yyleng;
         lexpos.offset -= yyleng;
-        fprintf(stderr, "Error en [lin %u, col %u]: %s (%s)\n",
+        fprintf(stderr, "****Error en [lin %u, col %u]: %s (%s)\n",
             lexpos.line, lexpos.column,
             msg,
             yytext
@@ -18,8 +18,6 @@
         exit(1);
     }
 
-    //#define MACRO_BODY(statements) do { statements } while (0)
-    #define RETURN_TOKEN(tok) { fprintf(yyout, "%s\t%i\t%s\n", #tok, tok, yytext); return tok; }
 
     /* Los contenidos de esta macro se ejecutan justo antes de que se corra el
      * codigo correspondiente a una regla. Lo usamos para contar las columnas.
@@ -38,47 +36,47 @@
 
 %%
 
-"main"      RETURN_TOKEN(TOK_MAIN);
-"int"       RETURN_TOKEN(TOK_INT);
-"boolean"   RETURN_TOKEN(TOK_BOOLEAN);
-"array"     RETURN_TOKEN(TOK_ARRAY);
-"function"  RETURN_TOKEN(TOK_FUNCTION);
-"if"        RETURN_TOKEN(TOK_IF);
-"else"      RETURN_TOKEN(TOK_ELSE);
-"while"     RETURN_TOKEN(TOK_WHILE);
-"scanf"     RETURN_TOKEN(TOK_SCANF);
-"printf"    RETURN_TOKEN(TOK_PRINTF);
-"return"    RETURN_TOKEN(TOK_RETURN);
+"main"      { return TOK_MAIN; }
+"int"       { return TOK_INT; }
+"boolean"   { return TOK_BOOLEAN; }
+"array"     { return TOK_ARRAY; }
+"function"  { return TOK_FUNCTION; }
+"if"        { return TOK_IF; }
+"else"      { return TOK_ELSE; }
+"while"     { return TOK_WHILE; }
+"scanf"     { return TOK_SCANF; }
+"printf"    { return TOK_PRINTF; }
+"return"    { return TOK_RETURN; }
 
-";"         RETURN_TOKEN(TOK_PUNTOYCOMA);
-","         RETURN_TOKEN(TOK_COMA);
-"("         RETURN_TOKEN(TOK_PARENTESISIZQUIERDO);
-")"         RETURN_TOKEN(TOK_PARENTESISDERECHO);
-"["         RETURN_TOKEN(TOK_CORCHETEIZQUIERDO);
-"]"         RETURN_TOKEN(TOK_CORCHETEDERECHO);
-"{"         RETURN_TOKEN(TOK_LLAVEIZQUIERDA);
-"}"         RETURN_TOKEN(TOK_LLAVEDERECHA);
-"="         RETURN_TOKEN(TOK_ASIGNACION);
-"+"         RETURN_TOKEN(TOK_MAS);
-"-"         RETURN_TOKEN(TOK_MENOS);
-"/"         RETURN_TOKEN(TOK_DIVISION);
-"*"         RETURN_TOKEN(TOK_ASTERISCO);
-"&&"        RETURN_TOKEN(TOK_AND);
-"||"        RETURN_TOKEN(TOK_OR);
-"!"         RETURN_TOKEN(TOK_NOT);
-"=="        RETURN_TOKEN(TOK_IGUAL);
-"!="        RETURN_TOKEN(TOK_DISTINTO);
-"<="        RETURN_TOKEN(TOK_MENORIGUAL);
-">="        RETURN_TOKEN(TOK_MAYORIGUAL);
-"<"         RETURN_TOKEN(TOK_MENOR);
-">"         RETURN_TOKEN(TOK_MAYOR);
+";"         { return TOK_PUNTOYCOMA; }
+","         { return TOK_COMA; }
+"("         { return TOK_PARENTESISIZQUIERDO; }
+")"         { return TOK_PARENTESISDERECHO; }
+"["         { return TOK_CORCHETEIZQUIERDO; }
+"]"         { return TOK_CORCHETEDERECHO; }
+"{"         { return TOK_LLAVEIZQUIERDA; }
+"}"         { return TOK_LLAVEDERECHA; }
+"="         { return TOK_ASIGNACION; }
+"+"         { return TOK_MAS; }
+"-"         { return TOK_MENOS; }
+"/"         { return TOK_DIVISION; }
+"*"         { return TOK_ASTERISCO; }
+"&&"        { return TOK_AND; }
+"||"        { return TOK_OR; }
+"!"         { return TOK_NOT; }
+"=="        { return TOK_IGUAL; }
+"!="        { return TOK_DISTINTO; }
+"<="        { return TOK_MENORIGUAL; }
+">="        { return TOK_MAYORIGUAL; }
+"<"         { return TOK_MENOR; }
+">"         { return TOK_MAYOR; }
 
-[0-9]+      RETURN_TOKEN(TOK_CONSTANTE_ENTERA);
-"true"      RETURN_TOKEN(TOK_TRUE);
-"false"     RETURN_TOKEN(TOK_FALSE);
+[0-9]+      { return TOK_CONSTANTE_ENTERA; }
+"true"      { return TOK_TRUE; }
+"false"     { return TOK_FALSE; }
 
 [a-zA-Z][a-zA-Z_0-9]*   { if (yyleng > 100) error_handler("identificador demasiado largo");
-                          else RETURN_TOKEN(TOK_IDENTIFICADOR); }
+                          else return TOK_IDENTIFICADOR; }
 
 \/\/[^\n]*  { /* Comentario */                                          }
 \n          { lexpos.column = 1; lexpos.line++; /* Salto de linea */    }

@@ -82,12 +82,17 @@ DEPEND_FILES := $(wildcard $(ODIR)/*.d)
 ## Definiciones de objetivos
 FLEX_SOURCES := $(wildcard $(SDIR)/*.l)
 FLEX_GENERATED_FILES := $(FLEX_SOURCES:.l=.yy.c)
+FLEX_OBJ = $(patsubst $(SDIR)/%.c, $(ODIR)/%.o, $(FLEX_GENERATED_FILES))
+
 SRCS := $(filter-out $(EXES) $(FLEX_GENERATED_FILES), $(wildcard $(SDIR)/*.c))
 SOBJ := $(patsubst $(SDIR)/%.c,$(ODIR)/%.o,$(SRCS) $(FLEX_GENERATED_FILES))
 
 TEST := $(wildcard $(TDIR)/*.c)
 TOBJ := $(patsubst $(TDIR)/%.c,$(ODIR)/%.o,$(TEST))
 TBIN := $(patsubst $(TDIR)/%.c,$(BDIR)/%,$(TEST))
+
+# Flags de compilacion extras para ficheros generados por flex
+$(FLEX_OBJ): CFLAGS += -Wno-sign-compare -D_XOPEN_SOURCE=700
 
 ## Flags adicionales
 all: CFLAGS += -O3 -DNDEBUG
