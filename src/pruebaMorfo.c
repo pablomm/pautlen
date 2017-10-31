@@ -38,6 +38,9 @@ int main(int argc, char const *argv[])
 
 	while ((tok = yylex()) > 0) {
 
+        if(TOK_ERROR == tok) break;
+
+
         switch(tok) {
 
             case TOK_MAIN:

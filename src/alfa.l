@@ -15,7 +15,6 @@
             msg,
             yytext
         );
-        exit(1);
     }
 
 
@@ -75,13 +74,13 @@
 "true"      { return TOK_TRUE; }
 "false"     { return TOK_FALSE; }
 
-[a-zA-Z][a-zA-Z_0-9]*   { if (yyleng > 100) error_handler("identificador demasiado largo");
+[a-zA-Z][a-zA-Z_0-9]*   { if (yyleng > 100) {error_handler("identificador demasiado largo"); return TOK_ERROR; }
                           else return TOK_IDENTIFICADOR; }
 
 \/\/[^\n]*  { /* Comentario */                                          }
 \n          { lexpos.column = 1; lexpos.line++; /* Salto de linea */    }
 [[:space:]] { /* Ignorado */                                            }
-.           { error_handler("simbolo no permitido");                    }
+.           { error_handler("simbolo no permitido"); return TOK_ERROR;  }
 
 %%
 
