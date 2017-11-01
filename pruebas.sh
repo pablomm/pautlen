@@ -21,8 +21,8 @@ cd "$( dirname "${BASH_SOURCE[0]}" )"
 ## Rutina auxiliar que limpia todos los ficheros generados
 clean_and_exit() {
 	#make clean
-	rm -f prueba1 prueba2 prueba3
-	rm -f prueba1.o prueba2.o prueba3.o
+	rm -f $BDIR/prueba1 $BDIR/prueba2 $BDIR/prueba3
+	rm -f $ODIR/prueba1.o $ODIR/prueba2.o $ODIR/prueba3.o
 	rm -f prueba1.nasm prueba2.nasm prueba3.nasm
 	exit 0
 }
