@@ -30,7 +30,7 @@
 %option noyywrap
 /* No genera estas funciones y evita avisos al compilar */
 %option nounput noinput
-/* No necesitamos que flex calcule la linea porque ya lo haecemos nosotros */
+/* No necesitamos que flex calcule la linea porque ya lo hacemos nosotros */
 /* %option yylineno */
 
 %%
@@ -74,7 +74,7 @@
 "true"      { return TOK_TRUE; }
 "false"     { return TOK_FALSE; }
 
-[a-zA-Z][a-zA-Z_0-9]*   { if (yyleng > 100) {error_handler("identificador demasiado largo"); return TOK_ERROR; }
+[a-zA-Z][a-zA-Z_0-9]*   { if (yyleng > 100) { error_handler("identificador demasiado largo"); return TOK_ERROR; }
                           else return TOK_IDENTIFICADOR; }
 
 \/\/[^\n]*  { /* Comentario */                                          }
