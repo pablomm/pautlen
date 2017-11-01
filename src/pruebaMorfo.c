@@ -5,9 +5,6 @@
 
 #include "tokens.h"
 
-
-#define PRINT_TOK(tokname) fprintf(out, "%s\t%d\t%s\n", tokname, tok, yytext)
-
 extern FILE* yyin;
 extern FILE* yyout;
 extern char *yytext;
@@ -24,190 +21,72 @@ static FILE* open_file(const char* path, const char* mode)
 	return fp;
 }
 
+/* Hace una pasada del analizador morfologico a un fichero */
+int lex_file(FILE* in, FILE* out)
+{
+	yyin = in;
+	/* out lo usamos en la macro */
+#define TOKEN_CASE(token) case token: fprintf(out, "%s\t%d\t%s\n", #token, token, yytext); break;
+	while (1) {
+		int tok = yylex();
+		switch(tok) {
+			case TOK_ERROR: return 0; /* Error en el lexer */
+			case 0: return 1; /* Fin del fichero */
+			default: fprintf(stderr, "Token no definido: %i\n", tok); return 0;
+			TOKEN_CASE(TOK_MAIN);
+			TOKEN_CASE(TOK_INT);
+			TOKEN_CASE(TOK_BOOLEAN);
+			TOKEN_CASE(TOK_ARRAY);
+			TOKEN_CASE(TOK_FUNCTION);
+			TOKEN_CASE(TOK_IF);
+			TOKEN_CASE(TOK_ELSE);
+			TOKEN_CASE(TOK_WHILE);
+			TOKEN_CASE(TOK_SCANF);
+			TOKEN_CASE(TOK_PRINTF);
+			TOKEN_CASE(TOK_RETURN);
+			TOKEN_CASE(TOK_PUNTOYCOMA);
+			TOKEN_CASE(TOK_COMA);
+			TOKEN_CASE(TOK_PARENTESISIZQUIERDO);
+			TOKEN_CASE(TOK_PARENTESISDERECHO);
+			TOKEN_CASE(TOK_CORCHETEIZQUIERDO);
+			TOKEN_CASE(TOK_CORCHETEDERECHO);
+			TOKEN_CASE(TOK_LLAVEIZQUIERDA);
+			TOKEN_CASE(TOK_LLAVEDERECHA);
+			TOKEN_CASE(TOK_ASIGNACION);
+			TOKEN_CASE(TOK_MAS);
+			TOKEN_CASE(TOK_MENOS);
+			TOKEN_CASE(TOK_DIVISION);
+			TOKEN_CASE(TOK_ASTERISCO);
+			TOKEN_CASE(TOK_AND);
+			TOKEN_CASE(TOK_OR);
+			TOKEN_CASE(TOK_NOT);
+			TOKEN_CASE(TOK_IGUAL);
+			TOKEN_CASE(TOK_DISTINTO);
+			TOKEN_CASE(TOK_MENORIGUAL);
+			TOKEN_CASE(TOK_MAYORIGUAL);
+			TOKEN_CASE(TOK_MENOR);
+			TOKEN_CASE(TOK_MAYOR);
+			TOKEN_CASE(TOK_IDENTIFICADOR);
+			TOKEN_CASE(TOK_CONSTANTE_ENTERA);
+			TOKEN_CASE(TOK_TRUE);
+			TOKEN_CASE(TOK_FALSE);
+		}
+	}
+}
+
 int main(int argc, char const *argv[])
 {
-
-    FILE * out = stdout;
-
-	if (argc >= 2) yyin  = open_file(argv[1], "r");
+	// Preparamos los ficheros de entrada/salida
+	FILE* in  = stdin;
+	FILE* out = stdout;
+	if (argc >= 2) in  = open_file(argv[1], "r");
 	if (argc >= 3) out = open_file(argv[2], "w");
 
-    yyout = out;
+	// El cuerpo del programa: lexear un fichero
+	int status = lex_file(in, out);
 
-    int tok;
-
-	while ((tok = yylex()) > 0) {
-
-        if(TOK_ERROR == tok) break;
-
-
-        switch(tok) {
-
-            case TOK_MAIN:
-                PRINT_TOK("TOK_MAIN");
-                break;
-
-            case TOK_INT:
-                PRINT_TOK("TOK_INT");
-                break;
-
-            case TOK_BOOLEAN:
-                PRINT_TOK("TOK_BOOLEAN");
-                break;
-
-            case TOK_ARRAY:
-                PRINT_TOK("TOK_ARRAY");
-                break;
-
-            case TOK_FUNCTION:
-                PRINT_TOK("TOK_FUNCTION");
-                break;
-
-            case TOK_IF:
-                PRINT_TOK("TOK_IF");
-                break;
-
-            case TOK_ELSE:
-                PRINT_TOK("TOK_ELSE");
-                break;
-
-            case TOK_WHILE:
-                PRINT_TOK("TOK_WHILE");
-                break;
-
-            case TOK_SCANF:
-                PRINT_TOK("TOK_SCANF");
-                break;
-
-            case TOK_PRINTF:
-                PRINT_TOK("TOK_PRINTF");
-                break;
-
-            case TOK_RETURN:
-                PRINT_TOK("TOK_RETURN");
-                break;
-
-            case TOK_PUNTOYCOMA:
-                PRINT_TOK("TOK_PUNTOYCOMA");
-                break;
-
-            case TOK_COMA:
-                PRINT_TOK("TOK_COMA");
-                break;
-
-            case TOK_PARENTESISIZQUIERDO:
-                PRINT_TOK("TOK_PARENTESISIZQUIERDO");
-                break;
-
-            case TOK_PARENTESISDERECHO:
-                PRINT_TOK("TOK_PARENTESISDERECHO");
-                break;
-
-            case TOK_CORCHETEIZQUIERDO:
-                PRINT_TOK("TOK_CORCHETEIZQUIERDO");
-                break;
-
-            case TOK_CORCHETEDERECHO:
-                PRINT_TOK("TOK_CORCHETEDERECHO");
-                break;
-
-            case TOK_LLAVEIZQUIERDA:
-                PRINT_TOK("TOK_LLAVEIZQUIERDA");
-                break;
-
-            case TOK_LLAVEDERECHA:
-                PRINT_TOK("TOK_LLAVEDERECHA");
-                break;
-
-            case TOK_ASIGNACION:
-                PRINT_TOK("TOK_ASIGNACION");
-                break;
-
-            case TOK_MAS:
-                PRINT_TOK("TOK_MAS");
-                break;
-
-            case TOK_MENOS:
-                PRINT_TOK("TOK_MENOS");
-                break;
-
-            case TOK_DIVISION:
-                PRINT_TOK("TOK_DIVISION");
-                break;
-
-            case TOK_ASTERISCO:
-                PRINT_TOK("TOK_ASTERISCO");
-                break;
-
-            case TOK_AND:
-                PRINT_TOK("TOK_AND");
-                break;
-
-            case TOK_OR:
-                PRINT_TOK("TOK_OR");
-                break;
-
-            case TOK_NOT:
-                PRINT_TOK("TOK_NOT");
-                break;
-
-            case TOK_IGUAL:
-                PRINT_TOK("TOK_IGUAL");
-                break;
-
-            case TOK_DISTINTO:
-                PRINT_TOK("TOK_DISTINTO");
-                break;
-
-            case TOK_MENORIGUAL:
-                PRINT_TOK("TOK_MENORIGUAL");
-                break;
-
-            case TOK_MAYORIGUAL:
-                PRINT_TOK("TOK_MAYORIGUAL");
-                break;
-
-            case TOK_MENOR:
-                PRINT_TOK("TOK_MENOR");
-                break;
-
-            case TOK_MAYOR:
-                PRINT_TOK("TOK_MAYOR");
-                break;
-
-            case TOK_IDENTIFICADOR:
-                PRINT_TOK("TOK_IDENTIFICADOR");
-                break;
-
-            case TOK_CONSTANTE_ENTERA:
-                PRINT_TOK("TOK_CONSTANTE_ENTERA");
-                break;
-
-            case TOK_TRUE:
-                PRINT_TOK("TOK_TRUE");
-                break;
-
-            case TOK_FALSE:
-                PRINT_TOK("TOK_FALSE");
-                break;
-
-            case TOK_ERROR: /* No deberia entrar en este caso */
-                PRINT_TOK("TOK_ERROR");
-                break;
-
-            default:
-                PRINT_TOK("TOK_UNKNOWN");
-                break;
-        }        
-    }
-
-    /* Salimos con estado 1 en caso de error */
-    if(TOK_ERROR == tok) {
-        exit(1);
-    }
-
-    fclose(yyin);
-    fclose(out);
-
-	return 0;
+	// Los cerramos y finalizamos el programa
+	if (argc >= 2) fclose(in);
+	if (argc >= 3) fclose(out);
+	return status ? EXIT_SUCCESS : EXIT_FAILURE;
 }
