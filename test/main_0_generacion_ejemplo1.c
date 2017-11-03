@@ -6,8 +6,11 @@ int main (int argc, char** argv)
 {
     FILE * salida;
 
-    if (argc != 2) {fprintf (stdout, "ERROR POCOS ARGUMENTOS\n"); return -1;}
-    
+    if (argc != 2) {
+        fprintf (stdout, "ERROR POCOS ARGUMENTOS\n");
+        return -1;
+    }
+
 
     salida = fopen(argv[1],"w");
 

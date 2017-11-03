@@ -8,86 +8,86 @@
 
 static void die(const char* msg)
 {
-	fprintf(stderr, "fatal error: %s\n", msg);
-	exit(1);
+    fprintf(stderr, "fatal error: %s\n", msg);
+    exit(1);
 }
 
 /* Se se carga el primer \n de una cadena. */
 static void chomp(char* str)
 {
-	while (*str != '\0' && *str != '\n') str++;
-	*str = '\0'; 
+    while (*str != '\0' && *str != '\n') str++;
+    *str = '\0';
 }
 
 /* Abre un fichero, y cierra el program si no lo puede abrir */
 static FILE* open_file(const char* path, const char* mode)
 {
-	FILE* fp = fopen(path, mode);
-	if (NULL == fp) {
-		fprintf(stderr, "%s: %s\n", path, strerror(errno));
-		exit(1);
-	}
-	return fp;
+    FILE* fp = fopen(path, mode);
+    if (NULL == fp) {
+        fprintf(stderr, "%s: %s\n", path, strerror(errno));
+        exit(1);
+    }
+    return fp;
 }
 
 static void parse_file(FILE* in, FILE* out)
 {
-	char buffer[256];
-	int ambito_abierto = 0;
+    char buffer[256];
+    int ambito_abierto = 0;
 
-	/* Debemos inicializar y destruir la tabla de simbolos */
-	iniciar_scope();
+    /* Debemos inicializar y destruir la tabla de simbolos */
+    iniciar_scope();
 
-	// Leemos linea a linea
-	while (1) {
-		if (NULL == fgets(buffer, sizeof buffer, in)) break;
-		chomp(buffer);
-		if ('\0' == buffer[0]) continue;
+    // Leemos linea a linea
+    while (1) {
+        if (NULL == fgets(buffer, sizeof buffer, in)) break;
+        chomp(buffer);
+        if ('\0' == buffer[0]) continue;
 
-		char* ident   = strtok(buffer, "\t");
-		char* num_str = strtok(NULL,   "\t");
+        char* ident   = strtok(buffer, "\t");
+        char* num_str = strtok(NULL,   "\t");
 
-		/* Si no hay numero, buscamos el simbolo */
-		if (NULL == num_str) {
-			INFO_SIMBOLO* info = uso_local(ident);
-			int val = info ? info->adicional1 : -1;
-			fprintf(out, "%s\t%i\n", ident, val);
-			continue;
-		}
+        /* Si no hay numero, buscamos el simbolo */
+        if (NULL == num_str) {
+            INFO_SIMBOLO* info = uso_local(ident);
+            int val = info ? info->adicional1 : -1;
+            fprintf(out, "%s\t%i\n", ident, val);
+            continue;
+        }
 
-		int num = atoi(num_str);
+        int num = atoi(num_str);
 
-		/* Si hay numero, nos indica que hacer */
+        /* Si hay numero, nos indica que hacer */
 
-		if (-999 == num) {
-			if (0 != strcmp(ident, "cierre")) {
-				die("El numero -999 debe ir con cierre");
-			}
-			cerrar_scope_local();
-			fprintf(out, "cierre\n");
-			ambito_abierto = 0;
-		}
-		else if (num < -1) {
-			if (ambito_abierto) die("No se puede abrir un ambito dentro de otro");
-			ambito_abierto = 1;
-			declarar_funcion(ident, ENTERO, num, 0);
-			fprintf(out, "%s\n", ident);
-		}
-		else {
-			STATUS code;
-			
-			if (ambito_abierto) {
-				code = declarar_local(ident, VARIABLE, ENTERO, ESCALAR, num, 0);
-			}
-			else {
-			 	code = declarar_global(ident, ENTERO, ESCALAR, num);
-			}			
+        if (-999 == num) {
+            if (0 != strcmp(ident, "cierre")) {
+                die("El numero -999 debe ir con cierre");
+            }
+            cerrar_scope_local();
+            fprintf(out, "cierre\n");
+            ambito_abierto = 0;
+        }
+        else if (num < -1) {
+            if (ambito_abierto) die("No se puede abrir un ambito dentro de otro");
+            ambito_abierto = 1;
+            declarar_funcion(ident, ENTERO, num, 0);
+            fprintf(out, "%s\n", ident);
+        }
+        else {
+            STATUS code;
 
-			fprintf(out, (OK == code) ? "%s\n" : "-1\t%s\n", ident);
-		}
-	}
+            if (ambito_abierto) {
+                code = declarar_local(ident, VARIABLE, ENTERO, ESCALAR, num, 0);
+            }
+            else {
+                code = declarar_global(ident, ENTERO, ESCALAR, num);
+            }
 
-	liberar_scope();
+            fprintf(out, (OK == code) ? "%s\n" : "-1\t%s\n", ident);
+        }
+    }
+
+    liberar_scope();
 }
 
 /*
@@ -97,16 +97,16 @@ static void parse_file(FILE* in, FILE* out)
  */
 int main(int argc, char** argv)
 {
-	FILE *in = stdin, *out = stdout;
+    FILE *in = stdin, *out = stdout;
 
-	if (argc >= 2) in  = open_file(argv[1], "r");
-	if (argc >= 3) out = open_file(argv[2], "w");
+    if (argc >= 2) in  = open_file(argv[1], "r");
+    if (argc >= 3) out = open_file(argv[2], "w");
 
-	parse_file(in, out);
+    parse_file(in, out);
 
-	/* Puede que cerremos stdin/out pero no pasa nada porque se acaba el programa */
-	fclose(in);
-	fclose(out);
-	return 0;
+    /* Puede que cerremos stdin/out pero no pasa nada porque se acaba el programa */
+    fclose(in);
+    fclose(out);
+    return 0;
 }
 

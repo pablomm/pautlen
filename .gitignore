@@ -6,6 +6,10 @@
 a.out
 .depend
 
+# Generados por astyle
+*.orig
+
+
 # Text-editor related
 *~
 .*.swp

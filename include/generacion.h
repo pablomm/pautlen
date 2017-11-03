@@ -14,7 +14,7 @@
 */
 
 void escribir_cabecera_compatibilidad(FILE* fpasm);
-/* 
+/*
    Función para imprimir el código NASM necesario para que sea multiplataforma.
 */
 
@@ -44,7 +44,7 @@ void escribir_segmento_codigo(FILE* fpasm);
 */
 
 void escribir_inicio_main(FILE* fpasm);
-/* 
+/*
    En este punto se debe escribir, al menos, la etiqueta main y la sentencia que guarda el puntero de pila en su variable (se recomienda usar __esp).
 */
 
@@ -66,7 +66,7 @@ es_var indica si este operando es una variable (como por ejemplo b1) con un 1 u 
 
 void asignar(FILE* fpasm, char* nombre, int es_referencia);
 /*
-Genera el código para asignar valor a la variable de nombre nombre. 
+Genera el código para asignar valor a la variable de nombre nombre.
 Se toma el valor de la cima de la pila.
 El último argumento es el que indica si lo que hay en la cima de la pila es una referencia (1) o ya un valor explícito (0).
 */
@@ -90,7 +90,7 @@ void y(FILE* fpasm, int es_referencia_1, int es_referencia_2);
 
 void cambiar_signo(FILE* fpasm, int es_referencia);
 /*
-   Función aritmética de cambio de signo. 
+   Función aritmética de cambio de signo.
    Es análoga a las binarias, excepto que sólo requiere de un acceso a la pila ya que sólo usa un operando.
 */
 

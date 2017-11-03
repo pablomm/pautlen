@@ -1,5 +1,5 @@
 .DEFAULT_GOAL = all
-.PHONY: all test debug clean zip help
+.PHONY: all test debug clean zip help astyle
 
 ##########################################################
 #                                                        #
@@ -146,9 +146,9 @@ $(EBIN):$(BDIR)/%: $(ODIR)/%.o $(SOBJ)
 
 
 clean:
-	$(RM) $(SOBJ) $(EOBJ) $(EBIN) $(TOBJ) $(TBIN) $(FLEX_GENERATED_FILES) $(DEPEND_FILES)
+	@$(RM) $(SOBJ) $(EOBJ) $(EBIN) $(TOBJ) $(TBIN) $(FLEX_GENERATED_FILES) $(DEPEND_FILES)
 
-zip: clean
+zip:
 	git archive --format zip -o $(ZIP) HEAD
 
 help:
@@ -160,6 +160,9 @@ help:
 	@echo "    zip      - comprime la rama activa del repositorio"
 	@echo "    help     - muestra esta ayuda"
 
+astyle:
+	@echo "Applying Artistic Style to C programming files."
+	@astyle $(IDIR)/*.h $(SDIR)/*.c $(TDIR)/*.c
 
 ## Deteccion de dependencias automatica, v2
 CFLAGS += -MMD

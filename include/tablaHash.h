@@ -1,4 +1,4 @@
-/* 
+/*
  * Fichero: tablaHash.h
  * Autor: Equipo docente PAUTLEN
  * Curso: 2016-17
@@ -15,7 +15,7 @@
 #define POS_INI_VARS_LOCALES 1  /* posición de inicio de variables locales de función (empiezan a contar en 1) */
 
 #define HASH_INI 5381
-#define HASH_FACTOR 33 
+#define HASH_FACTOR 33
 
 
 /**************** DECLARACIONES DE TIPOS ****************/
@@ -35,7 +35,7 @@ typedef enum { ESCALAR, VECTOR } CLASE;
 /* Información de un símbolo */
 typedef struct {
     char *lexema;           /* identificador */
-    CATEGORIA categoria;    /* categoría */    
+    CATEGORIA categoria;    /* categoría */
     TIPO tipo;              /* tipo */
     CLASE clase;            /* clase */
     int adicional1;    /* valor si escalar, longitud si vector, número de parámetros si función */
