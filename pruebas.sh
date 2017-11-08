@@ -20,7 +20,7 @@ cd "$( dirname "${BASH_SOURCE[0]}" )"
 
 ## Rutina auxiliar que limpia todos los ficheros generados
 clean_and_exit() {
-	#make clean
+	make clean
 	rm -f $BDIR/prueba1 $BDIR/prueba2 $BDIR/prueba3
 	rm -f $ODIR/prueba1.o $ODIR/prueba2.o $ODIR/prueba3.o
 	rm -f prueba1.nasm prueba2.nasm prueba3.nasm
@@ -102,13 +102,13 @@ practica3() {
 	title 'Pruebas practica 3 - analizador morfologico'
 
 	subtitle Prueba 3.1
-	diff <($BDIR/pruebaMorfo $MDIR/p3_entrada_1.txt) "$MDIR/p3_salida_1.txt"
+	diff <($BDIR/main_2_morfo $MDIR/p3_entrada_1.txt) "$MDIR/p3_salida_1.txt"
 
 	subtitle Prueba 3.2
-	diff <($BDIR/pruebaMorfo $MDIR/p3_entrada_2.txt 2> /dev/null) "$MDIR/p3_salida_2.txt"
+	diff <($BDIR/main_2_morfo $MDIR/p3_entrada_2.txt 2> /dev/null) "$MDIR/p3_salida_2.txt"
 
 	subtitle Prueba 3.3
-	diff <($BDIR/pruebaMorfo $MDIR/p3_entrada_3.txt 2> /dev/null) "$MDIR/p3_salida_3.txt"
+	diff <($BDIR/main_2_morfo $MDIR/p3_entrada_3.txt 2> /dev/null) "$MDIR/p3_salida_3.txt"
 
 	echo
 }

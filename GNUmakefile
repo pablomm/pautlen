@@ -61,7 +61,7 @@ ODIR := obj
 EDIR := src
 
 ## Nombre fichero compresion
-ZIP := ../BlancManuel_MarcosPablo_morfo.zip
+ZIP := ../BlancManuel_MarcosPablo_sintactico.zip
 
 ## Configuracion de las herramientas
 CC       ?= gcc
@@ -71,7 +71,7 @@ LFLAGS   :=
 RM       := rm -fv
 
 ## Mains objetivos de make all
-EXES := pruebaMorfo.c
+EXES := 
 
 EXES := $(patsubst %,$(EDIR)/%,$(EXES))
 EOBJ := $(patsubst $(EDIR)/%.c,$(ODIR)/%.o,$(EXES))
