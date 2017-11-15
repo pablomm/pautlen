@@ -6,6 +6,9 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define OK (0)
+#define ERR (-1)
+
 static void die(const char* msg)
 {
 	fprintf(stderr, "fatal error: %s\n", msg);
@@ -74,7 +77,7 @@ static void parse_file(FILE* in, FILE* out)
 			fprintf(out, "%s\n", ident);
 		}
 		else {
-			STATUS code;
+			int code;
 			
 			if (ambito_abierto) {
 				code = declarar_local(ident, VARIABLE, ENTERO, ESCALAR, num, 0);
