@@ -65,13 +65,16 @@ ZIP := ../BlancManuel_MarcosPablo_sintactico.zip
 
 ## Configuracion de las herramientas
 CC       ?= gcc
+LEX      ?= flex
+BISON    ?= bison
 CFLAGS   := -std=c99 -Iinclude -pedantic -Wall -Wextra
 LDFLAGS  :=
 LFLAGS   :=
+BFLAGS   := -d -y -v
 RM       := rm -fv
 
 ## Mains objetivos de make all
-EXES := 
+EXES := pruebaSintactico.c
 
 EXES := $(patsubst %,$(EDIR)/%,$(EXES))
 EOBJ := $(patsubst $(EDIR)/%.c,$(ODIR)/%.o,$(EXES))
@@ -82,10 +85,15 @@ DEPEND_FILES := $(wildcard $(ODIR)/*.d)
 ## Definiciones de objetivos
 FLEX_SOURCES := $(wildcard $(SDIR)/*.l)
 FLEX_GENERATED_FILES := $(FLEX_SOURCES:.l=.yy.c)
-FLEX_OBJ = $(patsubst $(SDIR)/%.c, $(ODIR)/%.o, $(FLEX_GENERATED_FILES))
+FLEX_OBJ := $(patsubst $(SDIR)/%.c, $(ODIR)/%.o, $(FLEX_GENERATED_FILES))
+
+## Definiciones de objetivos
+BISON_SOURCES := $(wildcard $(SDIR)/*.y)
+BISON_GENERATED_FILES := $(FLEX_SOURCES:.y=.tab.c)
+BISON_OBJ := $(patsubst $(SDIR)/%.c, $(ODIR)/%.o, $(BISON_GENERATED_FILES))
 
 SRCS := $(filter-out $(EXES) $(FLEX_GENERATED_FILES), $(wildcard $(SDIR)/*.c))
-SOBJ := $(patsubst $(SDIR)/%.c,$(ODIR)/%.o,$(SRCS) $(FLEX_GENERATED_FILES))
+SOBJ := $(patsubst $(SDIR)/%.c,$(ODIR)/%.o,$(SRCS) $(FLEX_GENERATED_FILES)  $(BISON_GENERATED_FILES))
 
 TEST := $(wildcard $(TDIR)/*.c)
 TOBJ := $(patsubst $(TDIR)/%.c,$(ODIR)/%.o,$(TEST))
@@ -128,6 +136,10 @@ $(SOBJ):$(ODIR)/%.o: $(SDIR)/%.c
 $(SDIR)/%.yy.c: $(SDIR)/%.l
 	$(LEX) $(LFLAGS) -o $@ $<
 
+## Generacion de .yy.c a partir de .l
+$(SDIR)/%.tab.c: $(SDIR)/%.y
+	$(BISON) $(BFLAGS) --define $(IDIR)/$*.tab.h -o $@ $<
+
 ## Compilacion de .c de tests
 $(TOBJ):$(ODIR)/%.o: $(TDIR)/%.c
 	$(CC) $(CFLAGS) -o $@ -c $<
@@ -146,7 +158,7 @@ $(EBIN):$(BDIR)/%: $(ODIR)/%.o $(SOBJ)
 
 
 clean:
-	@$(RM) $(SOBJ) $(EOBJ) $(EBIN) $(TOBJ) $(TBIN) $(FLEX_GENERATED_FILES) $(DEPEND_FILES)
+	@$(RM) $(SOBJ) $(EOBJ) $(EBIN) $(TOBJ) $(TBIN) $(FLEX_GENERATED_FILES) $(DEPEND_FILES) $(BISON_GENERATED_FILES)
 
 zip:
 	git archive --format zip -o $(ZIP) HEAD
