@@ -1,6 +1,6 @@
 
 %{
-    #include "tokens.h"
+    #include "alfa.tab.h"
 
     /* Estructura privada para guardar la posicion del lexer */
     static struct _LexerPosition {
