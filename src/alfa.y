@@ -68,7 +68,7 @@ programa                	: TOK_MAIN '{' declaraciones funciones sentencias '}' {
 declaraciones           	: declaracion { REGLA(2,"<declaraciones> ::= <declaracion>"); }
                         	| declaracion declaraciones { REGLA(3,"<declaraciones> ::= <declaracion> <declaraciones>"); }
                         	;
-declaracion              	: clase identificadores { REGLA(4,"<declaracion> ::= <clase> <identificadores>"); }
+declaracion              	: clase identificadores ';' { REGLA(4,"<declaracion> ::= <clase> <identificadores> ;"); }
                         	;
 clase                   	: clase_escalar { REGLA(5,"<clase> ::= <clase_escalar>"); }
                         	| clase_vector { REGLA(7,"<clase> ::= <clase_vector>"); }
