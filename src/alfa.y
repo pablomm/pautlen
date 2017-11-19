@@ -1,37 +1,28 @@
 
 %{
     #include "alfa.tab.h"
+
+    #include "comun.h"
+
     #include <stdio.h>
     #include <stdlib.h>
 
     /* Fichero de salida */
     extern FILE* out;
 
-    /* Flag global error morfologico */
-    extern int error_morfologico;
-
-    /* Estructura global con posicion */
-    extern struct _LexerPosition {
-        unsigned line, column, offset;
-    } lexpos;
+    /* Flag global con tipo de error */
+      extern ErrorType error_flag;
 
 
     #define REGLA(numero,msg) fprintf(out,";R%d:\t%s\n",numero,msg)
 
 
-    void error_handler_syntax(const char* msg) {
-	fprintf(stderr, "****Error sintactico en [lin %u, col %u]: %s\n",
-	    lexpos.line, lexpos.column,
-	    msg
-	);
-    }
-
-    int yyerror(void)
+    int yyerror()
     {
-        if (0 == error_morfologico) fprintf(out, "\nERROR SINTACTICO\n");
+        error_flag = ERR_SINTACTICO;
 
-	fprintf(out,"EXPRESION INCORRECTA\n");
-	exit(1);
+  	fprintf(out,"EXPRESION INCORRECTA\n");
+  	exit(1);
     }
 
 %}
@@ -59,19 +50,14 @@
 %token TOK_DISTINTO
 %token TOK_MENORIGUAL
 %token TOK_MAYORIGUAL
-%token TOK_MENOR
-%token TOK_MAYOR
 
 
-/* Identificadores */
 %token TOK_IDENTIFICADOR
 
-/* Constantes */
 %token TOK_CONSTANTE_ENTERA
 %token TOK_TRUE
 %token TOK_FALSE
 
-/* Error morfologico */
 %token TOK_ERROR
 
 %%
@@ -82,7 +68,7 @@ programa                	: TOK_MAIN '{' declaraciones funciones sentencias '}' {
 declaraciones           	: declaracion { REGLA(2,"<declaraciones> ::= <declaracion>"); }
                         	| declaracion declaraciones { REGLA(3,"<declaraciones> ::= <declaracion> <declaraciones>"); }
                         	;
-declaraion              	: clase identificadores { REGLA(4,"<declaracion> ::= <clase> <identificadores>"); }
+declaracion              	: clase identificadores { REGLA(4,"<declaracion> ::= <clase> <identificadores>"); }
                         	;
 clase                   	: clase_escalar { REGLA(5,"<clase> ::= <clase_escalar>"); }
                         	| clase_vector { REGLA(7,"<clase> ::= <clase_vector>"); }
@@ -100,14 +86,14 @@ identificadores         	: identificador { REGLA(18,"<identificadores> ::= <iden
 funciones               	: funcion funciones { REGLA(20,"<funciones> ::= <funcion>"); }
                         	| /* empty regla 21 */
                         	;
-funcion                 	: TOK_FUNCTION tipo identificador '(' parametros_funcion ')' '{' declaraciones_funcion <sentencias> '}'
-                        	{ REGLA(22,"<funcion> ::= function <tipo> <identificador> ( <parametros_funcion> ) { <declaraciones_funcion> <sentencias> }") }
+funcion                 	: TOK_FUNCTION tipo identificador '(' parametros_funcion ')' '{' declaraciones_funcion sentencias '}'
+                        	{ REGLA(22,"<funcion> ::= function <tipo> <identificador> ( <parametros_funcion> ) { <declaraciones_funcion> <sentencias> }"); }
                         	;
-parametros_funcion      	: parametro_funcion resto_parametros_funcion { REGLA(23, "<parametros_funcion> ::= <parametro_funcion> <resto_parametros_funcion>") }
+parametros_funcion      	: parametro_funcion resto_parametros_funcion { REGLA(23, "<parametros_funcion> ::= <parametro_funcion> <resto_parametros_funcion>"); }
                         	| /* empty  regla 24*/
                         	;
 resto_parametros_funcion	: ';' parametro_funcion resto_parametros_funcion 
-                        	{ REGLA(25,"<resto_parametros_funcion> ::= ; <parametro_funcion> <resto_parametros_funcion>")}
+                        	{ REGLA(25,"<resto_parametros_funcion> ::= ; <parametro_funcion> <resto_parametros_funcion>"); }
                         	| /* empty regla 26 */
                         	;
 parametro_funcion       	: tipo identificador { REGLA(27,"<parametro_funcion> : <tipo> <identificador>"); }
@@ -135,7 +121,7 @@ asignacion              	: identificador '=' exp { REGLA(43,"<asignacion> ::= <i
 elemento_vector         	: identificador '[' exp ']' { REGLA(48,"<elemento_vector> ::= <identificador> [ <exp> ]"); }
                         	;
 condicional             	: TOK_IF '(' exp ')' '{' sentencias '}' { REGLA(50,"<condicional> ::= if ( <exp> ) { <sentencias> }"); }
-                        	| TOK_IF '(' exp ')' '{' sentencias '}' TOK_ELSE '{' <sentencias> '}' { REGLA(51,"<condicional> ::= if ( <exp> ) { <sentencias> } else { <sentencias> }"); }
+                        	| TOK_IF '(' exp ')' '{' sentencias '}' TOK_ELSE '{' sentencias '}' { REGLA(51,"<condicional> ::= if ( <exp> ) { <sentencias> } else { <sentencias> }"); }
                         	;
 bucle                   	: TOK_WHILE'(' exp ')' '{' sentencias '}' { REGLA(52,"<bucle> ::= while ( <exp> ) { <sentencias> }"); }
                         	;
@@ -185,8 +171,5 @@ identificador           	: TOK_IDENTIFICADOR { REGLA(108, "<identificador> ::= T
                         	;
 
 
-
-
 %%
-
 

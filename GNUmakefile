@@ -59,6 +59,7 @@ IDIR := include
 TDIR := test
 ODIR := obj
 EDIR := src
+MDIR := misc
 
 ## Nombre fichero compresion
 ZIP := ../BlancManuel_MarcosPablo_sintactico.zip
@@ -89,11 +90,11 @@ FLEX_OBJ := $(patsubst $(SDIR)/%.c, $(ODIR)/%.o, $(FLEX_GENERATED_FILES))
 
 ## Definiciones de objetivos
 BISON_SOURCES := $(wildcard $(SDIR)/*.y)
-BISON_GENERATED_FILES := $(FLEX_SOURCES:.y=.tab.c)
+BISON_GENERATED_FILES := $(BISON_SOURCES:.y=.tab.c)
 BISON_OBJ := $(patsubst $(SDIR)/%.c, $(ODIR)/%.o, $(BISON_GENERATED_FILES))
 
-SRCS := $(filter-out $(EXES) $(FLEX_GENERATED_FILES), $(wildcard $(SDIR)/*.c))
-SOBJ := $(patsubst $(SDIR)/%.c,$(ODIR)/%.o,$(SRCS) $(FLEX_GENERATED_FILES)  $(BISON_GENERATED_FILES))
+SRCS := $(filter-out $(EXES) $(FLEX_GENERATED_FILES) $(BISON_GENERATED_FILES), $(wildcard $(SDIR)/*.c))
+SOBJ := $(patsubst $(SDIR)/%.c,$(ODIR)/%.o,$(SRCS) $(FLEX_GENERATED_FILES) $(BISON_GENERATED_FILES))
 
 TEST := $(wildcard $(TDIR)/*.c)
 TOBJ := $(patsubst $(TDIR)/%.c,$(ODIR)/%.o,$(TEST))
@@ -102,13 +103,16 @@ TBIN := $(patsubst $(TDIR)/%.c,$(BDIR)/%,$(TEST))
 # Flags de compilacion extras para ficheros generados por flex
 $(FLEX_OBJ): CFLAGS += -Wno-sign-compare -D_XOPEN_SOURCE=700
 
+# Nos aseguramos que se genera el bison antes que flex
+bison: $(SDIR)/alfa.tab.c
+
 ## Flags adicionales
 all: CFLAGS += -O3 -DNDEBUG
 test: CFLAGS += -O3 -DNDEBUG
 debug: CFLAGS += -g
 
 ## Objetivos
-all: $(EBIN)
+all: bison $(EBIN)
 test: $(TBIN)
 
 debug: $(EBIN)
@@ -136,9 +140,11 @@ $(SOBJ):$(ODIR)/%.o: $(SDIR)/%.c
 $(SDIR)/%.yy.c: $(SDIR)/%.l
 	$(LEX) $(LFLAGS) -o $@ $<
 
-## Generacion de .yy.c a partir de .l
+## Generacion de .tab.c a partir de .y
 $(SDIR)/%.tab.c: $(SDIR)/%.y
-	$(BISON) $(BFLAGS) --define $(IDIR)/$*.tab.h -o $@ $<
+	$(BISON) $(BFLAGS) -o $@ $<
+	mv $(SDIR)/alfa.tab.h $(IDIR)/alfa.tab.h
+	mv $(SDIR)/alfa.output $(MDIR)/alfa.output
 
 ## Compilacion de .c de tests
 $(TOBJ):$(ODIR)/%.o: $(TDIR)/%.c
@@ -158,7 +164,9 @@ $(EBIN):$(BDIR)/%: $(ODIR)/%.o $(SOBJ)
 
 
 clean:
-	@$(RM) $(SOBJ) $(EOBJ) $(EBIN) $(TOBJ) $(TBIN) $(FLEX_GENERATED_FILES) $(DEPEND_FILES) $(BISON_GENERATED_FILES)
+	@$(RM) $(SOBJ) $(EOBJ) $(EBIN) $(TOBJ) $(TBIN) $(DEPEND_FILES)
+	@$(RM) $(FLEX_GENERATED_FILES) $(BISON_GENERATED_FILES)
+	@$(RM) $(IDIR)/alfa.tab.h $(SDIR)/alfa.tab.h $(MDIR)/alfa.output $(SDIR)/alfa.output
 
 zip:
 	git archive --format zip -o $(ZIP) HEAD

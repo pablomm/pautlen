@@ -8,11 +8,17 @@ enum StatusCode { OK = 0, ERR = -1 };
 #define SWAP(a, b, type) MACRO_BODY( type c = a; a = b; b = c; )
 
 typedef enum ErrorType {
+	NO_ERR,
 	ERR_LEXICO,
+	ERR_MORFOLOGICO,
 	ERR_SINTACTICO,
 	ERR_SEMANTICO,
 } ErrorType;
 
-void error_handler_syntax(ErrorType type, const char* msg);
+typedef struct _LexerPosition {
+        unsigned line, column, offset;
+}  LexerPosition;
+
+void error_handler(const char* msg);
 
 #endif /* COMUN_H */

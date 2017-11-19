@@ -1,5 +1,6 @@
 
 
+
 #include <stdio.h>
 
 extern FILE *yyin;
@@ -7,7 +8,7 @@ extern FILE *yyout;
 
 FILE *out = NULL;
 
-int yyerror(char* s);
+int yyparse();
 
 
 int main(int argc, char* argv[])
