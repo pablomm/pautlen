@@ -115,7 +115,7 @@ debug: CFLAGS += -g
 all: bison $(EBIN)
 test: $(TBIN)
 
-debug: $(EBIN)
+debug: bison $(EBIN)
 
 ## Deteccion automatica de dependencias (_solo_ entre ficheros .c y .h)
 # La siguiente regla le dice a make como generar el fichero .depend

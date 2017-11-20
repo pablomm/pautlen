@@ -19,11 +19,17 @@
 
     int yyerror()
     {
-        error_flag = ERR_SINTACTICO;
 
-  	fprintf(out,"EXPRESION INCORRECTA\n");
-  	exit(1);
+        if(NO_ERR == error_flag) {
+            error_flag = ERR_SINTACTICO;
+            error_handler(NULL, NULL);
+        }
+        return 1;
     }
+
+    /* Prototipo para evitar warning */
+    int yylex(void);
+
 
 %}
 

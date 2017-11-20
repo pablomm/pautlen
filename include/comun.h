@@ -19,6 +19,6 @@ typedef struct _LexerPosition {
         unsigned line, column, offset;
 }  LexerPosition;
 
-void error_handler(const char* msg);
+void error_handler(const char* msg1, const char* msg2);
 
 #endif /* COMUN_H */

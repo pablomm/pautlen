@@ -67,13 +67,13 @@
 "true"      {  DESPLAZAMIENTO(); return TOK_TRUE; }
 "false"     {  DESPLAZAMIENTO(); return TOK_FALSE; }
 
-[a-zA-Z][a-zA-Z_0-9]*   { if (yyleng > 100) { error_flag = ERR_MORFOLOGICO; error_handler("identificador demasiado largo"); return TOK_ERROR; }
+[a-zA-Z][a-zA-Z_0-9]*   { if (yyleng > 100) { error_flag = ERR_MORFOLOGICO; error_handler("identificador demasiado largo", yytext); return TOK_ERROR; }
                           else {  DESPLAZAMIENTO(); return TOK_IDENTIFICADOR;} }
 
 \/\/[^\n]*  { /* Comentario */                                          }
 \n          { lexpos.column = 1; lexpos.line++; /* Salto de linea */    }
 [[:space:]] { /* Ignorado */                                            }
-.           { error_flag = ERR_MORFOLOGICO; error_handler("simbolo no permitido"); return TOK_ERROR;  }
+.           { error_flag = ERR_MORFOLOGICO; error_handler("simbolo no permitido", yytext); return TOK_ERROR;  }
 
 %%
 
