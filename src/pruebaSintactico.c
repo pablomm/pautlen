@@ -14,19 +14,19 @@ int yyparse();
 int main(int argc, char* argv[])
 {
 
-	FILE *in = stdin;
-	out = stdout;
+    FILE *in = stdin;
+    out = stdout;
 
-	if(argc > 1) in = fopen(argv[1],"r");
-	if(argc > 2) out = fopen(argv[2],"w");
+    if(argc > 1) in = fopen(argv[1],"r");
+    if(argc > 2) out = fopen(argv[2],"w");
 
-	yyin = in;
-	yyout = out;
+    yyin = in;
+    yyout = out;
 
-	yyparse();
+    yyparse();
 
-	fclose(in);
-	fclose(out);
+    fclose(in);
+    fclose(out);
 
-	return 0;
+    return 0;
 }

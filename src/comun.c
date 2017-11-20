@@ -15,25 +15,25 @@ FILE *out = NULL;
 
 static const char* type2string(ErrorType type)
 {
-	if (ERR_LEXICO     == type) return "lexico";
-	if (ERR_SINTACTICO == type) return "sintactico";
-	if (ERR_MORFOLOGICO == type) return "morfologico";
-	if (ERR_SEMANTICO  == type) return "semantico";
-	return "desconocido";
+    if (ERR_LEXICO     == type) return "lexico";
+    if (ERR_SINTACTICO == type) return "sintactico";
+    if (ERR_MORFOLOGICO == type) return "morfologico";
+    if (ERR_SEMANTICO  == type) return "semantico";
+    return "desconocido";
 }
 
 void error_handler(const char* msg1, const char* msg2) {
 
 
-	fprintf(stderr, "****Error %s en [lin %u, col %u]",
-		type2string(error_flag),
-		lexpos.line, lexpos.column - 1
-	);
-	if(NULL != msg1)
-		fprintf(stderr, ": %s", msg1);
+    fprintf(stderr, "****Error %s en [lin %u, col %u]",
+            type2string(error_flag),
+            lexpos.line, lexpos.column - 1
+           );
+    if(NULL != msg1)
+        fprintf(stderr, ": %s", msg1);
 
-	if(NULL != msg2)
-		fprintf(stderr, " (%s)", msg2);
+    if(NULL != msg2)
+        fprintf(stderr, " (%s)", msg2);
 
-	fprintf(stderr,"\n");
+    fprintf(stderr,"\n");
 }

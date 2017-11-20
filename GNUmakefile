@@ -165,6 +165,7 @@ clean:
 	@$(RM) $(SOBJ) $(EOBJ) $(EBIN) $(TOBJ) $(TBIN) $(DEPEND_FILES)
 	@$(RM) $(FLEX_GENERATED_FILES) $(BISON_GENERATED_FILES)
 	@$(RM) $(IDIR)/alfa.tab.h $(SDIR)/alfa.tab.h $(MDIR)/alfa.output $(SDIR)/alfa.output
+	@$(RM) $(IDIR)/*.h.orig $(SDIR)/*.c.orig
 
 zip:
 	git archive --format zip -o $(ZIP) HEAD
