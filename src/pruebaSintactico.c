@@ -6,7 +6,7 @@
 extern FILE *yyin;
 extern FILE *yyout;
 
-FILE *out = NULL;
+extern FILE *out;
 
 int yyparse();
 

@@ -103,19 +103,16 @@ TBIN := $(patsubst $(TDIR)/%.c,$(BDIR)/%,$(TEST))
 # Flags de compilacion extras para ficheros generados por flex
 $(FLEX_OBJ): CFLAGS += -Wno-sign-compare -D_XOPEN_SOURCE=700
 
-# Nos aseguramos que se genera el bison antes que flex
-bison: $(SDIR)/alfa.tab.c
-
 ## Flags adicionales
 all: CFLAGS += -O3 -DNDEBUG
 test: CFLAGS += -O3 -DNDEBUG
 debug: CFLAGS += -g
 
 ## Objetivos
-all: bison $(EBIN)
+all: $(EBIN)
 test: $(TBIN)
 
-debug: bison $(EBIN)
+debug: $(EBIN)
 
 ## Deteccion automatica de dependencias (_solo_ entre ficheros .c y .h)
 # La siguiente regla le dice a make como generar el fichero .depend
@@ -137,7 +134,8 @@ $(SOBJ):$(ODIR)/%.o: $(SDIR)/%.c
 	$(CC) $(CFLAGS) -o $@ -c $<
 
 ## Generacion de .yy.c a partir de .l
-$(SDIR)/%.yy.c: $(SDIR)/%.l
+## Debe estar generada la cabecera de bison
+$(SDIR)/%.yy.c: $(SDIR)/%.l $(SDIR)/alfa.tab.c
 	$(LEX) $(LFLAGS) -o $@ $<
 
 ## Generacion de .tab.c a partir de .y

@@ -9,6 +9,9 @@ LexerPosition lexpos = {1, 0, 1};
 /* Flag para hacer seguimiento del tipo de error */
 ErrorType error_flag = NO_ERR;
 
+/* Fichero de salida para las pruebas en general */
+FILE *out = NULL;
+
 
 static const char* type2string(ErrorType type)
 {

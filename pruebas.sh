@@ -113,10 +113,26 @@ practica3() {
 	echo
 }
 
+practica4() {
+	title 'Pruebas practica 4 - analizador sintactico'
+
+	subtitle Prueba 3.1
+	diff -bB <($BDIR/pruebaSintactico $MDIR/p4_entrada_1.txt) "$MDIR/p4_salida_1.txt"
+
+	subtitle Prueba 3.2
+	diff -bB <($BDIR/pruebaSintactico $MDIR/p4_entrada_2.txt 2> /dev/null) "$MDIR/p4_salida_2.txt"
+
+	subtitle Prueba 3.3
+	diff -bB <($BDIR/pruebaSintactico $MDIR/p4_entrada_3.txt 2> /dev/null) "$MDIR/p4_salida_3.txt"
+
+	echo
+}
+
 compile
 practica1
 practica2
-practica3
+#practica3
+practica4
 
 title 'Borrando ficheros generados'
 clean_and_exit
