@@ -84,22 +84,22 @@ identificadores         	: identificador { REGLA(18,"<identificadores> ::= <iden
                         	| identificador ',' identificadores { REGLA(19,"<identificadores> ::= <identificador> , <identificadores>"); }
                         	;
 funciones               	: funcion funciones { REGLA(20,"<funciones> ::= <funcion>"); }
-                        	| /* empty regla 21 */
+                        	| /* empty regla 21 */ { REGLA(21,"<funciones> ::="); }
                         	;
 funcion                 	: TOK_FUNCTION tipo identificador '(' parametros_funcion ')' '{' declaraciones_funcion sentencias '}'
                         	{ REGLA(22,"<funcion> ::= function <tipo> <identificador> ( <parametros_funcion> ) { <declaraciones_funcion> <sentencias> }"); }
                         	;
 parametros_funcion      	: parametro_funcion resto_parametros_funcion { REGLA(23, "<parametros_funcion> ::= <parametro_funcion> <resto_parametros_funcion>"); }
-                        	| /* empty  regla 24*/
+                        	| /* empty  regla 24*/ { REGLA(24, "<parametros_funcion> ::="); }
                         	;
 resto_parametros_funcion	: ';' parametro_funcion resto_parametros_funcion 
                         	{ REGLA(25,"<resto_parametros_funcion> ::= ; <parametro_funcion> <resto_parametros_funcion>"); }
-                        	| /* empty regla 26 */
+                        	| /* empty regla 26 */ { REGLA(26,"<resto_parametros_funcion> ::="); }
                         	;
 parametro_funcion       	: tipo identificador { REGLA(27,"<parametro_funcion> : <tipo> <identificador>"); }
                         	;
 declaraciones_funcion   	: declaraciones { REGLA(28,"<declaraciones_funcion> ::= <declaraciones>"); }
-                        	| /* empty regla 29 */
+                        	| /* empty regla 29 */ { REGLA(29,"<declaraciones_funcion> ::="); }
                         	;
 sentencias              	: sentencia { REGLA(30,"<sentencias> ::= <sentencia>"); }
                         	| sentencia sentencias { REGLA(31,"<sentencias> ::= <sentencia> <sentencias>"); }
@@ -147,10 +147,10 @@ exp                     	: exp '+' exp                               { REGLA(72,
                         	| identificador '(' lista_expresiones ')'   { REGLA(88,"<exp> ::= <identificador> ( <lista_expresiones> )"); }
                         	;
 lista_expresiones       	: exp resto_lista_expresiones { REGLA(89,"<lista_expresiones> ::= <exp> <resto_lista_expresiones>"); }
-                        	| /* empty regla 90 */
+                        	| /* empty regla 90 */ { REGLA(90,"<lista_expresiones> ::="); }
                         	;
 resto_lista_expresiones 	: ',' exp resto_lista_expresiones { REGLA(91,"<resto_lista_expresiones> ::= , <exp> <resto_lista_expresiones>"); }
-                        	| /* empty regla 92 */
+                        	| /* empty regla 92 */ { REGLA(92,"<resto_lista_expresiones> ::="); }
                         	;
 comparacion             	: exp TOK_IGUAL exp        { REGLA(93, "<comparacion> ::= <exp> == <exp>"); }
                         	| exp TOK_DISTINTO exp     { REGLA(94, "<comparacion> ::= <exp> != <exp>"); }
