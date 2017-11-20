@@ -92,6 +92,11 @@ FLEX_OBJ := $(patsubst $(SDIR)/%.c, $(ODIR)/%.o, $(FLEX_GENERATED_FILES))
 BISON_SOURCES := $(wildcard $(SDIR)/*.y)
 BISON_GENERATED_FILES := $(BISON_SOURCES:.y=.tab.c)
 BISON_OBJ := $(patsubst $(SDIR)/%.c, $(ODIR)/%.o, $(BISON_GENERATED_FILES))
+BISON_HEADERS_ORIG := $(patsubst %.c,%.h, $(BISON_GENERATED_FILES))
+BISON_HEADERS := $(patsubst $(SDIR)/%,$(IDIR)/%, $(BISON_HEADERS_ORIG))
+BISON_OUTPUT_ORIG := $(patsubst %.tab.c,%.output, $(BISON_GENERATED_FILES))
+BISON_OUTPUT := $(patsubst $(SDIR)/%,$(MDIR)/%, $(BISON_OUTPUT_ORIG))
+
 
 SRCS := $(filter-out $(EXES) $(FLEX_GENERATED_FILES) $(BISON_GENERATED_FILES), $(wildcard $(SDIR)/*.c))
 SOBJ := $(patsubst $(SDIR)/%.c,$(ODIR)/%.o,$(SRCS) $(FLEX_GENERATED_FILES) $(BISON_GENERATED_FILES))
@@ -135,14 +140,14 @@ $(SOBJ):$(ODIR)/%.o: $(SDIR)/%.c
 
 ## Generacion de .yy.c a partir de .l
 ## Debe estar generada la cabecera de bison
-$(SDIR)/%.yy.c: $(SDIR)/%.l $(SDIR)/alfa.tab.c
+$(SDIR)/%.yy.c: $(SDIR)/%.l $(BISON_GENERATED_FILES)
 	$(LEX) $(LFLAGS) -o $@ $<
 
 ## Generacion de .tab.c a partir de .y
 $(SDIR)/%.tab.c: $(SDIR)/%.y
 	$(BISON) $(BFLAGS) -o $@ $<
-	mv $(SDIR)/alfa.tab.h $(IDIR)/alfa.tab.h
-	mv $(SDIR)/alfa.output $(MDIR)/alfa.output
+	mv $(BISON_HEADERS_ORIG) $(IDIR)
+	mv $(BISON_OUTPUT_ORIG) $(MDIR)
 
 ## Compilacion de .c de tests
 $(TOBJ):$(ODIR)/%.o: $(TDIR)/%.c
@@ -164,8 +169,8 @@ $(EBIN):$(BDIR)/%: $(ODIR)/%.o $(SOBJ)
 clean:
 	@$(RM) $(SOBJ) $(EOBJ) $(EBIN) $(TOBJ) $(TBIN) $(DEPEND_FILES)
 	@$(RM) $(FLEX_GENERATED_FILES) $(BISON_GENERATED_FILES)
-	@$(RM) $(IDIR)/alfa.tab.h $(SDIR)/alfa.tab.h $(MDIR)/alfa.output $(SDIR)/alfa.output
-	@$(RM) $(IDIR)/*.h.orig $(SDIR)/*.c.orig
+	@$(RM) $(BISON_HEADERS) $(BISON_HEADERS_ORIG) $(BISON_OUTPUT) $(BISON_OUTPUT_ORIG)
+	@$(RM) $(IDIR)/*.h.orig $(SDIR)/*.c.orig $(TDIR)/*.c.orig
 
 zip:
 	git archive --format zip -o $(ZIP) HEAD
