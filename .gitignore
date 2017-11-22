@@ -27,3 +27,9 @@ main_0_generacion_ejemplo3
 
 pruebaMorfo
 prueba_tabla
+pruebaSintactico
+
+include/alfa.tab.h
+misc/alfa.output
+src/alfa.tab.c
+
