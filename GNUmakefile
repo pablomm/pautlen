@@ -61,6 +61,10 @@ ODIR := obj
 EDIR := src
 MDIR := misc
 
+# Fichero con configuracion de astyle
+# Respeta la variable de entorno en caso de estar definida
+ARTISTIC_STYLE_OPTIONS ?= .astylerc
+
 ## Nombre fichero compresion
 ZIP := ../BlancManuel_MarcosPablo_sintactico.zip
 
@@ -170,7 +174,6 @@ clean:
 	@$(RM) $(SOBJ) $(EOBJ) $(EBIN) $(TOBJ) $(TBIN) $(DEPEND_FILES)
 	@$(RM) $(FLEX_GENERATED_FILES) $(BISON_GENERATED_FILES)
 	@$(RM) $(BISON_HEADERS) $(BISON_HEADERS_ORIG) $(BISON_OUTPUT) $(BISON_OUTPUT_ORIG)
-	@$(RM) $(IDIR)/*.h.orig $(SDIR)/*.c.orig $(TDIR)/*.c.orig
 
 zip:
 	git archive --format zip -o $(ZIP) HEAD
@@ -186,7 +189,7 @@ help:
 
 astyle:
 	@echo "Applying Artistic Style to C programming files."
-	@astyle $(IDIR)/*.h $(SDIR)/*.c $(TDIR)/*.c
+	astyle --options=$(ARTISTIC_STYLE_OPTIONS) $(IDIR)/*.h $(SDIR)/*.c $(TDIR)/*.c
 
 ## Deteccion de dependencias automatica, v2
 CFLAGS += -MMD
