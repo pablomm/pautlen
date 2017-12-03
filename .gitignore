@@ -9,7 +9,6 @@ a.out
 # Generados por astyle
 *.orig
 
-
 # Text-editor related
 *~
 .*.swp
@@ -18,18 +17,26 @@ a.out
 # Incluimos el alfalib por comodidad
 !obj/alfalib.o
 
-# Ejecutables
+# Ejecutables de pruebas
 main_0_generacion
-main_1_tabla
 main_0_generacion_ejemplo1
 main_0_generacion_ejemplo2
 main_0_generacion_ejemplo3
+main_1_tabla
+main_2_morfo
 
-pruebaMorfo
-prueba_tabla
-pruebaSintactico
+# Ejecutable compilador
+alfa
 
-include/alfa.tab.h
-misc/alfa.output
+# Generado por bison
+src/alfa.yy.c
 src/alfa.tab.c
+include/alfa.tab.h
+src/alfa.dot
+src/alfa.output
+misc/alfa.dot
+misc/alfa.output
+
+# Grafo del automata
+misc/alfa.dot.pdf
 

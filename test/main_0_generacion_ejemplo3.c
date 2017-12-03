@@ -1,14 +1,14 @@
 #include <stdio.h>
 #include "generacion.h"
 
-int main (int argc, char** argv)
+int main(int argc, char** argv)
 {
-    FILE * salida;
+    FILE* salida;
     int cuantos_no = 0;
 
 
     if (argc != 2) {
-        fprintf (stdout, "ERROR POCOS ARGUMENTOS\n");
+        fprintf(stdout, "ERROR POCOS ARGUMENTOS\n");
         return -1;
     }
 

@@ -75,11 +75,11 @@ BISON    ?= bison
 CFLAGS   := -std=c99 -Iinclude -pedantic -Wall -Wextra
 LDFLAGS  :=
 LFLAGS   :=
-BFLAGS   := -d -y -v
+BFLAGS   := -d -y -v -g
 RM       := rm -fv
 
 ## Mains objetivos de make all
-EXES := pruebaSintactico.c
+EXES := alfa.c
 
 EXES := $(patsubst %,$(EDIR)/%,$(EXES))
 EOBJ := $(patsubst $(EDIR)/%.c,$(ODIR)/%.o,$(EXES))
@@ -100,6 +100,8 @@ BISON_HEADERS_ORIG := $(patsubst %.c,%.h, $(BISON_GENERATED_FILES))
 BISON_HEADERS := $(patsubst $(SDIR)/%,$(IDIR)/%, $(BISON_HEADERS_ORIG))
 BISON_OUTPUT_ORIG := $(patsubst %.tab.c,%.output, $(BISON_GENERATED_FILES))
 BISON_OUTPUT := $(patsubst $(SDIR)/%,$(MDIR)/%, $(BISON_OUTPUT_ORIG))
+BISON_GRAPH_ORIG := $(patsubst %.tab.c,%.dot, $(BISON_GENERATED_FILES))
+BISON_GRAPH := $(patsubst $(SDIR)/%,$(MDIR)/%, $(BISON_GRAPH_ORIG))
 
 
 SRCS := $(filter-out $(EXES) $(FLEX_GENERATED_FILES) $(BISON_GENERATED_FILES), $(wildcard $(SDIR)/*.c))
@@ -121,7 +123,7 @@ debug: CFLAGS += -g
 all: $(EBIN)
 test: $(TBIN)
 
-debug: $(EBIN)
+debug: $(EBIN) $(TBIN)
 
 ## Deteccion automatica de dependencias (_solo_ entre ficheros .c y .h)
 # La siguiente regla le dice a make como generar el fichero .depend
@@ -152,6 +154,7 @@ $(SDIR)/%.tab.c: $(SDIR)/%.y
 	$(BISON) $(BFLAGS) -o $@ $<
 	mv $(BISON_HEADERS_ORIG) $(IDIR)
 	mv $(BISON_OUTPUT_ORIG) $(MDIR)
+	mv $(BISON_GRAPH_ORIG) $(MDIR)
 
 ## Compilacion de .c de tests
 $(TOBJ):$(ODIR)/%.o: $(TDIR)/%.c
@@ -174,6 +177,7 @@ clean:
 	@$(RM) $(SOBJ) $(EOBJ) $(EBIN) $(TOBJ) $(TBIN) $(DEPEND_FILES)
 	@$(RM) $(FLEX_GENERATED_FILES) $(BISON_GENERATED_FILES)
 	@$(RM) $(BISON_HEADERS) $(BISON_HEADERS_ORIG) $(BISON_OUTPUT) $(BISON_OUTPUT_ORIG)
+	@$(RM) $(BISON_GRAPH_ORIG) $(BISON_GRAPH)
 
 zip:
 	git archive --format zip -o $(ZIP) HEAD
@@ -185,11 +189,15 @@ help:
 	@echo "    debug    - compila todo usando con simbolos de depuracion"
 	@echo "    clean    - borra todos los ficheros generados"
 	@echo "    zip      - comprime la rama activa del repositorio"
+	@echo "    astyle   - estiliza el codigo utilizando el programa astyle"
+	@echo "    graph    - genera un diagrama en pdf a partir de la salida de bison"
 	@echo "    help     - muestra esta ayuda"
 
 astyle:
-	@echo "Applying Artistic Style to C programming files."
 	astyle --options=$(ARTISTIC_STYLE_OPTIONS) $(IDIR)/*.h $(SDIR)/*.c $(TDIR)/*.c
+
+graph: $(BISON_GENERATED_FILES)
+	dot -O -Tpdf $(BISON_GRAPH)
 
 ## Deteccion de dependencias automatica, v2
 CFLAGS += -MMD

@@ -16,18 +16,18 @@ void liberar_scope(void);
 STATUS cerrar_scope_local(void);
 
 /** Declara una variable */
-STATUS declarar_global(const char *id, TIPO tipo, CLASE clase, int valor);
+STATUS declarar_global(const char* id, TIPO tipo, CLASE clase, int valor);
 
 /** Declara una variable local nueva */
-STATUS declarar_local(const char *id, CATEGORIA categ, TIPO tipo, CLASE clase, int adic1, int adic2);
+STATUS declarar_local(const char* id, CATEGORIA categ, TIPO tipo, CLASE clase, int adic1, int adic2);
 
 /** Declara una funcion y abre un ambito local nuevo */
-STATUS declarar_funcion(const char *id, TIPO tipo, int n_params, int n_vars);
+STATUS declarar_funcion(const char* id, TIPO tipo, int n_params, int n_vars);
 
 /** Obtiene la informacion de un simbolo global */
-INFO_SIMBOLO* uso_global(const char *id);
+INFO_SIMBOLO* uso_global(const char* id);
 
 /** Obtiene la informacion de un simbolo local */
-INFO_SIMBOLO* uso_local(const char *id);
+INFO_SIMBOLO* uso_local(const char* id);
 
 #endif  /* TABLASIMBOLOS_H */

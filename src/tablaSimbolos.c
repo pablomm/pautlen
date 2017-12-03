@@ -36,7 +36,7 @@ STATUS cerrar_scope_local(void)
  *      longitud si VECTOR
  *      valor si ESCALAR
  */
-STATUS declarar_global(const char *id, TIPO tipo, CLASE clase, int valor)
+STATUS declarar_global(const char* id, TIPO tipo, CLASE clase, int valor)
 {
     /* Se asume que el ambito global esta inicializado */
 
@@ -45,14 +45,14 @@ STATUS declarar_global(const char *id, TIPO tipo, CLASE clase, int valor)
 }
 
 
-STATUS declarar_local(const char *id, CATEGORIA categ, TIPO tipo, CLASE clase, int adic1, int adic2)
+STATUS declarar_local(const char* id, CATEGORIA categ, TIPO tipo, CLASE clase, int adic1, int adic2)
 {
     if (NULL == scope_local) return ERR;
     /* No hace falta comprobar si ya esta en el ambito local porque tablaHash se encarga de eso */
     return insertar_simbolo(scope_local, id, categ, tipo, clase, adic1, adic2);
 }
 
-STATUS declarar_funcion(const char *id, TIPO tipo, int n_params, int n_vars)
+STATUS declarar_funcion(const char* id, TIPO tipo, int n_params, int n_vars)
 {
     /* Se asume que el ambito global esta inicializado */
 
@@ -72,12 +72,12 @@ STATUS declarar_funcion(const char *id, TIPO tipo, int n_params, int n_vars)
     return OK;
 }
 
-INFO_SIMBOLO* uso_global(const char *id)
+INFO_SIMBOLO* uso_global(const char* id)
 {
     return (scope_global) ? buscar_simbolo(scope_global, id) : NULL;
 }
 
-INFO_SIMBOLO* uso_local(const char *id)
+INFO_SIMBOLO* uso_local(const char* id)
 {
     INFO_SIMBOLO* info;
 

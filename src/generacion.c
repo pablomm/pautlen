@@ -21,16 +21,16 @@
 
 
 #if !defined(NDEBUG) || NDEBUG == 0
-#	define PUT_COMMENT(...) _put_asm(fpasm, "\t; [DEBUG] ", " [/DEBUG]\n", __VA_ARGS__)
+#   define PUT_COMMENT(...) _put_asm(fpasm, "\t; [DEBUG] ", " [/DEBUG]\n", __VA_ARGS__)
 #else
-#	define PUT_COMMENT(...) ((void)0)
+#   define PUT_COMMENT(...) ((void)0)
 #endif
 
 /* Funcion auxiliar privada. Es necesaria porque en una macro de aridad variable,
  * __VA_ARGS__ debe contener al menos un argumento. Como queremos que funcione como
  * un printf, el argumento obligatorio debe ser el formato. Esto tiene la pega de
  * que no nos deja anyadir un sufijo facilmente a la cadena del formato. */
-static void _put_asm( FILE* fpasm, char* prefix, char* suffix, char* fmt, ...)
+static void _put_asm(FILE* fpasm, char* prefix, char* suffix, char* fmt, ...)
 {
     va_list ap;
     va_start(ap, fmt);
@@ -81,7 +81,7 @@ void escribir_cabecera_bss(FILE* fpasm)
 
 }
 /**********************************************************************************/
-void declarar_variable(FILE* fpasm, char * nombre,  int tipo,  int tamano)
+void declarar_variable(FILE* fpasm, char* nombre,  int tipo,  int tamano)
 {
     PUT_COMMENT("Declaracion de la variable '%s', de tipo %i", nombre, tipo);
 
@@ -138,14 +138,14 @@ void escribir_fin(FILE* fpasm)
 
 /**********************************************************************************/
 
-void escribir_operando(FILE* fpasm, char * nombre, int es_var)
+void escribir_operando(FILE* fpasm, char* nombre, int es_var)
 {
     PUT_COMMENT("Guardar el operando %s en la pila", nombre);
 
     PUT_ASM("push dword %s%s", (es_var == 1) ? "_" : "" , nombre);
 }
 
-void asignar(FILE* fpasm, char * nombre, int es_referencia)
+void asignar(FILE* fpasm, char* nombre, int es_referencia)
 {
     PUT_COMMENT("Asignacion de la pila a %s", nombre);
 
@@ -154,7 +154,7 @@ void asignar(FILE* fpasm, char * nombre, int es_referencia)
 
     PUT_ASM("pop dword eax");
 
-    if(es_referencia)
+    if (es_referencia)
         PUT_ASM("mov eax,dword [eax]");
 
     PUT_ASM("mov dword [_%s], eax", nombre);
@@ -172,7 +172,7 @@ void sumar(FILE* fpasm, int es_referencia_1, int es_referencia_2)
     */
 
     /* Caso solo es referencia el primer operando */
-    if(es_referencia_1 && !es_referencia_2) {
+    if (es_referencia_1 && !es_referencia_2) {
 
         PUT_ASM("pop dword eax");
         PUT_ASM("pop dword ebx");
@@ -184,7 +184,7 @@ void sumar(FILE* fpasm, int es_referencia_1, int es_referencia_2)
         PUT_ASM("pop dword ebx");
 
         PUT_ASM("pop dword eax");
-        if(es_referencia_1)
+        if (es_referencia_1)
             PUT_ASM("mov dword eax, [eax]");
 
         PUT_ASM("add eax, %s", es_referencia_2 ? "[ebx]" : "ebx");
@@ -201,7 +201,7 @@ void cambiar_signo(FILE* fpasm, int es_referencia)
     /* Doc: B.4.189 NEG , NOT : Two’s and One’s Complement */
     PUT_ASM("pop dword eax");
 
-    if(es_referencia)
+    if (es_referencia)
         PUT_ASM("mov dword eax, [eax]");
 
     PUT_ASM("neg dword eax");
@@ -223,7 +223,7 @@ void no(FILE* fpasm, int es_referencia, int cuantos_no)
 }
 
 
-void leer(FILE* fpasm, char * nombre, int tipo)
+void leer(FILE* fpasm, char* nombre, int tipo)
 {
     PUT_COMMENT("Lectura a la variable %s", nombre);
 
@@ -240,7 +240,7 @@ void escribir(FILE* fpasm, int es_referencia, int tipo)
 {
     PUT_COMMENT("Escritura");
 
-    if(es_referencia) {
+    if (es_referencia) {
         PUT_ASM("pop eax");
         PUT_ASM("push dword [eax]");
     }
@@ -267,7 +267,7 @@ void restar(FILE* fpasm, int es_referencia_1, int es_referencia_2)
     PUT_ASM("pop dword ebx");
 
     PUT_ASM("pop dword eax");
-    if(es_referencia_1)
+    if (es_referencia_1)
         PUT_ASM("mov dword eax, [eax]");
 
     PUT_ASM("sub eax, %s", es_referencia_2 ? "[ebx]" : "ebx");
@@ -286,7 +286,7 @@ void multiplicar(FILE* fpasm, int es_referencia_1, int es_referencia_2)
     PUT_ASM("pop dword ebx");
     PUT_ASM("pop dword eax");
 
-    if(es_referencia_1)
+    if (es_referencia_1)
         PUT_ASM("mov eax, [eax]");
 
     PUT_ASM("imul %s", es_referencia_2 ? "[ebx]" : "ebx");
@@ -310,10 +310,10 @@ void dividir(FILE* fpasm, int es_referencia_1, int es_referencia_2)
     PUT_ASM("pop dword ebx");
     PUT_ASM("pop dword eax");
 
-    if(es_referencia_1)
+    if (es_referencia_1)
         PUT_ASM("mov eax, dword [eax]");
 
-    if(es_referencia_2)
+    if (es_referencia_2)
         PUT_ASM("mov ebx, dword [ebx]");
 
     PUT_ASM("cmp ebx, 0");
@@ -336,7 +336,7 @@ void o(FILE* fpasm, int es_referencia_1, int es_referencia_2)
     */
 
     /* Caso solo es referencia el primer operando */
-    if(es_referencia_1 && !es_referencia_2) {
+    if (es_referencia_1 && !es_referencia_2) {
 
         PUT_ASM("pop dword eax");
         PUT_ASM("pop dword ebx");
@@ -348,7 +348,7 @@ void o(FILE* fpasm, int es_referencia_1, int es_referencia_2)
         PUT_ASM("pop dword ebx");
 
         PUT_ASM("pop dword eax");
-        if(es_referencia_1)
+        if (es_referencia_1)
             PUT_ASM("mov dword eax, [eax]");
 
         PUT_ASM("or eax, %s", es_referencia_2 ? "[ebx]" : "ebx");
@@ -369,7 +369,7 @@ void y(FILE* fpasm, int es_referencia_1, int es_referencia_2)
     */
 
     /* Caso solo es referencia el primer operando */
-    if(es_referencia_1 && !es_referencia_2) {
+    if (es_referencia_1 && !es_referencia_2) {
 
         PUT_ASM("pop dword eax");
         PUT_ASM("pop dword ebx");
@@ -381,7 +381,7 @@ void y(FILE* fpasm, int es_referencia_1, int es_referencia_2)
         PUT_ASM("pop dword ebx");
 
         PUT_ASM("pop dword eax");
-        if(es_referencia_1)
+        if (es_referencia_1)
             PUT_ASM("mov dword eax, [eax]");
 
         PUT_ASM("and eax, %s", es_referencia_2 ? "[ebx]" : "ebx");

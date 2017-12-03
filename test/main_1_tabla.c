@@ -32,7 +32,7 @@ static FILE* open_file(const char* path, const char* mode)
 
 static void parse_file(FILE* in, FILE* out)
 {
-    char buffer[256];
+    char buffer[256] = {0};
     int ambito_abierto = 0;
 
     /* Debemos inicializar y destruir la tabla de simbolos */
@@ -44,8 +44,8 @@ static void parse_file(FILE* in, FILE* out)
         chomp(buffer);
         if ('\0' == buffer[0]) continue;
 
-        char* ident   = strtok(buffer, "\t");
-        char* num_str = strtok(NULL,   "\t");
+        char* ident   = strtok(buffer, "\t\r");
+        char* num_str = strtok(NULL,   "\t\r");
 
         /* Si no hay numero, buscamos el simbolo */
         if (NULL == num_str) {
@@ -66,25 +66,32 @@ static void parse_file(FILE* in, FILE* out)
             cerrar_scope_local();
             fprintf(out, "cierre\n");
             ambito_abierto = 0;
-        }
-        else if (num < -1) {
-            if (ambito_abierto) die("No se puede abrir un ambito dentro de otro");
-            ambito_abierto = 1;
-            declarar_funcion(ident, ENTERO, num, 0);
-            fprintf(out, "%s\n", ident);
-        }
-        else {
-            STATUS code;
+        } else
+            if (num < -1) {
+                /* Nota: Modificado para adecuarse a la salida de todos
+                         los ficheros de prueba (3/12/17)
+                */
+                if (ambito_abierto) {
+                    fprintf(out, "-1\t%s\n", ident);
+                } else {
+                    if (OK != declarar_funcion(ident, ENTERO, num, 0)) {
+                        fprintf(out, "-1\t%s\n", ident);
+                    } else {
+                        fprintf(out, "%s\n", ident);
+                        ambito_abierto = 1;
+                    }
+                }
+            } else {
+                STATUS code;
 
-            if (ambito_abierto) {
-                code = declarar_local(ident, VARIABLE, ENTERO, ESCALAR, num, 0);
-            }
-            else {
-                code = declarar_global(ident, ENTERO, ESCALAR, num);
-            }
+                if (ambito_abierto) {
+                    code = declarar_local(ident, VARIABLE, ENTERO, ESCALAR, num, 0);
+                } else {
+                    code = declarar_global(ident, ENTERO, ESCALAR, num);
+                }
 
-            fprintf(out, (OK == code) ? "%s\n" : "-1\t%s\n", ident);
-        }
+                fprintf(out, (OK == code) ? "%s\n" : "-1\t%s\n", ident);
+            }
     }
 
     liberar_scope();
@@ -97,7 +104,7 @@ static void parse_file(FILE* in, FILE* out)
  */
 int main(int argc, char** argv)
 {
-    FILE *in = stdin, *out = stdout;
+    FILE* in = stdin, *out = stdout;
 
     if (argc >= 2) in  = open_file(argv[1], "r");
     if (argc >= 3) out = open_file(argv[2], "w");

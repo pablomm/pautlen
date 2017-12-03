@@ -5,8 +5,8 @@
 
 
 /* Declaraciones de tipos de datos del compilador */
-#define ENTERO	0
-#define BOOLEANO 	1
+#define ENTERO  0
+#define BOOLEANO    1
 
 
 /* OBSERVACIÓN GENERAL A TODAS LAS FUNCIONES:
@@ -30,7 +30,7 @@ void escribir_cabecera_bss(FILE* fpasm);
    Con seguridad sabes que deberás reservar una variable entera para guardar el puntero de pila extendido (esp). Se te sugiere el nombre __esp para esta variable.
 */
 
-void declarar_variable(FILE* fpasm, char * nombre,  int tipo,  int tamano);
+void declarar_variable(FILE* fpasm, char* nombre,  int tipo,  int tamano);
 /*
    Para ser invocada en la sección .bss cada vez que se quiera declarar una variable:
 El argumento nombre es el de la variable.

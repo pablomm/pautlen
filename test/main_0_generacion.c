@@ -1,23 +1,23 @@
 #include <stdio.h>
 #include "generacion.h"
 
-int main (int argc, char ** argv)
+int main(int argc, char** argv)
 {
     /*
-    	int x;
-    	int y;
-    	int z;
+        int x;
+        int y;
+        int z;
 
-    	x = 8;
+        x = 8;
 
-    	scanf y;
-    	z = x + y;
-    	printf z;
+        scanf y;
+        z = x + y;
+        printf z;
     */
-    FILE * salida;
+    FILE* salida;
 
     if (argc != 2) {
-        fprintf (stdout, "ERROR POCOS ARGUMENTOS\n");
+        fprintf(stdout, "ERROR POCOS ARGUMENTOS\n");
         return -1;
     }
 

@@ -9,7 +9,7 @@
 
     /* Imprime un desplazamiento con el formato de la practica 4 */
     /* No se añade a YY_USER_ACTION para que no imprima desplazamientos en blanco */
-    #define DESPLAZAMIENTO() fprintf(out, ";D:\t%s\n", yytext)
+    #define DESPLAZAMIENTO() if(NULL != out) fprintf(out, ";D:\t%s\n", yytext)
 
     /* Se ejecuta antes de cada regla para actualizar la posicion */
     #define YY_USER_ACTION { lexpos.column += yyleng; lexpos.offset += yyleng; }
@@ -67,8 +67,9 @@
 "true"      {  DESPLAZAMIENTO(); return TOK_TRUE; }
 "false"     {  DESPLAZAMIENTO(); return TOK_FALSE; }
 
-[a-zA-Z][a-zA-Z_0-9]*   { if (yyleng > 100) { error_flag = ERR_MORFOLOGICO; error_handler("identificador demasiado largo", yytext); return TOK_ERROR; }
-                          else {  DESPLAZAMIENTO(); return TOK_IDENTIFICADOR;} }
+[a-zA-Z][a-zA-Z_0-9]*   { DESPLAZAMIENTO(); 
+                          if (yyleng > 100) { error_flag = ERR_MORFOLOGICO; error_handler("identificador demasiado largo", yytext); return TOK_ERROR; }
+                          else { return TOK_IDENTIFICADOR;} }
 
 \/\/[^\n]*  { /* Comentario */                                          }
 \n          { lexpos.column = 1; lexpos.line++; /* Salto de linea */    }

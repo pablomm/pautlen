@@ -10,7 +10,10 @@ LexerPosition lexpos = {1, 0, 1};
 ErrorType error_flag = NO_ERR;
 
 /* Fichero de salida para las pruebas en general */
-FILE *out = NULL;
+FILE* out = NULL;
+
+/* Fichero de salida para el compilador */
+FILE* pfasm = NULL;
 
 
 static const char* type2string(ErrorType type)
@@ -22,17 +25,18 @@ static const char* type2string(ErrorType type)
     return "desconocido";
 }
 
-void error_handler(const char* msg1, const char* msg2) {
+void error_handler(const char* msg1, const char* msg2)
+{
 
 
     fprintf(stderr, "****Error %s en [lin %u, col %u]",
             type2string(error_flag),
             lexpos.line, lexpos.column - 1
            );
-    if(NULL != msg1)
+    if (NULL != msg1)
         fprintf(stderr, ": %s", msg1);
 
-    if(NULL != msg2)
+    if (NULL != msg2)
         fprintf(stderr, " (%s)", msg2);
 
     fprintf(stderr,"\n");

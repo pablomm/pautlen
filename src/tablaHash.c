@@ -26,10 +26,11 @@
  * Salida:
  *      INFO_SIMBOLO *: puntero a la estructura reservada, NULL si se produce algún error.
  */
-INFO_SIMBOLO *crear_info_simbolo(const char *lexema, CATEGORIA categ, TIPO tipo, CLASE clase, int adic1, int adic2) {
-    INFO_SIMBOLO *is;
+INFO_SIMBOLO* crear_info_simbolo(const char* lexema, CATEGORIA categ, TIPO tipo, CLASE clase, int adic1, int adic2)
+{
+    INFO_SIMBOLO* is;
 
-    if ((is = (INFO_SIMBOLO *) malloc(sizeof(INFO_SIMBOLO)))) {
+    if ((is = (INFO_SIMBOLO*) malloc(sizeof(INFO_SIMBOLO)))) {
         /* Duplicar lexema */
         if (!(is->lexema = strdup(lexema))) {
             free(is);
@@ -53,7 +54,8 @@ INFO_SIMBOLO *crear_info_simbolo(const char *lexema, CATEGORIA categ, TIPO tipo,
  *
  * Salida: ninguna.
  */
-void liberar_info_simbolo(INFO_SIMBOLO *is) {
+void liberar_info_simbolo(INFO_SIMBOLO* is)
+{
     if (is) {
         if (is->lexema) {
             free(is->lexema);
@@ -72,10 +74,11 @@ void liberar_info_simbolo(INFO_SIMBOLO *is) {
  * Salida:
  *      NODO_HASH *: puntero al nodo reservada, NULL si se produce algún error.
  */
-NODO_HASH *crear_nodo(INFO_SIMBOLO *is) {
-    NODO_HASH *nh;
+NODO_HASH* crear_nodo(INFO_SIMBOLO* is)
+{
+    NODO_HASH* nh;
 
-    if ((nh = (NODO_HASH *) malloc(sizeof(NODO_HASH)))) {
+    if ((nh = (NODO_HASH*) malloc(sizeof(NODO_HASH)))) {
         nh->info = is;
         nh->siguiente = NULL;   /* no hay siguiente */
     }
@@ -91,7 +94,8 @@ NODO_HASH *crear_nodo(INFO_SIMBOLO *is) {
  *
  * Salida: ninguna.
  */
-void liberar_nodo(NODO_HASH *nh) {
+void liberar_nodo(NODO_HASH* nh)
+{
     if (nh) {
         liberar_info_simbolo(nh->info);
         free(nh);
@@ -108,13 +112,14 @@ void liberar_nodo(NODO_HASH *nh) {
  * Salida:
  *      TABLA_HASH *: puntero a la tabla hash creada, NULL si se produce algún error.
  */
-TABLA_HASH *crear_tabla(int tam) {
-    TABLA_HASH *th;
+TABLA_HASH* crear_tabla(int tam)
+{
+    TABLA_HASH* th;
 
     /* Reservar estructura */
-    if ((th = (TABLA_HASH *) malloc(sizeof(TABLA_HASH)))) {
+    if ((th = (TABLA_HASH*) malloc(sizeof(TABLA_HASH)))) {
         /* Reservar tabla en sí */
-        if (!(th->tabla = (NODO_HASH **) calloc(tam, sizeof(NODO_HASH *)))) {    /* todos los punteros a nodo a NULL */
+        if (!(th->tabla = (NODO_HASH**) calloc(tam, sizeof(NODO_HASH*)))) {      /* todos los punteros a nodo a NULL */
             free(th);
             return NULL;
         }
@@ -133,9 +138,10 @@ TABLA_HASH *crear_tabla(int tam) {
  *
  * Salida: ninguna.
  */
-void liberar_tabla(TABLA_HASH *th) {
+void liberar_tabla(TABLA_HASH* th)
+{
     int i;
-    NODO_HASH *n1, *n2;
+    NODO_HASH* n1, *n2;
 
     if (th) {
         if (th->tabla) {
@@ -164,11 +170,12 @@ void liberar_tabla(TABLA_HASH *th) {
  * Salida:
  *      unsigned long: hash calculado para la cadena.
  */
-unsigned long hash(const char *str) {
+unsigned long hash(const char* str)
+{
     unsigned long h = HASH_INI;
-    unsigned char *p;
+    unsigned char* p;
 
-    for (p = (unsigned char *) str; *p; p++) {
+    for (p = (unsigned char*) str; *p; p++) {
         h = h*HASH_FACTOR + *p;
     }
     return h;
@@ -184,9 +191,10 @@ unsigned long hash(const char *str) {
  * Salida:
  *      INFO_SIMBOLO *: puntero a la información del símbolo, NULL si el símbolo no se encuentra.
  */
-INFO_SIMBOLO *buscar_simbolo(const TABLA_HASH *th, const char *lexema) {
+INFO_SIMBOLO* buscar_simbolo(const TABLA_HASH* th, const char* lexema)
+{
     unsigned int ind;
-    NODO_HASH *n;
+    NODO_HASH* n;
 
     /* Calcular posición */
     ind = hash(lexema) % th->tam;
@@ -214,10 +222,11 @@ INFO_SIMBOLO *buscar_simbolo(const TABLA_HASH *th, const char *lexema) {
  * Salida:
  *      STATUS: OK si se inserta correctamente, ERR si no (por ya existir o por memoria insuficiente).
  */
-STATUS insertar_simbolo(TABLA_HASH *th, const char *lexema, CATEGORIA categ, TIPO tipo, CLASE clase, int adic1, int adic2) {
+STATUS insertar_simbolo(TABLA_HASH* th, const char* lexema, CATEGORIA categ, TIPO tipo, CLASE clase, int adic1, int adic2)
+{
     int ind;
-    INFO_SIMBOLO *is;
-    NODO_HASH *n = NULL;
+    INFO_SIMBOLO* is;
+    NODO_HASH* n = NULL;
 
     /* Buscar símbolo */
     if (buscar_simbolo(th, lexema)) {
@@ -249,9 +258,10 @@ STATUS insertar_simbolo(TABLA_HASH *th, const char *lexema, CATEGORIA categ, TIP
  *
  * Salida: ninguna.
  */
-void borrar_simbolo(TABLA_HASH *th, const char *lexema) {
+void borrar_simbolo(TABLA_HASH* th, const char* lexema)
+{
     int ind;
-    NODO_HASH *n, *prev = NULL;
+    NODO_HASH* n, *prev = NULL;
 
     /* Calcular posición */
     ind = hash(lexema) % th->tam;
@@ -267,8 +277,7 @@ void borrar_simbolo(TABLA_HASH *th, const char *lexema) {
     if (!prev) {
         /* Caso especial: el nodo a borrar es el primero */
         th->tabla[ind] = n->siguiente;
-    }
-    else {
+    } else {
         /* Caso normal: el nodo a borrar es cualquier otro */
         prev->siguiente = n->siguiente;
     }

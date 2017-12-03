@@ -14,7 +14,7 @@
       extern ErrorType error_flag;
 
 
-    #define REGLA(numero,msg) fprintf(out,";R%d:\t%s\n",numero,msg)
+    #define REGLA(numero,msg) if(NULL != out) fprintf(out,";R%d:\t%s\n",numero,msg)
 
 
     int yyerror()
@@ -89,7 +89,7 @@ clase_vector            	: TOK_ARRAY tipo '[' constante_entera ']' { REGLA(15,"<
 identificadores         	: identificador { REGLA(18,"<identificadores> ::= <identificador>"); }
                         	| identificador ',' identificadores { REGLA(19,"<identificadores> ::= <identificador> , <identificadores>"); }
                         	;
-funciones               	: funcion funciones { REGLA(20,"<funciones> ::= <funcion>"); }
+funciones               	: funcion funciones { REGLA(20,"<funciones> ::= <funcion> <funciones>"); }
                         	| /* empty regla 21 */ { REGLA(21,"<funciones> ::="); }
                         	;
 funcion                 	: TOK_FUNCTION tipo identificador '(' parametros_funcion ')' '{' declaraciones_funcion sentencias '}'
@@ -102,7 +102,7 @@ resto_parametros_funcion	: ';' parametro_funcion resto_parametros_funcion
                         	{ REGLA(25,"<resto_parametros_funcion> ::= ; <parametro_funcion> <resto_parametros_funcion>"); }
                         	| /* empty regla 26 */ { REGLA(26,"<resto_parametros_funcion> ::="); }
                         	;
-parametro_funcion       	: tipo identificador { REGLA(27,"<parametro_funcion> : <tipo> <identificador>"); }
+parametro_funcion       	: tipo identificador { REGLA(27,"<parametro_funcion> ::= <tipo> <identificador>"); }
                         	;
 declaraciones_funcion   	: declaraciones { REGLA(28,"<declaraciones_funcion> ::= <declaraciones>"); }
                         	| /* empty regla 29 */ { REGLA(29,"<declaraciones_funcion> ::="); }
