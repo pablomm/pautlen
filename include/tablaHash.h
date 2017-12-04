@@ -7,6 +7,8 @@
 #ifndef TABLAHASH_H
 #define TABLAHASH_H
 
+
+#include "comun.h"
 #include <stdio.h>
 
 /**************** CONSTANTES ****************/
@@ -17,20 +19,6 @@
 #define HASH_INI 5381
 #define HASH_FACTOR 33
 
-
-/**************** DECLARACIONES DE TIPOS ****************/
-
-/* Retorno de función error/ok */
-typedef enum { ERR = 0, OK = 1 } STATUS;
-
-/* Categoría de un símbolo: variable, parámetro de función o función */
-typedef enum { VARIABLE, PARAMETRO, FUNCION } CATEGORIA;
-
-/* Tipo de un símbolo: sólo se trabajará con enteros y booleanos */
-typedef enum { ENTERO, BOOLEANO } TIPO;
-
-/* Clase de un símbolo: pueden ser variables atómicas (escalares) o listas/arrays (vectores) */
-typedef enum { ESCALAR, VECTOR } CLASE;
 
 /* Información de un símbolo */
 typedef struct {

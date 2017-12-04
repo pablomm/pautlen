@@ -3,6 +3,7 @@
 #include <errno.h>
 #include <stdlib.h>
 
+#include "comun.h"
 #include "alfa.tab.h"
 
 extern FILE* yyin;

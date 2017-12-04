@@ -1,7 +1,9 @@
 
 %{
-    #include "alfa.tab.h"
     #include "comun.h"
+    #include "alfa.tab.h"
+
+    #include <string.h>
 
     extern LexerPosition lexpos;
     extern ErrorType error_flag;
@@ -63,13 +65,24 @@
 ">="        {  DESPLAZAMIENTO(); return TOK_MAYORIGUAL; }
 
 
-[0-9]+      {  DESPLAZAMIENTO(); return TOK_CONSTANTE_ENTERA; }
+[0-9]+      {  DESPLAZAMIENTO();
+               yylval.atributos.valor_entero=atoi(yytext); 
+               return TOK_CONSTANTE_ENTERA;
+            }
 "true"      {  DESPLAZAMIENTO(); return TOK_TRUE; }
 "false"     {  DESPLAZAMIENTO(); return TOK_FALSE; }
 
 [a-zA-Z][a-zA-Z_0-9]*   { DESPLAZAMIENTO(); 
-                          if (yyleng > 100) { error_flag = ERR_MORFOLOGICO; error_handler("identificador demasiado largo", yytext); return TOK_ERROR; }
-                          else { return TOK_IDENTIFICADOR;} }
+                          if (yyleng > MAX_LONG_ID) { 
+                              error_flag = ERR_MORFOLOGICO; 
+                              error_handler("identificador demasiado largo", yytext); 
+                              return TOK_ERROR; 
+                            }
+                          else { 
+                               strcpy(yylval.atributos.lexema,yytext);
+                               return TOK_IDENTIFICADOR;
+                            } 
+                        }
 
 \/\/[^\n]*  { /* Comentario */                                          }
 \n          { lexpos.column = 1; lexpos.line++; /* Salto de linea */    }

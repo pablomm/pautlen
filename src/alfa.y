@@ -1,17 +1,22 @@
 
 %{
-    #include "alfa.tab.h"
-
     #include "comun.h"
+    #include "alfa.tab.h"
+    #include "tablaSimbolos.h"
+    #include "generacion.h"
+    #include "tablaHash.h"
 
     #include <stdio.h>
     #include <stdlib.h>
 
-    /* Fichero de salida */
+    /* Fichero de salida de debug */
     extern FILE* out;
 
+    /* Fichero con codigo asm */
+    extern FILE* pfasm;
+
     /* Flag global con tipo de error */
-      extern ErrorType error_flag;
+    extern ErrorType error_flag;
 
 
     #define REGLA(numero,msg) if(NULL != out) fprintf(out,";R%d:\t%s\n",numero,msg)
@@ -30,8 +35,19 @@
     /* Prototipo para evitar warning */
     int yylex(void);
 
+    /* Variables globales para simular herencia */
+    int tipo_actual = 0;
+    int clase_actual = 0;
+    int ambito_actual = 0;
+
 
 %}
+
+
+%union {
+    tipo_atributos atributos;
+}
+
 
 %left '+' '-' TOK_OR
 %left '*' '/' TOK_AND
@@ -58,31 +74,65 @@
 %token TOK_MAYORIGUAL
 
 
-%token TOK_IDENTIFICADOR
+%token <atributos> TOK_CONSTANTE_ENTERA
+%token <atributos> TOK_CONSTANTE_REAL
+%token <atributos> TOK_IDENTIFICADOR
 
-%token TOK_CONSTANTE_ENTERA
 %token TOK_TRUE
 %token TOK_FALSE
 
 %token TOK_ERROR
 
+%type <atributos> condicional
+%type <atributos> comparacion
+%type <atributos> elemento_vector
+%type <atributos> exp
+%type <atributos> constante
+%type <atributos> constante_entera
+%type <atributos> constante_logica
+%type <atributos> identificador
+
+
 %%
 
 
-programa                	: TOK_MAIN '{' declaraciones funciones sentencias '}' { REGLA(1,"<programa> ::= main { <declaraciones> <funciones> <sentencias> }"); }
+programa                	: TOK_MAIN '{' inicio declaraciones escritura1 funciones escritura2 sentencias final '}' 
+                                        { REGLA(1,"<programa> ::= main { <declaraciones> <funciones> <sentencias> }"); }
+
+inicio                      : { iniciar_scope();
+                                escribir_cabecera_compatibilidad(pfasm);
+                                escribir_subseccion_data(pfasm);
+                                escribir_cabecera_bss(pfasm);
+                              }
+escritura1                  : { /* AQUI SE ESCRIBIRIAN LAS VARIABLES DECLARADAS QUE HEMOS GUARDADO EN LA TABLA HASH */
+                                escribir_segmento_codigo(pfasm); }
+
+escritura2                  : { escribir_inicio_main(pfasm);}
+
+final                       : { escribir_fin(pfasm);
+                                liberar_scope(); }
+
                         	;
 declaraciones           	: declaracion { REGLA(2,"<declaraciones> ::= <declaracion>"); }
                         	| declaracion declaraciones { REGLA(3,"<declaraciones> ::= <declaracion> <declaraciones>"); }
                         	;
 declaracion              	: clase identificadores ';' { REGLA(4,"<declaracion> ::= <clase> <identificadores> ;"); }
                         	;
-clase                   	: clase_escalar { REGLA(5,"<clase> ::= <clase_escalar>"); }
-                        	| clase_vector { REGLA(7,"<clase> ::= <clase_vector>"); }
+clase                   	: clase_escalar { REGLA(5,"<clase> ::= <clase_escalar>");
+                                              clase_actual = ESCALAR;
+                                            }
+                        	| clase_vector { REGLA(7,"<clase> ::= <clase_vector>"); 
+                                             clase_actual = VECTOR;
+                                            }
                         	;
 clase_escalar           	: tipo { REGLA(9,"<clase_escalar> ::= <tipo>"); }
                         	;
-tipo                    	: TOK_INT  { REGLA(10,"<tipo> ::= int"); }
-                        	| TOK_BOOLEAN { REGLA(11,"<tipo> ::= boolean"); }
+tipo                    	: TOK_INT  { REGLA(10,"<tipo> ::= int"); 
+                                         tipo_actual = ENTERO;
+                                        }
+                        	| TOK_BOOLEAN { REGLA(11,"<tipo> ::= boolean"); 
+                                            tipo_actual = BOOLEANO;
+                                           }
                         	;
 clase_vector            	: TOK_ARRAY tipo '[' constante_entera ']' { REGLA(15,"<clase_vector> ::= array <tipo> [ <constante_entera> ]"); }
                         	;
@@ -121,7 +171,7 @@ sentencia_simple        	: asignacion { REGLA(34,"<sentencia_simple> ::= <asigna
 bloque                  	: condicional { REGLA(40,"<bloque> ::= <condicional>"); }
                         	| bucle { REGLA(41,"<bloque> ::= <bucle>"); }
                         	;
-asignacion              	: identificador '=' exp { REGLA(43,"<asignacion> ::= <identificador> = <exp>"); }
+asignacion              	: TOK_IDENTIFICADOR '=' exp { REGLA(43,"<asignacion> ::= <identificador> = <exp>"); }
                         	| elemento_vector '=' exp { REGLA(44,"<asignacion> ::= <elemento_vector> = <exp>"); }
                         	;
 elemento_vector         	: identificador '[' exp ']' { REGLA(48,"<elemento_vector> ::= <identificador> [ <exp> ]"); }
@@ -145,7 +195,7 @@ exp                     	: exp '+' exp                               { REGLA(72,
                         	| exp TOK_AND exp                           { REGLA(77,"<exp> ::= <exp> && <exp>"); }
                         	| exp TOK_OR exp                            { REGLA(78,"<exp> ::= <exp> || <exp>"); }
                         	| '!' exp                                   { REGLA(79,"<exp> ::= ! <exp>"); }
-                        	| identificador                             { REGLA(80,"<exp> ::= <identificador>"); }
+                        	| TOK_IDENTIFICADOR                         { REGLA(80,"<exp> ::= <identificador>"); }
                         	| constante                                 { REGLA(81,"<exp> ::= <constante>"); }
                         	| '(' exp ')'                               { REGLA(82,"<exp> ::= ( <exp> )"); }
                         	| '(' comparacion ')'                       { REGLA(83,"<exp> ::= ( <comparacion> )"); }
@@ -173,7 +223,21 @@ constante_logica        	: TOK_TRUE { REGLA(101, "<constante_logica> ::= true");
                         	;
 constante_entera        	: TOK_CONSTANTE_ENTERA { REGLA(104, "<constante_entera> ::= TOK_CONSTANTE_ENTERA"); }
                         	;
-identificador           	: TOK_IDENTIFICADOR { REGLA(108, "<identificador> ::= TOK_IDENTIFICADOR"); }
+identificador           	: TOK_IDENTIFICADOR { REGLA(108, "<identificador> ::= TOK_IDENTIFICADOR"); 
+                                                  /* Añadimos al ambito actual */
+                                                  /*
+                                                    Esta regla no esta acabada, habria que gestionar si falla la insercion
+                                                    y ver bien los argumentos de tipo y categoria
+                                                  */
+                                                  if(0 == ambito_actual) {
+                                                      declarar_global($1.lexema, tipo_actual, clase_actual, 0);
+
+                                                  } else {
+                                                     declarar_local($1.lexema, 0, tipo_actual, clase_actual, 0,0);
+                                                  }
+
+
+                                                }
                         	;
 
 

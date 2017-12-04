@@ -79,7 +79,7 @@ BFLAGS   := -d -y -v -g
 RM       := rm -fv
 
 ## Mains objetivos de make all
-EXES := alfa.c
+EXES := compilador.c
 
 EXES := $(patsubst %,$(EDIR)/%,$(EXES))
 EOBJ := $(patsubst $(EDIR)/%.c,$(ODIR)/%.o,$(EXES))
