@@ -190,7 +190,10 @@ bucle                       : TOK_WHILE'(' exp ')' '{' sentencias '}' { REGLA(52
                             ;
 lectura                     : TOK_SCANF identificador { REGLA(54,"<lectura> ::= scanf <identificador>"); }
                             ;
-escritura                   : TOK_PRINTF exp { REGLA(56,"<escritura> ::= printf <exp>"); }
+escritura                   : TOK_PRINTF exp { REGLA(56,"<escritura> ::= printf <exp>");
+                                               escribir_operando(pfasm, $2.lexema, $2.es_direccion);
+                                               escribir(pfasm, $2.es_direccion, $2.tipo);
+                                             }
                             ;
 retorno_funcion             : TOK_RETURN exp { REGLA(61, "<retorno_funcion> ::= return <exp>"); }
                             ;
