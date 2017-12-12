@@ -171,7 +171,14 @@ sentencia_simple            : asignacion { REGLA(34,"<sentencia_simple> ::= <asi
 bloque                      : condicional { REGLA(40,"<bloque> ::= <condicional>"); }
                             | bucle { REGLA(41,"<bloque> ::= <bucle>"); }
                             ;
-asignacion                  : TOK_IDENTIFICADOR '=' exp { REGLA(43,"<asignacion> ::= <identificador> = <exp>"); }
+asignacion                  : TOK_IDENTIFICADOR '=' exp { REGLA(43,"<asignacion> ::= <identificador> = <exp>");
+                                                          INFO_SIMBOLO* info = uso_local($1.lexema);
+                                                          if (NULL == info) YYABORT;
+                                                          if (FUNCION == info->categoria) YYABORT;
+                                                          if (VECTOR == info->clase) YYABORT;
+                                                          if ($3.tipo != info->tipo) YYABORT;
+                                                          asignar(pfasm, $1.lexema, $3.es_direccion);
+                                                        }
                             | elemento_vector '=' exp { REGLA(44,"<asignacion> ::= <elemento_vector> = <exp>"); }
                             ;
 elemento_vector             : identificador '[' exp ']' { REGLA(48,"<elemento_vector> ::= <identificador> [ <exp> ]"); }
