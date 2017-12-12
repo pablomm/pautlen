@@ -389,3 +389,8 @@ void y(FILE* fpasm, int es_referencia_1, int es_referencia_2)
 
     PUT_ASM("push dword eax");
 }
+
+void apilar_constante(FILE* fpasm, int valor)
+{
+    PUT_ASM("push dword %i", valor);
+}

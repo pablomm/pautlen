@@ -216,12 +216,20 @@ comparacion                 : exp TOK_IGUAL exp        { REGLA(93, "<comparacion
                             | exp '>' exp              { REGLA(98, "<comparacion> ::= <exp> > <exp>"); }
                             ;
 constante                   : constante_logica { REGLA(99, "<constante> ::= <constante_logica>"); }
-                            | constante_entera { REGLA(100, "<constante> ::= <constante_entera>"); }
+                            | constante_entera { REGLA(100, "<constante> ::= <constante_entera>");
+                                                 $$.tipo = $1.tipo;
+                                                 $$.es_direccion = $1.es_direccion;
+                                               }
                             ;
 constante_logica            : TOK_TRUE { REGLA(101, "<constante_logica> ::= true"); }
                             | TOK_FALSE { REGLA(102, "<constante_logica> ::= false"); }
                             ;
-constante_entera            : TOK_CONSTANTE_ENTERA { REGLA(104, "<constante_entera> ::= TOK_CONSTANTE_ENTERA"); }
+constante_entera            : TOK_CONSTANTE_ENTERA { REGLA(104, "<constante_entera> ::= TOK_CONSTANTE_ENTERA");
+                                                     $$.tipo = ENTERO;
+                                                     $$.es_direccion = 0;
+                                                     $$.valor_entero = $1.valor_entero;
+                                                     apilar_constante(pfasm, $1.valor_entero);
+                                                   }
                             ;
 identificador               : TOK_IDENTIFICADOR { REGLA(108, "<identificador> ::= TOK_IDENTIFICADOR"); 
                                                   /* Añadimos al ambito actual */

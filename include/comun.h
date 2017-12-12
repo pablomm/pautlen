@@ -57,10 +57,10 @@ void error_handler(const char* msg1, const char* msg2);
 /* Estructura comun valores de los atributos */
 typedef struct
 {
-	char lexema[MAX_LONG_ID+1];
-	int valor_entero;
-	int tipo;
-	int direcciones;
+    char lexema[MAX_LONG_ID+1];
+    int valor_entero;
+    int tipo;
+    int es_direccion;
     int etiqueta;
 } tipo_atributos;
 

@@ -108,4 +108,6 @@ void no(FILE* fpasm, int es_referencia, int cuantos_no);
 void leer(FILE* fpasm, char* nombre, int tipo);
 void escribir(FILE* fpasm, int es_referencia, int tipo);
 
+void apilar_constante(FILE* fpasm, int valor);
+
 #endif
