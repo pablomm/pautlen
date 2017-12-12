@@ -101,6 +101,7 @@ BISON_HEADERS := $(patsubst $(SDIR)/%,$(IDIR)/%, $(BISON_HEADERS_ORIG))
 BISON_OUTPUT_ORIG := $(patsubst %.tab.c,%.output, $(BISON_GENERATED_FILES))
 BISON_OUTPUT := $(patsubst $(SDIR)/%,$(MDIR)/%, $(BISON_OUTPUT_ORIG))
 BISON_GRAPH_ORIG := $(patsubst %.tab.c,%.dot, $(BISON_GENERATED_FILES))
+BISON_GRAPH_VCG_ORIG := $(patsubst %.tab.c,%.vcg, $(BISON_GENERATED_FILES))
 BISON_GRAPH := $(patsubst $(SDIR)/%,$(MDIR)/%, $(BISON_GRAPH_ORIG))
 
 
@@ -150,11 +151,14 @@ $(SDIR)/%.yy.c: $(SDIR)/%.l $(BISON_GENERATED_FILES)
 	$(LEX) $(LFLAGS) -o $@ $<
 
 ## Generacion de .tab.c a partir de .y
+# Permitimos que falle el mover el grafico ya que no
+# es imprescindible
 $(SDIR)/%.tab.c: $(SDIR)/%.y
 	$(BISON) $(BFLAGS) -o $@ $<
 	mv $(BISON_HEADERS_ORIG) $(IDIR)
 	mv $(BISON_OUTPUT_ORIG) $(MDIR)
-	mv $(BISON_GRAPH_ORIG) $(MDIR)
+	-mv $(BISON_GRAPH_ORIG) $(MDIR)
+	-mv $(BISON_GRAPH_VCG_ORIG) $(MDIR)
 
 ## Compilacion de .c de tests
 $(TOBJ):$(ODIR)/%.o: $(TDIR)/%.c

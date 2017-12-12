@@ -1,6 +1,7 @@
 # Generated
 *.yy.c
 *.nasm
+*.vcg
 *.o
 *.d
 a.out
@@ -27,6 +28,7 @@ main_2_morfo
 
 # Ejecutable compilador
 alfa
+compilador
 
 # Generado por bison
 src/alfa.yy.c
