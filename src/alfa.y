@@ -202,7 +202,15 @@ exp                         : exp '+' exp                               { REGLA(
                             | exp TOK_AND exp                           { REGLA(77,"<exp> ::= <exp> && <exp>"); }
                             | exp TOK_OR exp                            { REGLA(78,"<exp> ::= <exp> || <exp>"); }
                             | '!' exp                                   { REGLA(79,"<exp> ::= ! <exp>"); }
-                            | TOK_IDENTIFICADOR                         { REGLA(80,"<exp> ::= <identificador>"); }
+                            | TOK_IDENTIFICADOR                         { REGLA(80,"<exp> ::= <identificador>");
+                                                                          INFO_SIMBOLO* info = uso_local($1.lexema);
+                                                                          if (NULL == info) YYABORT;
+                                                                          if (FUNCION == info->categoria) YYABORT;
+                                                                          if (VECTOR == info->clase) YYABORT;
+                                                                          $$.tipo = info->tipo;
+                                                                          $$.es_direccion = 1;
+                                                                          escribir_operando(pfasm, $1.lexema, 1);
+                                                                        }
                             | constante                                 { REGLA(81,"<exp> ::= <constante>"); $$.tipo = $1.tipo; $$.es_direccion = $1.es_direccion; }
                             | '(' exp ')'                               { REGLA(82,"<exp> ::= ( <exp> )"); }
                             | '(' comparacion ')'                       { REGLA(83,"<exp> ::= ( <comparacion> )"); }
