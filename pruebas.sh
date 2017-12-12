@@ -7,7 +7,7 @@ BDIR="."                  # Carpeta con binarios
 ODIR="obj"                # Carpeta con objetos
 MDIR="misc"               # Carpeta con otros recursos
 ALFALIB="$ODIR/alfalib.o" # Objeto alfalib
-COMPILADOR="compilador"   # Nombre del binario del compilador
+COMPILADOR="$BDIR/compilador"   # Binario del compilador
 
 
 TABLA_SIMBOLOS_PRUEBAS="$MDIR/tabla_simbolos_pruebas"
@@ -31,10 +31,10 @@ n_pruebas=0
 
 ## Rutina auxiliar que limpia todos los ficheros generados
 clean() {
+	rm -vf $BDIR/prueba1 $BDIR/prueba2 $BDIR/prueba3
+	rm -vf $ODIR/prueba1.o $ODIR/prueba2.o $ODIR/prueba3.o
+	rm -vf prueba1.nasm prueba2.nasm prueba3.nasm
 	make clean
-	rm -f $BDIR/prueba1 $BDIR/prueba2 $BDIR/prueba3
-	rm -f $ODIR/prueba1.o $ODIR/prueba2.o $ODIR/prueba3.o
-	rm -f prueba1.nasm prueba2.nasm prueba3.nasm
 }
 
 clean_and_exit() {
@@ -165,16 +165,15 @@ compilador() {
 
 		subtitle "Prueba 5.$i - $file"
 
-		./$COMPILADOR "$COMPILADOR_PRUEBAS/$file.alf" "$file.nasm"
+		$COMPILADOR "$COMPILADOR_PRUEBAS/$file.alf" "_$file.nasm"
 
-		nasm -f elf32 -o $ODIR/$file.o $file.nasm
-		gcc -m32 -o $file $ODIR/$file.o $ALFALIB
+		nasm -f elf32 -o $ODIR/_$file.o _$file.nasm
+		gcc -m32 -o _$file $ODIR/_$file.o $ALFALIB
 
-		diff <(./$file) "$COMPILADOR_PRUEBAS/$file.out"
+		diff <(./_$file) "$COMPILADOR_PRUEBAS/$file.out"
 
-		rm $file
-		rm $file.nasm
-		rm $ODIR/$file.o
+		rm -v _$file _$file.nasm $ODIR/_$file.o
+
 
 	done
 
@@ -189,7 +188,7 @@ practica3
 compilador
 
 title 'Borrando ficheros generados'
-#clean
+clean
 
 title "$n_pruebas/$n_pruebas pruebas completadas con exito"
 echo -e "${GREEN}OK$NC"
