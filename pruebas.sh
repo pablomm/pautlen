@@ -7,11 +7,13 @@ BDIR="."                  # Carpeta con binarios
 ODIR="obj"                # Carpeta con objetos
 MDIR="misc"               # Carpeta con otros recursos
 ALFALIB="$ODIR/alfalib.o" # Objeto alfalib
+COMPILADOR="compilador"   # Nombre del binario del compilador
 
 
 TABLA_SIMBOLOS_PRUEBAS="$MDIR/tabla_simbolos_pruebas"
 ANALIZADOR_MORFOLOGICO_PRUEBAS="$MDIR/analizador_morfologico_pruebas"
 ANALIZADOR_SINTACTICO_PRUEBAS="$MDIR/analizador_sintactico_pruebas"
+COMPILADOR_PRUEBAS="$MDIR/compilador_pruebas"
 
 ## Colorines
 NC="$(tput sgr0)"
@@ -153,14 +155,41 @@ practica4() {
 	echo
 }
 
+compilador() {
+	title 'Pruebas compilador - pruebas propias'
+
+	i=0
+	for file in $(ls $COMPILADOR_PRUEBAS/*.alf); do
+		file=$(cut -d "/" -f 3 <<< "$file" | cut -d '_' -f 2- | cut -f 1 -d '.' )
+		i=$(expr $i + 1)
+
+		subtitle "Prueba 5.$i - $file"
+
+		./$COMPILADOR "$COMPILADOR_PRUEBAS/$file.alf" "$file.nasm"
+
+		nasm -f elf32 -o $ODIR/$file.o $file.nasm
+		gcc -m32 -o $file $ODIR/$file.o $ALFALIB
+
+		diff <(./$file) "$COMPILADOR_PRUEBAS/$file.out"
+
+		rm $file
+		rm $file.nasm
+		rm $ODIR/$file.o
+
+	done
+
+	echo
+}
+
 compile
 practica1
 practica2
 practica3
-practica4
+#practica4
+compilador
 
 title 'Borrando ficheros generados'
-clean
+#clean
 
 title "$n_pruebas/$n_pruebas pruebas completadas con exito"
 echo -e "${GREEN}OK$NC"

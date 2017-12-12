@@ -30,4 +30,10 @@ INFO_SIMBOLO* uso_global(const char* id);
 /** Obtiene la informacion de un simbolo local */
 INFO_SIMBOLO* uso_local(const char* id);
 
+/** Devuelve el primer simbolo de la lista enlazada con simbolos globales */
+INFO_SIMBOLO* simbolos_globales(void);
+
+/** Devuelve el primer simbolo de la lista enlazada con simbolos locales */
+INFO_SIMBOLO* simbolos_locales(void);
+
 #endif  /* TABLASIMBOLOS_H */

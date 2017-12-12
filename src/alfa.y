@@ -40,7 +40,6 @@
     int clase_actual = 0;
     int ambito_actual = 0;
 
-
 %}
 
 
@@ -105,7 +104,21 @@ inicio                      : { iniciar_scope();
                                 escribir_cabecera_bss(pfasm);
                               }
                             ;
-escritura1                  : { /* AQUI SE ESCRIBIRIAN LAS VARIABLES DECLARADAS QUE HEMOS GUARDADO EN LA TABLA HASH */
+escritura1                  : { /* Declaramos en bss todas las variables globales declaradas */
+
+                                 INFO_SIMBOLO * simbolos = simbolos_globales();
+
+                                 if (NULL != simbolos)
+                                 do {
+
+                                      if(simbolos->categoria == VARIABLE)
+                                        declarar_variable(pfasm, simbolos->lexema, simbolos->tipo, (VECTOR == simbolos->clase) ? simbolos->adicional1 : 1);
+
+                                      simbolos = simbolos->siguiente;
+
+                                 } while(NULL != simbolos);
+
+
                                 escribir_segmento_codigo(pfasm); }
                             ;
 escritura2                  : { escribir_inicio_main(pfasm);}

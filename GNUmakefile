@@ -209,17 +209,16 @@ $(EBIN):$(BDIR)/%: $(ODIR)/%.o $(SOBJ)
 $(NASM_OBJ):$(ODIR)/%.o: $(NDIR)/%.nasm
 	$(NASM) $(NFLAGS) -o $@ $<
 
+## Linkado de los nasm junto con alfalib
 $(NASM_BIN): $(BDIR)/%: $(ODIR)/%.o $(ALFALIB)
 	$(CC) $(CCNASMFLAGS) -o $@ $^ $(CFLAGS)
-
-## Linkado de los nasm junto con alfalib
 
 clean:
 	@$(RM) $(SOBJ) $(EOBJ) $(EBIN) $(TOBJ) $(TBIN) $(DEPEND_FILES)
 	@$(RM) $(FLEX_GENERATED_FILES) $(BISON_GENERATED_FILES)
 	@$(RM) $(BISON_HEADERS) $(BISON_HEADERS_ORIG) $(BISON_OUTPUT) $(BISON_OUTPUT_ORIG)
 	@$(RM) $(BISON_GRAPH_ORIG) $(BISON_GRAPH)
-	@$(RM) $(NASM_OBJ)
+	@$(RM) $(NASM_OBJ) $(NASM_BIN)
 
 zip:
 	git archive --format zip -o $(ZIP) HEAD

@@ -1,0 +1,16 @@
+main {
+	int x;
+	int y;
+	int w;
+	int z;
+
+	x = 1;
+	y = 2;
+	w = 3;
+	z = 4;
+
+	printf x;
+	printf y;
+	printf w;
+	printf z;
+}
