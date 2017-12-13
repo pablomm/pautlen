@@ -40,6 +40,9 @@
     int clase_actual = 0;
     int ambito_actual = 0;
 
+    /* variable para la generacion de etiquetas */
+    int etiqueta=1;
+
 %}
 
 
@@ -228,13 +231,33 @@ lectura                     : TOK_SCANF TOK_IDENTIFICADOR { REGLA(54,"<lectura> 
                             }
                             ;
 escritura                   : TOK_PRINTF exp { REGLA(56,"<escritura> ::= printf <exp>");
-                                               escribir_operando(pfasm, $2.lexema, $2.es_direccion);
+                                              /*  Habria que ver que esta en la tabla hash */
                                                escribir(pfasm, $2.es_direccion, $2.tipo);
                                              }
                             ;
 retorno_funcion             : TOK_RETURN exp { REGLA(61, "<retorno_funcion> ::= return <exp>"); }
                             ;
-exp                         : exp '+' exp                               { REGLA(72,"<exp> ::= <exp> + <exp>"); }
+exp                         : exp '+' exp                               { REGLA(72,"<exp> ::= <exp> + <exp>"); 
+
+                            /* Solo podemos sumar enteros  */
+                              if($1.tipo == $3.tipo && $1.tipo == ENTERO) {
+
+                          
+
+                                sumar(pfasm, $1.es_direccion, $3.es_direccion);
+
+                              /* Propaga correctamente los atributos*/
+                              $$.tipo = ENTERO;
+                              $$.es_direccion = 0;
+
+
+                              } else {
+                                printf("No se pueden sumar expresiones no enteras\n");
+                                YYABORT;
+                              }
+
+                            }
+
                             | exp '-' exp                               { REGLA(73,"<exp> ::= <exp> - <exp>"); }
                             | exp '/' exp                               { REGLA(74,"<exp> ::= <exp> / <exp>"); }
                             | exp '*' exp                               { REGLA(75,"<exp> ::= <exp> * <exp>"); }
@@ -242,15 +265,19 @@ exp                         : exp '+' exp                               { REGLA(
                             | exp TOK_AND exp                           { REGLA(77,"<exp> ::= <exp> && <exp>"); }
                             | exp TOK_OR exp                            { REGLA(78,"<exp> ::= <exp> || <exp>"); }
                             | '!' exp                                   { REGLA(79,"<exp> ::= ! <exp>"); }
-                            | TOK_IDENTIFICADOR                         { REGLA(80,"<exp> ::= <identificador>");
-                                                                          INFO_SIMBOLO* info = uso_local($1.lexema);
-                                                                          if (NULL == info) YYABORT;
-                                                                          if (FUNCION == info->categoria) YYABORT;
-                                                                          if (VECTOR == info->clase) YYABORT;
-                                                                          $$.tipo = info->tipo;
-                                                                          $$.es_direccion = 1;
-                                                                          escribir_operando(pfasm, $1.lexema, 1);
+                            | TOK_IDENTIFICADOR                         { 
+
+
+                                 REGLA(80,"<exp> ::= <identificador>");
+                                 INFO_SIMBOLO* info = uso_local($1.lexema);
+                                 if (NULL == info) YYABORT;
+                                 if (FUNCION == info->categoria) YYABORT;
+                                 if (VECTOR == info->clase) YYABORT;
+                                 $$.tipo = info->tipo;
+                                 $$.es_direccion = 1;
+                                 escribir_operando(pfasm, $1.lexema, 1);
                                                                         }
+
                             | constante                                 { REGLA(81,"<exp> ::= <constante>"); $$.tipo = $1.tipo; $$.es_direccion = $1.es_direccion; }
                             | '(' exp ')'                               { REGLA(82,"<exp> ::= ( <exp> )"); }
                             | '(' comparacion ')'                       { REGLA(83,"<exp> ::= ( <comparacion> )"); }

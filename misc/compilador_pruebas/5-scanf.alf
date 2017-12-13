@@ -1,0 +1,15 @@
+main {
+	int x;
+	int y;
+
+	scanf x;
+	printf x;
+
+	scanf y;
+	printf y;
+
+	scanf x;
+	printf x;
+
+	printf y;
+}

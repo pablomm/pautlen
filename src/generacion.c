@@ -232,7 +232,7 @@ void leer(FILE* fpasm, char* nombre, int tipo)
     /* Si tipo no es ENTERO o BOLEANO habria error, pero simplemente llama a scan_boolean */
     PUT_ASM("call %s", (tipo == ENTERO) ? "scan_int" : "scan_boolean");
     PUT_ASM("add esp, 4");
-    PUT_ASM("push dword eax");
+    /*PUT_ASM("push dword eax");*/
 }
 
 
@@ -392,6 +392,7 @@ void y(FILE* fpasm, int es_referencia_1, int es_referencia_2)
 
 void apilar_constante(FILE* fpasm, int valor)
 {
+    PUT_COMMENT("Apilamos la constante %i", valor);
     PUT_ASM("push dword %i", valor);
 }
 

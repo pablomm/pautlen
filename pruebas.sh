@@ -170,7 +170,14 @@ compilador() {
 		nasm -f elf32 -o $ODIR/_$file.o _$file.nasm
 		gcc -m32 -o _$file $ODIR/_$file.o $ALFALIB
 
-		diff <(./_$file) "$COMPILADOR_PRUEBAS/$file.out"
+
+		if [ -f $COMPILADOR_PRUEBAS/$file.in ]; then
+
+		    diff <(./_$file < $COMPILADOR_PRUEBAS/$file.in ) "$COMPILADOR_PRUEBAS/$file.out"
+		else
+
+			diff <(./_$file) "$COMPILADOR_PRUEBAS/$file.out"
+		fi
 
 		rm -v _$file _$file.nasm $ODIR/_$file.o
 
@@ -180,11 +187,15 @@ compilador() {
 	echo
 }
 
-compile
-practica1
-practica2
-practica3
+#compile
+#practica1
+#practica2
+#practica3
 #practica4
+
+
+# Comentadas resto de pruebas de momento por comodidad
+make
 compilador
 
 title 'Borrando ficheros generados'

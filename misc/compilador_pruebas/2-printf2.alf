@@ -1,0 +1,9 @@
+main {
+
+	// Tiene que haber al menos una declaracion XD
+	int x;
+
+	printf 1;
+	printf 2;
+	printf 3;
+}
