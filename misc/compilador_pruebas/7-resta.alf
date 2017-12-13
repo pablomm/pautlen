@@ -1,0 +1,29 @@
+main {
+
+        int x1, x2; 
+     	int y;
+
+        scanf x1;
+        scanf x2;
+
+        printf 3 - 1;
+
+        printf x1 - x1;
+
+        printf x1 - x2;
+
+        printf x2 - x1;
+
+        printf 3 - x2;
+
+        printf x1 - 1;
+
+        y = 100 - 4;
+
+        printf y;
+
+        y = y - x1;
+
+        printf y;
+
+}

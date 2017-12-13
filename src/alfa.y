@@ -236,31 +236,88 @@ escritura                   : TOK_PRINTF exp { REGLA(56,"<escritura> ::= printf 
                             ;
 retorno_funcion             : TOK_RETURN exp { REGLA(61, "<retorno_funcion> ::= return <exp>"); }
                             ;
-exp                         : exp '+' exp                               { REGLA(72,"<exp> ::= <exp> + <exp>"); 
+exp                         : exp '+' exp                               { 
+                            REGLA(72,"<exp> ::= <exp> + <exp>"); 
 
                             /* Solo podemos sumar enteros  */
                               if($1.tipo == $3.tipo && $1.tipo == ENTERO) {
-
-                          
-
                                 sumar(pfasm, $1.es_direccion, $3.es_direccion);
 
-                              /* Propaga correctamente los atributos*/
-                              $$.tipo = ENTERO;
-                              $$.es_direccion = 0;
-
-
+                                /* Propaga correctamente los atributos*/
+                                $$.tipo = ENTERO;
+                                $$.es_direccion = 0;
                               } else {
                                 printf("No se pueden sumar expresiones no enteras\n");
                                 YYABORT;
                               }
-
                             }
 
-                            | exp '-' exp                               { REGLA(73,"<exp> ::= <exp> - <exp>"); }
-                            | exp '/' exp                               { REGLA(74,"<exp> ::= <exp> / <exp>"); }
-                            | exp '*' exp                               { REGLA(75,"<exp> ::= <exp> * <exp>"); }
-                            | '-'  %prec NEG exp                        { REGLA(76,"<exp> ::= - <exp>"); }
+                            | exp '-' exp                               { 
+
+                               REGLA(73,"<exp> ::= <exp> - <exp>"); 
+
+                              /* Solo podemos restar enteros  */
+                              if($1.tipo == $3.tipo && $1.tipo == ENTERO) {
+                                restar(pfasm, $1.es_direccion, $3.es_direccion);
+
+                                /* Propaga correctamente los atributos*/
+                                $$.tipo = ENTERO;
+                                $$.es_direccion = 0;
+                              } else {
+                                printf("No se pueden restar expresiones no enteras\n");
+                                YYABORT;
+                              }
+
+
+                            }
+                            | exp '/' exp                               { 
+                                REGLA(74,"<exp> ::= <exp> / <exp>"); 
+
+                              /* Solo podemos dividir enteros  */
+                              if($1.tipo == $3.tipo && $1.tipo == ENTERO) {
+                                dividir(pfasm, $1.es_direccion, $3.es_direccion);
+
+                                /* Propaga correctamente los atributos*/
+                                $$.tipo = ENTERO;
+                                $$.es_direccion = 0;
+                              } else {
+                                printf("No se pueden dividir expresiones no enteras\n");
+                                YYABORT;
+                              }
+
+                            }
+                            | exp '*' exp                               { 
+                               REGLA(75,"<exp> ::= <exp> * <exp>"); 
+                              /* Solo podemos multiplicar enteros  */
+                              if($1.tipo == $3.tipo && $1.tipo == ENTERO) {
+                                multiplicar(pfasm, $1.es_direccion, $3.es_direccion);
+
+                                /* Propaga correctamente los atributos*/
+                                $$.tipo = ENTERO;
+                                $$.es_direccion = 0;
+                              } else {
+                                printf("No se pueden multiplicar expresiones no enteras\n");
+                                YYABORT;
+                              }
+
+                            }
+                            | '-'  %prec NEG exp                        { REGLA(76,"<exp> ::= - <exp>"); 
+
+                              if($2.tipo == ENTERO) {
+                                cambiar_signo(pfasm, $2.es_direccion);
+
+                                /* Propaga correctamente los atributos*/
+                                $$.tipo = ENTERO;
+                                $$.es_direccion = 0;
+                              } else {
+                                printf("No se pueden cambiar signo a expresiones no enteras\n");
+                                YYABORT;
+                              }
+
+
+
+
+                            }
                             | exp TOK_AND exp                           { REGLA(77,"<exp> ::= <exp> && <exp>"); }
                             | exp TOK_OR exp                            { REGLA(78,"<exp> ::= <exp> || <exp>"); }
                             | '!' exp                                   { REGLA(79,"<exp> ::= ! <exp>"); }

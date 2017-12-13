@@ -289,7 +289,7 @@ void multiplicar(FILE* fpasm, int es_referencia_1, int es_referencia_2)
     if (es_referencia_1)
         PUT_ASM("mov eax, [eax]");
 
-    PUT_ASM("imul %s", es_referencia_2 ? "[ebx]" : "ebx");
+    PUT_ASM("imul dword %s", es_referencia_2 ? "[ebx]" : "ebx");
 
     /* No estoy seguro del orden de apilar argumentos */
     PUT_ASM("push dword edx");

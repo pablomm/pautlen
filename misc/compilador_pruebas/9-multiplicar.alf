@@ -1,0 +1,26 @@
+main {
+	
+	int x, y;
+
+	printf 2 * 3;
+
+	printf 0 * 2;
+
+	printf -1 * 2;
+
+	printf -2 * 10;
+
+	x = 9;
+
+	printf x * 12;
+
+	y = 2 * 3;
+
+	printf y;
+
+	printf x * y;
+
+	printf x * y * - 1;
+
+
+}
