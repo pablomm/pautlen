@@ -111,15 +111,14 @@ escritura1                  : { /* Declaramos en bss todas las variables globale
 
                                  INFO_SIMBOLO * simbolos = simbolos_globales();
 
-                                 if (NULL != simbolos)
-                                 do {
+                                 while (NULL != simbolos) {
 
                                       if(simbolos->categoria == VARIABLE)
                                         declarar_variable(pfasm, simbolos->lexema, simbolos->tipo, (VECTOR == simbolos->clase) ? simbolos->adicional1 : 1);
 
                                       simbolos = simbolos->siguiente;
 
-                                 } while(NULL != simbolos);
+                                 };
 
 
                                 escribir_segmento_codigo(pfasm); }
