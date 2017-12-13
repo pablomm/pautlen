@@ -201,7 +201,31 @@ condicional                 : TOK_IF '(' exp ')' '{' sentencias '}' { REGLA(50,"
                             ;
 bucle                       : TOK_WHILE'(' exp ')' '{' sentencias '}' { REGLA(52,"<bucle> ::= while ( <exp> ) { <sentencias> }"); }
                             ;
-lectura                     : TOK_SCANF identificador { REGLA(54,"<lectura> ::= scanf <identificador>"); }
+lectura                     : TOK_SCANF TOK_IDENTIFICADOR { REGLA(54,"<lectura> ::= scanf <identificador>"); 
+                                  /*  Buscamos el identificador en las tablas */
+                                  INFO_SIMBOLO* info = uso_local($2.lexema);
+
+                                  /* Gestionamos el error de que el simbolo no existe */
+                                  if(NULL == info) {
+                                      YYABORT;
+                                  }
+
+                                  /* Solo podemos leer en caso de escalares */
+                                  if(ESCALAR != info->categoria) {
+                                      YYABORT;
+                                  }
+
+                                  /* Apilamos la direccion de la variable */
+
+
+                                  /* Llamamos a scanf, restauramos la pila en funcion del tipo */
+                                  if(info->tipo == ENTERO || info->tipo == BOOLEANO) {
+                                      leer(pfasm, info->lexema, info->tipo);
+
+                                  } else { /* Error en el tipo */
+                                      YYABORT;
+                                  }
+                            }
                             ;
 escritura                   : TOK_PRINTF exp { REGLA(56,"<escritura> ::= printf <exp>");
                                                escribir_operando(pfasm, $2.lexema, $2.es_direccion);
