@@ -42,3 +42,5 @@ misc/alfa.output
 # Grafo del automata
 misc/alfa.dot.pdf
 
+# Por si se quedan a medias las pruebas
+_*
