@@ -188,11 +188,25 @@ bloque                      : condicional { REGLA(40,"<bloque> ::= <condicional>
                             ;
 asignacion                  : TOK_IDENTIFICADOR '=' exp { REGLA(43,"<asignacion> ::= <identificador> = <exp>");
                                                           INFO_SIMBOLO* info = uso_local($1.lexema);
-                                                          if (NULL == info) YYABORT;
-                                                          if (FUNCION == info->categoria) YYABORT;
-                                                          if (VECTOR == info->clase) YYABORT;
-                                                          if ($3.tipo != info->tipo) YYABORT;
+                                                          if (NULL == info) { 
+															printf("Error identificador no asignado\n");
+															YYABORT;
+                                                          }
+                                                          if (FUNCION == info->categoria){ 
+															printf("Error no puedes asignar valor a una funcion\n");
+															YYABORT;
+                                                          }
+                                                          if (VECTOR == info->clase){ 
+															printf("No puedes asignar valor a un vector directamente\n");
+															YYABORT;
+                                                          }
+                                                          if ($3.tipo != info->tipo){ 
+															printf("TIpos incompatibles\n");
+															YYABORT;
+                                                          }
+
                                                           asignar(pfasm, $1.lexema, $3.es_direccion);
+
                                                         }
                             | elemento_vector '=' exp { REGLA(44,"<asignacion> ::= <elemento_vector> = <exp>"); }
                             ;
@@ -230,14 +244,14 @@ lectura                     : TOK_SCANF TOK_IDENTIFICADOR { REGLA(54,"<lectura> 
                             }
                             ;
 escritura                   : TOK_PRINTF exp { REGLA(56,"<escritura> ::= printf <exp>");
-                                              /*  Habria que ver que esta en la tabla hash */
+
                                                escribir(pfasm, $2.es_direccion, $2.tipo);
                                              }
                             ;
 retorno_funcion             : TOK_RETURN exp { REGLA(61, "<retorno_funcion> ::= return <exp>"); }
                             ;
 exp                         : exp '+' exp                               { 
-                            REGLA(72,"<exp> ::= <exp> + <exp>"); 
+                              REGLA(72,"<exp> ::= <exp> + <exp>"); 
 
                             /* Solo podemos sumar enteros  */
                               if($1.tipo == $3.tipo && $1.tipo == ENTERO) {
@@ -301,7 +315,8 @@ exp                         : exp '+' exp                               {
                               }
 
                             }
-                            | '-'  %prec NEG exp                        { REGLA(76,"<exp> ::= - <exp>"); 
+                            | '-'  %prec NEG exp                        { 
+                               REGLA(76,"<exp> ::= - <exp>"); 
 
                               if($2.tipo == ENTERO) {
                                 cambiar_signo(pfasm, $2.es_direccion);
@@ -318,9 +333,61 @@ exp                         : exp '+' exp                               {
 
 
                             }
-                            | exp TOK_AND exp                           { REGLA(77,"<exp> ::= <exp> && <exp>"); }
-                            | exp TOK_OR exp                            { REGLA(78,"<exp> ::= <exp> || <exp>"); }
-                            | '!' exp                                   { REGLA(79,"<exp> ::= ! <exp>"); }
+                            | exp TOK_AND exp                           { 
+
+                                   REGLA(77,"<exp> ::= <exp> && <exp>"); 
+
+                                   /* Solo podemos ahcer ands de booleanos  */
+	                              	if($1.tipo == $3.tipo && $1.tipo == BOOLEANO) {
+
+	                                	y(pfasm, $1.es_direccion, $3.es_direccion);
+
+	                                /* Propaga correctamente los atributos*/
+	                                $$.tipo = BOOLEANO;
+	                                $$.es_direccion = 0;
+	                              } else {
+	                                printf("No se puede hacer and de expresiones no booleanas\n");
+	                                YYABORT;
+	                              }
+
+                            }
+                            | exp TOK_OR exp                            { 
+
+                                 REGLA(78,"<exp> ::= <exp> || <exp>"); 
+
+                                  /* Solo podemos ahcer ands de booleanos  */
+	                              	if($1.tipo == $3.tipo && $1.tipo == BOOLEANO) {
+
+	                                	o(pfasm, $1.es_direccion, $3.es_direccion);
+
+	                                /* Propaga correctamente los atributos*/
+	                                $$.tipo = BOOLEANO;
+	                                $$.es_direccion = 0;
+	                              } else {
+	                                printf("No se puede hacer or de expresiones no booleanas\n");
+	                                YYABORT;
+	                              }
+
+                             }
+
+
+                            | '!' exp                                   { 
+
+                                REGLA(79,"<exp> ::= ! <exp>"); 
+
+								if($2.tipo == BOOLEANO) {
+
+                                no(pfasm, $2.es_direccion,etiqueta++);
+                                $$.tipo = BOOLEANO;
+                                $$.es_direccion = 0;
+                              } else {
+                                printf("No se pueden negar expresiones no booleanas\n");
+                                YYABORT;
+                              }
+
+                            }
+
+
                             | TOK_IDENTIFICADOR                         { 
 
 
@@ -334,9 +401,23 @@ exp                         : exp '+' exp                               {
                                  escribir_operando(pfasm, $1.lexema, 1);
                                                                         }
 
-                            | constante                                 { REGLA(81,"<exp> ::= <constante>"); $$.tipo = $1.tipo; $$.es_direccion = $1.es_direccion; }
-                            | '(' exp ')'                               { REGLA(82,"<exp> ::= ( <exp> )"); }
-                            | '(' comparacion ')'                       { REGLA(83,"<exp> ::= ( <comparacion> )"); }
+                            | constante                                 { 
+                                  REGLA(81,"<exp> ::= <constante>"); 
+                                  $$.tipo = $1.tipo; 
+                                  $$.es_direccion = $1.es_direccion; 
+                            }
+                            
+                            | '(' exp ')'                               { 
+                                REGLA(82,"<exp> ::= ( <exp> )"); 
+                                $$.tipo = $2.tipo;
+                                $$.es_direccion = $2.es_direccion;
+                            }
+                            | '(' comparacion ')'                       { 
+
+                               REGLA(83,"<exp> ::= ( <comparacion> )"); 
+							    $$.tipo = $2.tipo;
+							    $$.es_direccion = $2.es_direccion;
+                            }
                             | elemento_vector                           { REGLA(85,"<exp> ::= <elemento_vector>"); }
                             | identificador '(' lista_expresiones ')'   { REGLA(88,"<exp> ::= <identificador> ( <lista_expresiones> )"); }
                             ;
@@ -353,14 +434,28 @@ comparacion                 : exp TOK_IGUAL exp        { REGLA(93, "<comparacion
                             | exp '<' exp              { REGLA(97, "<comparacion> ::= <exp> < <exp>"); }
                             | exp '>' exp              { REGLA(98, "<comparacion> ::= <exp> > <exp>"); }
                             ;
-constante                   : constante_logica { REGLA(99, "<constante> ::= <constante_logica>"); }
+constante                   : constante_logica { REGLA(99, "<constante> ::= <constante_logica>");
+                                                 $$.tipo = $1.tipo;
+                                                 $$.es_direccion = $1.es_direccion;
+                            }
                             | constante_entera { REGLA(100, "<constante> ::= <constante_entera>");
                                                  $$.tipo = $1.tipo;
                                                  $$.es_direccion = $1.es_direccion;
                                                }
                             ;
-constante_logica            : TOK_TRUE { REGLA(101, "<constante_logica> ::= true"); }
-                            | TOK_FALSE { REGLA(102, "<constante_logica> ::= false"); }
+constante_logica            : TOK_TRUE { REGLA(101, "<constante_logica> ::= true"); 
+													 $$.tipo = BOOLEANO;
+                                                     $$.es_direccion = 0;
+                                                     $$.valor_entero = 1;
+                                                     apilar_constante(pfasm, 1);
+
+                            }
+                            | TOK_FALSE { REGLA(102, "<constante_logica> ::= false");
+                                                     $$.tipo = BOOLEANO;
+                                                     $$.es_direccion = 0;
+                                                     $$.valor_entero = 0;
+                                                     apilar_constante(pfasm, 0);
+                             }
                             ;
 constante_entera            : TOK_CONSTANTE_ENTERA { REGLA(104, "<constante_entera> ::= TOK_CONSTANTE_ENTERA");
                                                      $$.tipo = ENTERO;

@@ -291,8 +291,6 @@ void multiplicar(FILE* fpasm, int es_referencia_1, int es_referencia_2)
 
     PUT_ASM("imul dword %s", es_referencia_2 ? "[ebx]" : "ebx");
 
-    /* No estoy seguro del orden de apilar argumentos */
-    PUT_ASM("push dword edx");
     PUT_ASM("push dword eax");
 
 }

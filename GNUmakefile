@@ -152,7 +152,7 @@ test: $(TBIN)
 
 nasm: $(NASM_BIN)
 
-debug: $(EBIN) $(TBIN)
+debug: $(EBIN)
 
 ## Deteccion automatica de dependencias (_solo_ entre ficheros .c y .h)
 # La siguiente regla le dice a make como generar el fichero .depend
