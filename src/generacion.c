@@ -232,7 +232,6 @@ void leer(FILE* fpasm, char* nombre, int tipo)
     /* Si tipo no es ENTERO o BOLEANO habria error, pero simplemente llama a scan_boolean */
     PUT_ASM("call %s", (tipo == ENTERO) ? "scan_int" : "scan_boolean");
     PUT_ASM("add esp, 4");
-    /*PUT_ASM("push dword eax");*/
 }
 
 
@@ -302,9 +301,6 @@ void dividir(FILE* fpasm, int es_referencia_1, int es_referencia_2)
     /* B.4.117 IDIV : Signed Integer Divide */
     /* B.4.19 CBW , CWD , CDQ , CWDE : Sign Extensions */
 
-    /* Falta comprobacion de division por 0 */
-    /* Salvar registros antes de usarlos? */
-
     PUT_ASM("pop dword ebx");
     PUT_ASM("pop dword eax");
 
@@ -330,7 +326,7 @@ void o(FILE* fpasm, int es_referencia_1, int es_referencia_2)
     /* B.4.191 OR : Bitwise OR */
     /* Dividimos los casos para aprovechar que
        se puede operar con un registro y una posicion
-       de memoria y evitarnos un moc
+       de memoria y evitarnos un mov
     */
 
     /* Caso solo es referencia el primer operando */
@@ -363,7 +359,7 @@ void y(FILE* fpasm, int es_referencia_1, int es_referencia_2)
     /* B.4.8 AND : Bitwise AND */
     /* Dividimos los casos para aprovechar que
        se puede operar con un registro y una posicion
-       de memoria y evitarnos un moc
+       de memoria y evitarnos un mov
     */
 
     /* Caso solo es referencia el primer operando */
@@ -394,4 +390,183 @@ void apilar_constante(FILE* fpasm, int valor)
     PUT_ASM("push dword %i", valor);
 }
 
+void igual(FILE* fpasm, int es_referencia_1, int es_referencia_2, int etiqueta)
+{
+    PUT_COMMENT("Comparacion igualdad");
 
+    if (es_referencia_1 && !es_referencia_2) {
+
+        PUT_ASM("pop dword eax");
+        PUT_ASM("pop dword ebx");
+        PUT_ASM("cmp eax, [ebx]");
+
+        /* Caso ambos referencia, solo el segundo o ninguno */
+    } else {
+
+        PUT_ASM("pop dword ebx");
+
+        PUT_ASM("pop dword eax");
+        if (es_referencia_1)
+            PUT_ASM("mov dword eax, [eax]");
+
+        PUT_ASM("cmp eax, %s", es_referencia_2 ? "[ebx]" : "ebx");
+    }
+
+    /* Comprobamos igualdad */
+    PUT_ASM("je _igual_%d", etiqueta);
+
+    /* Caso no se cumple la condicion */
+    PUT_ASM("push dword 0");
+    PUT_ASM("jmp _end_igual_%d", etiqueta);
+
+    PUT_DIRECTIVE("_igual_%d:", etiqueta);
+    PUT_ASM("push dword 1");
+    PUT_DIRECTIVE("_end_igual_%d:", etiqueta);
+}
+
+void distinto(FILE* fpasm, int es_referencia_1, int es_referencia_2, int etiqueta)
+{
+    PUT_COMMENT("Comparacion distinto");
+
+    if (es_referencia_1 && !es_referencia_2) {
+
+        PUT_ASM("pop dword eax");
+        PUT_ASM("pop dword ebx");
+        PUT_ASM("cmp eax, [ebx]");
+
+        /* Caso ambos referencia, solo el segundo o ninguno */
+    } else {
+
+        PUT_ASM("pop dword ebx");
+
+        PUT_ASM("pop dword eax");
+        if (es_referencia_1)
+            PUT_ASM("mov dword eax, [eax]");
+
+        PUT_ASM("cmp eax, %s", es_referencia_2 ? "[ebx]" : "ebx");
+    }
+
+    /* Comprobamos igualdad */
+    PUT_ASM("je _distinto_%d", etiqueta);
+
+    /* Caso se cumple la condicion */
+    PUT_ASM("push dword 1");
+    PUT_ASM("jmp _end_distinto_%d", etiqueta);
+
+    PUT_DIRECTIVE("_distinto_%d:", etiqueta);
+    PUT_ASM("push dword 0");
+    PUT_DIRECTIVE("_end_distinto_%d:", etiqueta);
+}
+
+
+void menorigual(FILE* fpasm, int es_referencia_1, int es_referencia_2, int etiqueta)
+{
+    PUT_COMMENT("Menor o igual");
+
+    PUT_ASM("pop dword ebx");
+    PUT_ASM("pop dword eax");
+
+    if (es_referencia_1)
+        PUT_ASM("mov eax, dword [eax]");
+
+    if (es_referencia_2)
+        PUT_ASM("mov ebx, dword [ebx]");
+
+    PUT_ASM("cmp eax, ebx");
+    
+    /* Comprobamos menor o igual */
+    /* JLE Jump Less or equal para signed */
+    PUT_ASM("jle _menorigual_%d", etiqueta);
+
+    /* Caso se cumple la condicion */
+    PUT_ASM("push dword 0");
+    PUT_ASM("jmp _end_menorigual_%d", etiqueta);
+
+    PUT_DIRECTIVE("_menorigual_%d:", etiqueta);
+    PUT_ASM("push dword 1");
+    PUT_DIRECTIVE("_end_menorigual_%d:", etiqueta);
+}
+
+void mayorigual(FILE* fpasm, int es_referencia_1, int es_referencia_2, int etiqueta)
+{
+    PUT_COMMENT("Mayor o igual");
+
+    PUT_ASM("pop dword ebx");
+    PUT_ASM("pop dword eax");
+
+    if (es_referencia_1)
+        PUT_ASM("mov eax, dword [eax]");
+
+    if (es_referencia_2)
+        PUT_ASM("mov ebx, dword [ebx]");
+
+    PUT_ASM("cmp eax, ebx");
+    
+    /* Comprobamos menor o igual */
+    /* JGE Jump greater or equal para signed */
+    PUT_ASM("jge _mayorigual_%d", etiqueta);
+
+    /* Caso se cumple la condicion */
+    PUT_ASM("push dword 0");
+    PUT_ASM("jmp _end_mayorigual_%d", etiqueta);
+
+    PUT_DIRECTIVE("_mayorigual_%d:", etiqueta);
+    PUT_ASM("push dword 1");
+    PUT_DIRECTIVE("_end_mayorigual_%d:", etiqueta);
+}
+
+void menor(FILE* fpasm, int es_referencia_1, int es_referencia_2, int etiqueta)
+{
+    PUT_COMMENT("Menor");
+
+    PUT_ASM("pop dword ebx");
+    PUT_ASM("pop dword eax");
+
+    if (es_referencia_1)
+        PUT_ASM("mov eax, dword [eax]");
+
+    if (es_referencia_2)
+        PUT_ASM("mov ebx, dword [ebx]");
+
+    PUT_ASM("cmp eax, ebx");
+    
+    /* Comprobamos menor o igual */
+    /* JL Jump Less para signed */
+    PUT_ASM("jl _menor_%d", etiqueta);
+
+    /* Caso se cumple la condicion */
+    PUT_ASM("push dword 0");
+    PUT_ASM("jmp _end_menor_%d", etiqueta);
+
+    PUT_DIRECTIVE("_menor_%d:", etiqueta);
+    PUT_ASM("push dword 1");
+    PUT_DIRECTIVE("_end_menor_%d:", etiqueta);
+}
+
+void mayor(FILE* fpasm, int es_referencia_1, int es_referencia_2, int etiqueta)
+{
+    PUT_COMMENT("Mayor");
+
+    PUT_ASM("pop dword ebx");
+    PUT_ASM("pop dword eax");
+
+    if (es_referencia_1)
+        PUT_ASM("mov eax, dword [eax]");
+
+    if (es_referencia_2)
+        PUT_ASM("mov ebx, dword [ebx]");
+
+    PUT_ASM("cmp eax, ebx");
+    
+    /* Comprobamos menor o igual */
+    /* JG Jump Less or equal para signed */
+    PUT_ASM("jg _mayor_%d", etiqueta);
+
+    /* Caso se cumple la condicion */
+    PUT_ASM("push dword 0");
+    PUT_ASM("jmp _end_mayor_%d", etiqueta);
+
+    PUT_DIRECTIVE("_mayor_%d:", etiqueta);
+    PUT_ASM("push dword 1");
+    PUT_DIRECTIVE("_end_mayor_%d:", etiqueta);
+}

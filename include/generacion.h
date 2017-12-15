@@ -110,4 +110,12 @@ void escribir(FILE* fpasm, int es_referencia, int tipo);
 
 void apilar_constante(FILE* fpasm, int valor);
 
+void igual(FILE *fpasm, int es_referencia_1, int es_referencia_2, int etiqueta);
+
+void distinto(FILE *fpasm, int es_referencia_1, int es_referencia_2, int etiqueta);
+void menorigual(FILE *fpasm, int es_referencia_1, int es_referencia_2, int etiqueta);
+void mayorigual(FILE *fpasm, int es_referencia_1, int es_referencia_2, int etiqueta);
+void menor(FILE *fpasm, int es_referencia_1, int es_referencia_2, int etiqueta);
+void mayor(FILE *fpasm, int es_referencia_1, int es_referencia_2, int etiqueta);
+
 #endif

@@ -329,9 +329,6 @@ exp                         : exp '+' exp                               {
                                 YYABORT;
                               }
 
-
-
-
                             }
                             | exp TOK_AND exp                           { 
 
@@ -427,12 +424,71 @@ lista_expresiones           : exp resto_lista_expresiones { REGLA(89,"<lista_exp
 resto_lista_expresiones     : ',' exp resto_lista_expresiones { REGLA(91,"<resto_lista_expresiones> ::= , <exp> <resto_lista_expresiones>"); }
                             | /* empty regla 92 */ { REGLA(92,"<resto_lista_expresiones> ::="); }
                             ;
-comparacion                 : exp TOK_IGUAL exp        { REGLA(93, "<comparacion> ::= <exp> == <exp>"); }
-                            | exp TOK_DISTINTO exp     { REGLA(94, "<comparacion> ::= <exp> != <exp>"); }
-                            | exp TOK_MENORIGUAL exp   { REGLA(95, "<comparacion> ::= <exp> <= <exp>"); }
-                            | exp TOK_MAYORIGUAL exp   { REGLA(96, "<comparacion> ::= <exp> >= <exp>"); }
-                            | exp '<' exp              { REGLA(97, "<comparacion> ::= <exp> < <exp>"); }
-                            | exp '>' exp              { REGLA(98, "<comparacion> ::= <exp> > <exp>"); }
+comparacion                 : exp TOK_IGUAL exp        { REGLA(93, "<comparacion> ::= <exp> == <exp>"); 
+
+								if($1.tipo == ENTERO && $3.tipo == ENTERO) {
+
+									igual(pfasm, $1.es_direccion, $3.es_direccion, etiqueta++);
+									$$.tipo = BOOLEANO;
+   									$$.es_direccion = 0;
+								} else {
+								    printf("Solo pueden hacerse comparaciones de igualdad entre enteros\n");
+								    YYABORT;
+								}
+
+                            }
+                            | exp TOK_DISTINTO exp     { REGLA(94, "<comparacion> ::= <exp> != <exp>"); 
+								if($1.tipo == ENTERO && $3.tipo == ENTERO) {
+									distinto(pfasm, $1.es_direccion, $3.es_direccion, etiqueta++);
+									$$.tipo = BOOLEANO;
+   									$$.es_direccion = 0;
+								} else {
+								    printf("Solo pueden hacerse comparaciones de desigualdad entre enteros\n");
+								    YYABORT;
+								}
+
+                            }
+                            | exp TOK_MENORIGUAL exp   { REGLA(95, "<comparacion> ::= <exp> <= <exp>"); 
+                                if($1.tipo == ENTERO && $3.tipo == ENTERO) {
+									menorigual(pfasm, $1.es_direccion, $3.es_direccion, etiqueta++);
+									$$.tipo = BOOLEANO;
+   									$$.es_direccion = 0;
+								} else {
+								    printf("Solo pueden hacerse comparaciones de menor o igual entre enteros\n");
+								    YYABORT;
+								}
+
+                            }
+                            | exp TOK_MAYORIGUAL exp   { REGLA(96, "<comparacion> ::= <exp> >= <exp>"); 
+	                            if($1.tipo == ENTERO && $3.tipo == ENTERO) {
+										mayorigual(pfasm, $1.es_direccion, $3.es_direccion, etiqueta++);
+										$$.tipo = BOOLEANO;
+	   									$$.es_direccion = 0;
+									} else {
+									    printf("Solo pueden hacerse comparaciones de mayor o igual entre enteros\n");
+									    YYABORT;
+									}
+							}
+                            | exp '<' exp              { REGLA(97, "<comparacion> ::= <exp> < <exp>"); 
+								if($1.tipo == ENTERO && $3.tipo == ENTERO) {
+									menor(pfasm, $1.es_direccion, $3.es_direccion, etiqueta++);
+									$$.tipo = BOOLEANO;
+   									$$.es_direccion = 0;
+								} else {
+								    printf("Solo pueden hacerse comparaciones de menor entre enteros\n");
+								    YYABORT;
+								}
+                            }
+                            | exp '>' exp              { REGLA(98, "<comparacion> ::= <exp> > <exp>");
+                               if($1.tipo == ENTERO && $3.tipo == ENTERO) {
+									mayor(pfasm, $1.es_direccion, $3.es_direccion, etiqueta++);
+									$$.tipo = BOOLEANO;
+   								    $$.es_direccion = 0;
+								} else {
+								    printf("Solo pueden hacerse comparaciones de menor entre enteros\n");
+								    YYABORT;
+								}
+						    }
                             ;
 constante                   : constante_logica { REGLA(99, "<constante> ::= <constante_logica>");
                                                  $$.tipo = $1.tipo;
