@@ -2,7 +2,7 @@
 #define COMUN_H 1
 
 #define UNUSED(arg) ((void)(arg))
-#define MACRO_BODY(block) do { BLOCK } while (0)
+#define MACRO_BODY(block) do { block } while (0)
 #define SWAP(a, b, type) MACRO_BODY( type c = a; a = b; b = c; )
 
 #define MAX_LONG_ID 100

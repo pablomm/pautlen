@@ -143,7 +143,7 @@ $(FLEX_OBJ): CFLAGS += -Wno-sign-compare -D_XOPEN_SOURCE=700
 
 ## Flags adicionales
 all: CFLAGS += -O3 -DNDEBUG
-test: CFLAGS += -O3 -DNDEBUG
+test: CFLAGS += -g
 debug: CFLAGS += -g
 
 ## Objetivos

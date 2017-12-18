@@ -28,7 +28,7 @@ typedef struct  info_simbolo {
     CLASE clase;            /* clase */
     int adicional1;    /* valor si escalar, longitud si vector, número de parámetros si función */
     int adicional2;    /* posición en llamada a función si parámetro, posición de declaración si variable local de función, número de variables locales si función */
-    struct  info_simbolo * siguiente; /* Lista enlazada con todos los simbolos de la tabla */
+    struct info_simbolo* siguiente; /* Lista enlazada con todos los simbolos de la tabla */
 
 } INFO_SIMBOLO;
 
@@ -42,7 +42,7 @@ typedef struct nodo_hash {
 typedef struct {
     int tam;            /* tamaño de la tabla hash */
     NODO_HASH** tabla;  /* tabla en sí (array de tam punteros a nodo) */
-    INFO_SIMBOLO * simbolos; /* Lista enlazada con todos los info_simbolos */
+    INFO_SIMBOLO* simbolos; /* Lista enlazada con todos los info_simbolos */
 } TABLA_HASH;
 
 
