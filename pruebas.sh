@@ -26,7 +26,7 @@ GREEN="$NC$(tput setaf 2)"
 cd "$( dirname "${BASH_SOURCE[0]}" )"
 
 ## Contador de numero de pruebas
-(( n_pruebas = 0 ))
+n_pruebas=0
 
 ## Compilamos tests en carpeta BDIR
 compile() {
@@ -57,7 +57,7 @@ diff() {
 	command diff "$@"
 
 	if [[ $? -eq 0 ]]; then
-		(( n_pruebas += 1 ))
+		n_pruebas=$(expr $n_pruebas + 1 )
 		echo -en "${GREEN}OK$NC "
 		return 0
 	else
@@ -73,14 +73,9 @@ if [[ "$*" == 'clean' ]]; then
 fi
 
 make_nasm_exe() {
-	file_nasm="$1"
-	if [[ "$(uname)" == 'Darwin' ]]; then
-		nasm -g -f macho32 --prefix _ -o "$ODIR/${file_nasm%.*}.o" "$file_nasm"
-		clang -g -m32 -o "${file_nasm%.*}" "$ODIR/${file_nasm%.*}.o" alfalib/alfalib.o -lc -Wl,-no_pie
-	else
-		nasm -f elf32 -o "$ODIR/${file_nasm%.*}.o" "$file_nasm"
-		gcc -m32 -o prueba1 "$ODIR/prueba1.o" "$ALFALIB"
-	fi
+	local file_nasm="$1"
+	nasm -f elf32 -o "$ODIR/${file_nasm%.*}.o" "$file_nasm"
+	gcc -m32 -o "${file_nasm%.*}" "$file_nasm" "$ALFALIB"
 }
 
 practica1() {
@@ -151,12 +146,12 @@ practica3() {
 practica4() {
 	title 'Pruebas practica 4 - analizador sintactico'
 
-	(( i = 0 ))
+	i=0
 	for file in $(ls $ANALIZADOR_SINTACTICO_PRUEBAS/ej_*.alf); do
 		file=$(basename -s .alf "$file")
 		file=${file#*_}
 
-		(( i += 1 ))
+		i=$(expr $i + 1)
 
 		subtitle "Prueba 4.$i - $file"
 
@@ -170,9 +165,9 @@ practica4() {
 compilador() {
 	title 'Pruebas compilador - pruebas propias'
 
-	(( i = 0 ))
+	i=0
 	for file in $(ls $COMPILADOR_PRUEBAS/*.alf); do
-		(( i += 1 ))
+		i=$(expr $i + 1)
 
 		file=$(basename -s .alf "$file")
 
