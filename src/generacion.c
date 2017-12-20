@@ -479,6 +479,16 @@ void apilar_constante(FILE* fpasm, int valor)
     PUT_ASM("push dword %i", valor);
 }
 
+void apilar_valor(FILE* fpasm, int es_referencia)
+{
+    if(es_referencia) {
+        PUT_COMMENT("Apilar el valor de parametro");
+        PUT_ASM("pop dword ebx");
+        PUT_ASM("mov ebx, [ebx]");
+        PUT_ASM("push dword ebx");
+    }
+}
+
 void igual(FILE* fpasm, int es_referencia_1, int es_referencia_2, int etiqueta)
 {
     PUT_COMMENT("Comparacion igualdad");
@@ -725,7 +735,7 @@ void generar_prologo_funcion(FILE* fpasm, const char* nombre, int num_locales)
 {
     PUT_COMMENT("Prologo de la funcion %s", nombre);
 
-    PUT_LABEL(nombre);
+    PUT_LABEL("_%s", nombre);
     PUT_ASM("push ebp");
     PUT_ASM("mov ebp, esp");
     PUT_ASM("sub esp, %i", 4*num_locales);
@@ -734,11 +744,10 @@ void generar_prologo_funcion(FILE* fpasm, const char* nombre, int num_locales)
     // Los argumentos estan en ebp[-1:-aridad:-1]
 }
 
-void generar_epilogo_funcion(FILE* fpasm)
+void generar_retorno_funcion(FILE* fpasm)
 {
-    PUT_COMMENT("Epilogo de la funcion");
+    PUT_COMMENT("Retorno de la funcion %s", nombre);
 
-    // Guardamos el valor de retorno en EAX
     PUT_ASM("pop eax");
 
     // Reestablecemos los punteros de pila
@@ -751,11 +760,10 @@ void generar_epilogo_funcion(FILE* fpasm)
 
 void generar_llamada_funcion(FILE* fpasm, const char* nombre, int aridad)
 {
-    PUT_COMMENT("Llamada a la funcion %s", nombre);
+    PUT_COMMENT("Llamada a la funcion %s con %i argumentos", nombre, aridad);
 
-    // TODO: Completar, aqui hay que hacer bastantes mas cosas
+    PUT_ASM("call _%s", nombre);
 
-    stack_align_begin(fpasm, aridad);
-    PUT_ASM("call %s", nombre);
-    stack_align_end(fpasm);
+    PUT_ASM("sub esp, %i", 4*aridad);
+    PUT_ASM("push dword eax");
 }

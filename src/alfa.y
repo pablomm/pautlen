@@ -43,6 +43,15 @@
     /* Variable para la generacion de etiquetas */
     static int etiqueta = 1;
 
+    /* Variables para la declaracion de funciones */
+    static int pos_parametro_actual = -1;
+    static int num_parametros_actual = 0;
+    static int num_variables_locales_actual = 0;
+	static int pos_variable_local_actual = 1;
+	static int fn_return = 0;
+	static int 	en_explist = 0;
+	static int num_parametros_llamada_actual;
+
 %}
 
 
@@ -92,7 +101,8 @@
 %type <atributos> constante
 %type <atributos> constante_entera
 %type <atributos> constante_logica
-%type <atributos> identificador_nuevo identificador_uso
+%type <atributos> identificador_nuevo identificador_uso idpf fn_name fn_declaration funcion
+%type <atributos> idf_llamada_funcion
 
 /* Manejo de las sentencias IF y ELSE */
 %type <atributos> if_exp if_exp_sentencias
@@ -150,17 +160,90 @@ identificadores             : identificador_nuevo { REGLA(18,"<identificadores> 
 funciones                   : funcion funciones { REGLA(20,"<funciones> ::= <funcion> <funciones>"); }
                             | /* empty regla 21 */ { REGLA(21,"<funciones> ::="); }
                             ;
-funcion                     : TOK_FUNCTION tipo identificador_nuevo '(' parametros_funcion ')' '{' declaraciones_funcion sentencias '}'
-                            { REGLA(22,"<funcion> ::= function <tipo> <identificador> ( <parametros_funcion> ) { <declaraciones_funcion> <sentencias> }"); }
-                            ;
+
+
+
+fn_name : TOK_FUNCTION tipo TOK_IDENTIFICADOR {
+        INFO_SIMBOLO* info = uso_global($3.lexema);
+        ASSERT_SEMANTICO(NULL == info, "Declaracion duplicada", NULL);
+
+        /* Abrimos un nuevo ambito */
+        /* Esta funcion declarara el nuevo ambito y realizara las inserciones correspondientes */
+        /* Aun no sabemos numero de variable y parametros se modificara a posteriori */
+        declarar_funcion($3.lexema, tipo_actual, -1, -1);
+
+        /* Inicializamos variables de la funcion */
+        num_variables_locales_actual = 0;
+		pos_variable_local_actual = 1;
+		num_parametros_actual = 0;
+		pos_parametro_actual = 0;
+		fn_return = 0;
+
+		/* Propagamos el nombre de la funcion */
+
+		$$ = $3;
+
+		ambito_actual = 1;
+
+        };
+
+fn_declaration : fn_name '(' parametros_funcion ')' '{' declaraciones_funcion {
+	
+	INFO_SIMBOLO* info = uso_global($1.lexema);
+	info->adicional1 = num_parametros_actual;
+	info->adicional2 = num_variables_locales_actual;
+
+	info = uso_local($1.lexema);
+	info->adicional1 = num_parametros_actual;
+	info->adicional2 = num_variables_locales_actual;
+
+	$$ = $1;
+
+	generar_prologo_funcion(pfasm, $$.lexema, num_variables_locales_actual);
+
+};
+
+funcion : fn_declaration sentencias '}' {
+	
+	ambito_actual = 0;
+	cerrar_scope_local();
+
+	ASSERT_SEMANTICO(fn_return != 0, "Funcion sin sentencia de retorno", $1.lexema);
+
+};
+
+
+
 parametros_funcion          : parametro_funcion resto_parametros_funcion { REGLA(23, "<parametros_funcion> ::= <parametro_funcion> <resto_parametros_funcion>"); }
                             | /* empty  regla 24*/ { REGLA(24, "<parametros_funcion> ::="); }
                             ;
+
 resto_parametros_funcion    : ';' parametro_funcion resto_parametros_funcion 
                             { REGLA(25,"<resto_parametros_funcion> ::= ; <parametro_funcion> <resto_parametros_funcion>"); }
                             | /* empty regla 26 */ { REGLA(26,"<resto_parametros_funcion> ::="); }
                             ;
-parametro_funcion           : tipo identificador_nuevo { REGLA(27,"<parametro_funcion> ::= <tipo> <identificador>"); }
+
+
+idpf : TOK_IDENTIFICADOR   {    
+                             $$ = $1;   
+                            }
+                            ;
+
+parametro_funcion           : tipo idpf { 
+
+                                REGLA(27,"<parametro_funcion> ::= <tipo> <identificador>");
+
+                                /* Declaracion de un parametro al declarar la funcion */ 
+                                INFO_SIMBOLO* info = uso_solo_local($2.lexema);
+                                ASSERT_SEMANTICO(NULL == info, "Declaracion duplicada", NULL);
+                                pos_parametro_actual++;
+                                num_parametros_actual++;
+
+                                /* Declaramos el parametro en la tabla local */
+                                /* Adicional 2 indica la posicion del parametro en llamada a funcion */
+                                declarar_local($2.lexema, PARAMETRO, tipo_actual, clase_actual, 0, pos_parametro_actual);
+
+                            }
                             ;
 declaraciones_funcion       : declaraciones { REGLA(28,"<declaraciones_funcion> ::= <declaraciones>"); }
                             | /* empty regla 29 */ { REGLA(29,"<declaraciones_funcion> ::="); }
@@ -258,7 +341,11 @@ escritura                   : TOK_PRINTF exp
 retorno_funcion             : TOK_RETURN exp
                               {
                                 REGLA(61, "<retorno_funcion> ::= return <exp>");
-                                //ASSERT_SEMANTICO(ambito_actual, "Sentencia de retorno fuera del cuerpo de una funcion", NULL);
+                                ASSERT_SEMANTICO(ambito_actual, "Sentencia de retorno fuera del cuerpo de una funcion", NULL);
+
+                                generar_retorno_funcion(pfasm);
+                                fn_return++; 
+
                               }
                             ;
 exp                         : exp '+' exp
@@ -378,16 +465,46 @@ exp                         : exp '+' exp
                                 REGLA(85,"<exp> ::= <elemento_vector>");
                                 $$ = $1; // Copiamos todo
                               }
-                            | identificador_uso '(' lista_expresiones ')'
+                            | idf_llamada_funcion '(' lista_expresiones ')'
                               {
                                 REGLA(88,"<exp> ::= <identificador> ( <lista_expresiones> )");
-                                // Aqui un call
+                                INFO_SIMBOLO* info = uso_local($1.lexema);
+                                ASSERT_SEMANTICO(NULL != info, "Funcion no declarada", $1.lexema);
+                                ASSERT_SEMANTICO(FUNCION == info->categoria, "No es una funcion", $1.lexema);
+                                ASSERT_SEMANTICO(num_parametros_actual == info->adicional1, "Numero de argumentos incorrecto", $1.lexema);
+                                generar_llamada_funcion(pfasm, $1.lexema, num_parametros_actual);
+                                en_explist = 0;
+                                $$.tipo = info->tipo;
+                                $$.es_direccion = 0;
                               }
                             ;
-lista_expresiones           : exp resto_lista_expresiones { REGLA(89,"<lista_expresiones> ::= <exp> <resto_lista_expresiones>"); }
+
+idf_llamada_funcion : TOK_IDENTIFICADOR {
+
+		ASSERT_SEMANTICO(en_explist == 0, "No se permiten lladas de funciones en paso de parametros", $1.lexema);
+
+		en_explist = 1;
+		num_parametros_llamada_actual = 0;
+
+
+
+
+};
+
+
+lista_expresiones           : exp resto_lista_expresiones { REGLA(89,"<lista_expresiones> ::= <exp> <resto_lista_expresiones>");
+								num_parametros_llamada_actual++; 
+								apilar_valor(pfasm, $1.es_direccion);
+
+							}
                             | /* empty regla 90 */ { REGLA(90,"<lista_expresiones> ::="); }
                             ;
-resto_lista_expresiones     : ',' exp resto_lista_expresiones { REGLA(91,"<resto_lista_expresiones> ::= , <exp> <resto_lista_expresiones>"); }
+resto_lista_expresiones     : ',' exp resto_lista_expresiones { 
+								REGLA(91,"<resto_lista_expresiones> ::= , <exp> <resto_lista_expresiones>"); 
+								num_parametros_llamada_actual++;
+								apilar_valor(pfasm, $2.es_direccion);
+							}
+
                             | /* empty regla 92 */ { REGLA(92,"<resto_lista_expresiones> ::="); }
                             ;
 comparacion                 : exp TOK_IGUAL exp /* == */

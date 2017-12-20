@@ -15,7 +15,7 @@
 typedef enum { ERR = 0, OK = 1 } STATUS;
 
 /* Categoría de un símbolo: variable, parámetro de función o función */
-typedef enum { VARIABLE, PARAMETRO, FUNCION } CATEGORIA;
+typedef enum { VARIABLE = 0, PARAMETRO, FUNCION } CATEGORIA;
 
 /* Tipo de un símbolo: sólo se trabajará con enteros y booleanos */
 typedef enum { ENTERO, BOOLEANO } TIPO;

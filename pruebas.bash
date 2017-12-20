@@ -17,7 +17,7 @@ COMPILADOR_PRUEBAS="$MDIR/compilador_pruebas"
 
 ## Colorines
 NC="$(tput sgr0)"
-BOLD="$(tput setaf 7)"
+BOLD="$(tput bold)"
 REVERSE="$(tput smso)"
 RED="$(tput setaf 1)"
 GREEN="$NC$(tput setaf 2)"
@@ -38,12 +38,11 @@ compile() {
 
 ## Rutina auxiliar que limpia todos los ficheros generados
 clean() {
-	echo
 	rm -f $BDIR/prueba1 $BDIR/prueba2 $BDIR/prueba3
 	rm -f $ODIR/prueba1.o $ODIR/prueba2.o $ODIR/prueba3.o
 	rm -f prueba1.nasm prueba2.nasm prueba3.nasm _*.nasm
+	rm -f $ODIR/_*.o $BDIR/_*
 	make clean > /dev/null
-	echo
 }
 
 ## Imprime una cabecera con formato
@@ -75,7 +74,7 @@ fi
 make_nasm_exe() {
 	local file_nasm="$1"
 	nasm -f elf32 -o "$ODIR/${file_nasm%.*}.o" "$file_nasm"
-	gcc -m32 -o "${file_nasm%.*}" "$file_nasm" "$ALFALIB"
+	gcc -m32 -o "${file_nasm%.*}" "$ODIR/${file_nasm%.*}.o" "$ALFALIB"
 }
 
 practica1() {
@@ -213,13 +212,14 @@ compilador() {
 }
 
 compile
-practica1
-practica2
-practica3
-practica4
+#practica1
+#practica2
+#practica3
+#practica4
 compilador
 
 title 'Borrando ficheros generados'
+echo
 clean
 
 title "$n_pruebas/$n_pruebas pruebas completadas con exito"

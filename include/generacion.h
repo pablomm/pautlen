@@ -134,7 +134,8 @@ void generar_endwhile(FILE* fpasm, int etiqueta);
 
 /* TODO: Funciones relacionadas con la generacion de funciones */
 void generar_prologo_funcion(FILE* fpasm, const char* nombre, int num_locales);
-void generar_epilogo_funcion(FILE* fpasm);
+void generar_retorno_funcion(FILE* fpasm);
 void generar_llamada_funcion(FILE* fpasm, const char* nombre, int aridad);
+void apilar_valor(FILE* fpasm, int es_referencia);
 
 #endif
