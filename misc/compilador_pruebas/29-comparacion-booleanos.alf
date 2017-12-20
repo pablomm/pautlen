@@ -1,0 +1,4 @@
+main {
+    boolean y1, y2;
+    printf (y1 > y2);
+}

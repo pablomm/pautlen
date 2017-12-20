@@ -1,6 +1,8 @@
 #ifndef COMUN_H
 #define COMUN_H 1
 
+#include <stdio.h>
+
 #define UNUSED(arg) ((void)(arg))
 #define MACRO_BODY(block) do { block } while (0)
 #define SWAP(a, b, type) MACRO_BODY( type c = a; a = b; b = c; )
@@ -49,20 +51,30 @@ typedef enum ErrorType {
 } ErrorType;
 
 typedef struct _LexerPosition {
-    unsigned line, column, offset;
+    unsigned line, column;
 }  LexerPosition;
+
+extern struct CompilerData {
+    ErrorType error;
+    LexerPosition pos;
+    FILE* f_in, *f_asm, *f_err, *f_dbg;
+} compiler;
+
+
 
 void error_handler(const char* msg1, const char* msg2);
 
 /* Estructura comun valores de los atributos */
-typedef struct
-{
+typedef struct {
     char lexema[MAX_LONG_ID+1];
     int valor_entero;
-    int tipo;
+    TIPO tipo;
     int es_direccion;
     int etiqueta;
 } tipo_atributos;
 
+FILE* fopen_or_die(const char* path, const char* mode);
+
+int run_compiler(void);
 
 #endif /* COMUN_H */

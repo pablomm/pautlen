@@ -1,5 +1,6 @@
 .DEFAULT_GOAL = all
 .PHONY: all test debug clean zip help graph nasm astyle
+.SUFFIXES:
 
 ##########################################################
 #                                                        #
@@ -82,10 +83,6 @@ NASM     := nasm
 NFLAGS   := -f elf32
 CCNASMFLAGS := -m32
 
-
-## Sistema operativo para saber si generar .dot o .vcg
-detected_OS := $(shell sh -c 'uname -s 2>/dev/null || echo not')
-
 ALFALIB     := $(ODIR)/alfalib.o
 
 ## Mains objetivos de make all
@@ -111,19 +108,10 @@ BISON_HEADERS := $(patsubst $(SDIR)/%,$(IDIR)/%, $(BISON_HEADERS_ORIG))
 BISON_OUTPUT_ORIG := $(patsubst %.tab.c,%.output, $(BISON_GENERATED_FILES))
 BISON_OUTPUT := $(patsubst $(SDIR)/%,$(MDIR)/%, $(BISON_OUTPUT_ORIG))
 
-## En linux el grafo se genera con Graphviz
-ifeq ($(detected_OS),Linux)
-	BISON_GRAPH_ORIG := $(patsubst %.tab.c,%.dot, $(BISON_GENERATED_FILES))
-	DOT := dot
-	DOTFLAGS := -O -Tpdf
-else
-	BISON_GRAPH_ORIG := $(patsubst %.tab.c,%.vcg, $(BISON_GENERATED_FILES))
-	DOT := 
-	DOTFLAGS :=
-endif
-
+BISON_GRAPH_ORIG := $(patsubst %.tab.c,%.dot, $(BISON_GENERATED_FILES))
 BISON_GRAPH := $(patsubst $(SDIR)/%,$(MDIR)/%, $(BISON_GRAPH_ORIG))
-
+DOT := dot
+DOTFLAGS := -O -Tpdf
 
 SRCS := $(filter-out $(EXES) $(FLEX_GENERATED_FILES) $(BISON_GENERATED_FILES), $(wildcard $(SDIR)/*.c))
 SOBJ := $(patsubst $(SDIR)/%.c,$(ODIR)/%.o,$(SRCS) $(FLEX_GENERATED_FILES) $(BISON_GENERATED_FILES))

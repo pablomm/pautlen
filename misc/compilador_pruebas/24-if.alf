@@ -1,0 +1,14 @@
+main {
+
+        boolean y1;
+        y1 = false;
+        if ( y1 )
+        {
+                printf 100;
+        }
+
+        if ( !y1 )
+        {
+                printf 200;
+        }
+}

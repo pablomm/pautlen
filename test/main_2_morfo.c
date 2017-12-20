@@ -11,21 +11,13 @@ extern FILE* yyout;
 extern char* yytext;
 extern int yylex();
 
-/* Abre un fichero, y cierra el program si no lo puede abrir */
-static FILE* open_file(const char* path, const char* mode)
-{
-    FILE* fp = fopen(path, mode);
-    if (NULL == fp) {
-        perror(path);
-        exit(1);
-    }
-    return fp;
-}
-
 /* Hace una pasada del analizador morfologico a un fichero */
 int lex_file(FILE* in, FILE* out)
 {
     yyin = in;
+    compiler.f_asm = fopen("/dev/null", "w");
+    compiler.f_err = stderr;
+    compiler.f_dbg = fopen("/dev/null", "w");
     /* out lo usamos en la macro */
 #define TOKEN_CASE(token) case token: fprintf(out, "%s\t%d\t%s\n", #token, token, yytext); break;
 
@@ -197,8 +189,8 @@ int main(int argc, char const* argv[])
     // Preparamos los ficheros de entrada/salida
     FILE* in  = stdin;
     FILE* out = stdout;
-    if (argc >= 2) in  = open_file(argv[1], "r");
-    if (argc >= 3) out = open_file(argv[2], "w");
+    if (argc >= 2) in  = fopen_or_die(argv[1], "r");
+    if (argc >= 3) out = fopen_or_die(argv[2], "w");
 
     // El cuerpo del programa: lexear un fichero
     int status = lex_file(in, out);

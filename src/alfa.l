@@ -5,16 +5,12 @@
 
     #include <string.h>
 
-    extern LexerPosition lexpos;
-    extern ErrorType error_flag;
-    extern FILE * out;
-
     /* Imprime un desplazamiento con el formato de la practica 4 */
     /* No se añade a YY_USER_ACTION para que no imprima desplazamientos en blanco */
-    #define DESPLAZAMIENTO() if(NULL != out) fprintf(out, ";D:\t%s\n", yytext)
+    #define DESPLAZAMIENTO() fprintf(compiler.f_dbg, ";D:\t%s\n", yytext)
 
     /* Se ejecuta antes de cada regla para actualizar la posicion */
-    #define YY_USER_ACTION { lexpos.column += yyleng; lexpos.offset += yyleng; }
+    #define YY_USER_ACTION { compiler.pos.column += yyleng; }
 %}
 
 /* Suprimir la accion por defecto de imprimir los caracteres que no encajan */
@@ -73,21 +69,22 @@
 "false"     {  DESPLAZAMIENTO(); return TOK_FALSE; }
 
 [a-zA-Z][a-zA-Z_0-9]*   { DESPLAZAMIENTO(); 
-                          if (yyleng > MAX_LONG_ID) { 
-                              error_flag = ERR_MORFOLOGICO; 
+                          if (yyleng > MAX_LONG_ID) {
+                              compiler.pos.column -= yyleng;
+                              compiler.error = ERR_MORFOLOGICO; 
                               error_handler("identificador demasiado largo", yytext); 
                               return TOK_ERROR; 
-                            }
+                          }
                           else { 
                                strcpy(yylval.atributos.lexema,yytext);
                                return TOK_IDENTIFICADOR;
-                            } 
+                          } 
                         }
 
-\/\/[^\n]*  { /* Comentario */                                          }
-\n          { lexpos.column = 1; lexpos.line++; /* Salto de linea */    }
-[[:space:]] { /* Ignorado */                                            }
-.           { error_flag = ERR_MORFOLOGICO; error_handler("simbolo no permitido", yytext); return TOK_ERROR;  }
+\/\/[^\n]*  { /* Comentario */ }
+\n          { compiler.pos.column = 1; compiler.pos.line++; /* Salto de linea */ }
+[[:space:]] { /* Ignorado */ }
+.           { compiler.pos.column -= 1; compiler.error = ERR_MORFOLOGICO; error_handler("simbolo no permitido", yytext); return TOK_ERROR; }
 
 %%
 

@@ -66,32 +66,38 @@ static void parse_file(FILE* in, FILE* out)
             cerrar_scope_local();
             fprintf(out, "cierre\n");
             ambito_abierto = 0;
-        } else
+        }
+        else {
             if (num < -1) {
                 /* Nota: Modificado para adecuarse a la salida de todos
                          los ficheros de prueba (3/12/17)
                 */
                 if (ambito_abierto) {
                     fprintf(out, "-1\t%s\n", ident);
-                } else {
+                }
+                else {
                     if (OK != declarar_funcion(ident, ENTERO, num, 0)) {
                         fprintf(out, "-1\t%s\n", ident);
-                    } else {
+                    }
+                    else {
                         fprintf(out, "%s\n", ident);
                         ambito_abierto = 1;
                     }
                 }
-            } else {
+            }
+            else {
                 STATUS code;
 
                 if (ambito_abierto) {
                     code = declarar_local(ident, VARIABLE, ENTERO, ESCALAR, num, 0);
-                } else {
+                }
+                else {
                     code = declarar_global(ident, ENTERO, ESCALAR, num);
                 }
 
                 fprintf(out, (OK == code) ? "%s\n" : "-1\t%s\n", ident);
             }
+        }
     }
 
     liberar_scope();

@@ -110,12 +110,31 @@ void escribir(FILE* fpasm, int es_referencia, int tipo);
 
 void apilar_constante(FILE* fpasm, int valor);
 
-void igual(FILE *fpasm, int es_referencia_1, int es_referencia_2, int etiqueta);
+void igual(FILE* fpasm, int es_referencia_1, int es_referencia_2, int etiqueta);
 
-void distinto(FILE *fpasm, int es_referencia_1, int es_referencia_2, int etiqueta);
-void menorigual(FILE *fpasm, int es_referencia_1, int es_referencia_2, int etiqueta);
-void mayorigual(FILE *fpasm, int es_referencia_1, int es_referencia_2, int etiqueta);
-void menor(FILE *fpasm, int es_referencia_1, int es_referencia_2, int etiqueta);
-void mayor(FILE *fpasm, int es_referencia_1, int es_referencia_2, int etiqueta);
+void distinto(FILE* fpasm, int es_referencia_1, int es_referencia_2, int etiqueta);
+void menorigual(FILE* fpasm, int es_referencia_1, int es_referencia_2, int etiqueta);
+void mayorigual(FILE* fpasm, int es_referencia_1, int es_referencia_2, int etiqueta);
+void menor(FILE* fpasm, int es_referencia_1, int es_referencia_2, int etiqueta);
+void mayor(FILE* fpasm, int es_referencia_1, int es_referencia_2, int etiqueta);
+
+/* Estas 3 funciones generan las partes necesarias para hacer un if.
+ * Algunos comentarios acerca de su implementacion:
+ * + _Siempre_ deben generarse el else y el endif.
+ * + El valor de etiqueta debe ser el mismo para los tres.
+ */
+void generar_if_then(FILE* fpasm, int es_referencia, int etiqueta);
+void generar_else(FILE* fpasm, int etiqueta);
+void generar_endif(FILE* fpasm, int etiqueta);
+
+/* Estas 2 funciones funcionan de manera similar para los bucles while */
+void generar_while(FILE* fpasm, int etiqueta);
+void generar_do(FILE* fpasm, int es_referencia, int etiqueta);
+void generar_endwhile(FILE* fpasm, int etiqueta);
+
+/* TODO: Funciones relacionadas con la generacion de funciones */
+void generar_prologo_funcion(FILE* fpasm, const char* nombre, int num_locales);
+void generar_epilogo_funcion(FILE* fpasm);
+void generar_llamada_funcion(FILE* fpasm, const char* nombre, int aridad);
 
 #endif

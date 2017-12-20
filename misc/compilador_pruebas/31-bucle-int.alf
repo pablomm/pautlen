@@ -1,0 +1,7 @@
+main {
+    int x;
+
+    while (x) {
+        printf x;
+    }
+}

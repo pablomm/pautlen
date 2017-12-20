@@ -285,7 +285,8 @@ void borrar_simbolo(TABLA_HASH* th, const char* lexema)
     if (!prev) {
         /* Caso especial: el nodo a borrar es el primero */
         th->tabla[ind] = n->siguiente;
-    } else {
+    }
+    else {
         /* Caso normal: el nodo a borrar es cualquier otro */
         prev->siguiente = n->siguiente;
     }

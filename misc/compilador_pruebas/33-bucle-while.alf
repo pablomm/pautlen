@@ -1,0 +1,11 @@
+main {
+    int x, y;
+
+    y = 1;
+    scanf x;
+
+    while ((y <= x)) {
+    	printf y;
+    	y = y + 1;
+    }
+}

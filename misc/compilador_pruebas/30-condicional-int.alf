@@ -1,0 +1,7 @@
+main {
+    int x;
+
+    if (x) {
+        printf x;
+    }
+}

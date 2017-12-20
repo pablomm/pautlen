@@ -26,50 +26,61 @@ GREEN="$NC$(tput setaf 2)"
 cd "$( dirname "${BASH_SOURCE[0]}" )"
 
 ## Contador de numero de pruebas
-n_pruebas=0
+(( n_pruebas = 0 ))
 
+## Compilamos tests en carpeta BDIR
+compile() {
+	title Compilando pruebas
+	echo
+	make debug test
+	echo
+}
 
 ## Rutina auxiliar que limpia todos los ficheros generados
 clean() {
-	rm -vf $BDIR/prueba1 $BDIR/prueba2 $BDIR/prueba3
-	rm -vf $ODIR/prueba1.o $ODIR/prueba2.o $ODIR/prueba3.o
-	rm -vf prueba1.nasm prueba2.nasm prueba3.nasm
-	make clean
-}
-
-clean_and_exit() {
-	clean
-	exit 0
+	echo
+	rm -f $BDIR/prueba1 $BDIR/prueba2 $BDIR/prueba3
+	rm -f $ODIR/prueba1.o $ODIR/prueba2.o $ODIR/prueba3.o
+	rm -f prueba1.nasm prueba2.nasm prueba3.nasm _*.nasm
+	make clean > /dev/null
+	echo
 }
 
 ## Imprime una cabecera con formato
-title()    { echo -e "$REVERSE[$*]$NC"; }
-subtitle() { echo -e    "$BOLD[$*]$NC"; }
+title()    { printf "$REVERSE[%s]$NC" "$*"; }
+subtitle() { printf "\n$BOLD%-60s$NC" "$*"; }
 
 ## Un diff un poco mas descriptivo
 diff() {
-	echo '> diff' "$@"
+	#echo '$ diff' "$@"
 	echo -en "$RED"
 	command diff "$@"
 
 	if [[ $? -eq 0 ]]; then
-		n_pruebas=$(expr $n_pruebas + 1)
-		echo -e "${GREEN}OK$NC"
+		(( n_pruebas += 1 ))
+		echo -en "${GREEN}OK$NC "
+		return 0
 	else
-		echo -e "${RED}ERR$NC"
+		echo -en "${RED}ERR$NC "
+		return 1
 	fi
 }
 
 # './pruebas.sh clean' borra lo generado
 if [[ "$*" == 'clean' ]]; then
-	clean_and_exit
+	clean
+	exit 0
 fi
 
-# Compilamos tests en carpeta BDIR
-compile() {
-	title Compilando pruebas
-	make test all
-	echo
+make_nasm_exe() {
+	file_nasm="$1"
+	if [[ "$(uname)" == 'Darwin' ]]; then
+		nasm -g -f macho32 --prefix _ -o "$ODIR/${file_nasm%.*}.o" "$file_nasm"
+		clang -g -m32 -o "${file_nasm%.*}" "$ODIR/${file_nasm%.*}.o" alfalib/alfalib.o -lc -Wl,-no_pie
+	else
+		nasm -f elf32 -o "$ODIR/${file_nasm%.*}.o" "$file_nasm"
+		gcc -m32 -o prueba1 "$ODIR/prueba1.o" "$ALFALIB"
+	fi
 }
 
 practica1() {
@@ -79,8 +90,7 @@ practica1() {
 	subtitle Prueba 1.1
 
 	$BDIR/main_0_generacion_ejemplo1 prueba1.nasm
-	nasm -f elf32 -o $ODIR/prueba1.o prueba1.nasm
-	gcc -m32 -o prueba1 $ODIR/prueba1.o $ALFALIB
+	make_nasm_exe prueba1.nasm
 
 	diff <(./prueba1 <<< $'-9\n') <(echo -n $'-1\n')
 	diff <(./prueba1 <<< $'10\n') <(echo -n $'18\n')
@@ -88,8 +98,7 @@ practica1() {
 	subtitle Prueba 1.2
 
 	$BDIR/main_0_generacion_ejemplo2 prueba2.nasm
-	nasm -f elf32 -o $ODIR/prueba2.o prueba2.nasm
-	gcc -m32 -o prueba2 $ODIR/prueba2.o $ALFALIB
+	make_nasm_exe prueba2.nasm
 
 	diff <(./prueba2 <<< $'0\n') <(echo -n $'true\nfalse\n')
 	diff <(./prueba2 <<< $'1\n') <(echo -n $'false\ntrue\n')
@@ -97,8 +106,7 @@ practica1() {
 	subtitle Prueba 1.3
 
 	$BDIR/main_0_generacion_ejemplo3 prueba3.nasm
-	nasm -f elf32 -o $ODIR/prueba3.o prueba3.nasm
-	gcc -m32 -o prueba3 $ODIR/prueba3.o $ALFALIB
+	make_nasm_exe prueba3.nasm
 
 	diff <(./prueba3 <<< $'-3\n3\n0\n') <(echo -n $'true\n3\n0\n3\n')
 	diff <(./prueba3 <<< $'10\n-9\n1\n') <(echo -n $'false\n-10\n1\n-9\n')
@@ -117,7 +125,7 @@ practica2() {
 		subtitle "Prueba 2.$i - $file"
 
 
-		diff -bB <($BDIR/main_1_tabla $file.in) "$file.out"
+		diff <($BDIR/main_1_tabla $file.in) "$file.out"
 	done
 
 	echo
@@ -126,14 +134,16 @@ practica2() {
 practica3() {
 	title 'Pruebas practica 3 - analizador morfologico'
 
-	subtitle Prueba 3.1
+	subtitle 'Prueba 3.1 - entrada valida'
 	diff <($BDIR/main_2_morfo $ANALIZADOR_MORFOLOGICO_PRUEBAS/p3_entrada_1.txt) "$ANALIZADOR_MORFOLOGICO_PRUEBAS/p3_salida_1.txt"
 
-	subtitle Prueba 3.2
+	subtitle 'Prueba 3.2 - identificador largo'
 	diff <($BDIR/main_2_morfo $ANALIZADOR_MORFOLOGICO_PRUEBAS/p3_entrada_2.txt 2> /dev/null) "$ANALIZADOR_MORFOLOGICO_PRUEBAS/p3_salida_2.txt"
+	diff <($BDIR/main_2_morfo $ANALIZADOR_MORFOLOGICO_PRUEBAS/p3_entrada_2.txt 2>&1 > /dev/null) "$ANALIZADOR_MORFOLOGICO_PRUEBAS/p3_error_2.txt"
 
-	subtitle Prueba 3.3
+	subtitle 'Prueba 3.3 - simbolo no permitido'
 	diff <($BDIR/main_2_morfo $ANALIZADOR_MORFOLOGICO_PRUEBAS/p3_entrada_3.txt 2> /dev/null) "$ANALIZADOR_MORFOLOGICO_PRUEBAS/p3_salida_3.txt"
+	diff <($BDIR/main_2_morfo $ANALIZADOR_MORFOLOGICO_PRUEBAS/p3_entrada_3.txt 2>&1 > /dev/null) "$ANALIZADOR_MORFOLOGICO_PRUEBAS/p3_error_3.txt"
 
 	echo
 }
@@ -141,14 +151,16 @@ practica3() {
 practica4() {
 	title 'Pruebas practica 4 - analizador sintactico'
 
-	i=0
+	(( i = 0 ))
 	for file in $(ls $ANALIZADOR_SINTACTICO_PRUEBAS/ej_*.alf); do
-		file=$(cut -d "/" -f 3 <<< "$file" | cut -d '_' -f 2- | cut -f 1 -d '.' )
-		i=$(expr $i + 1)
+		file=$(basename -s .alf "$file")
+		file=${file#*_}
+
+		(( i += 1 ))
 
 		subtitle "Prueba 4.$i - $file"
 
-		diff -bB  <($BDIR/main_3_sintactico $ANALIZADOR_SINTACTICO_PRUEBAS/ej_$file.alf 2> /dev/null)  "$ANALIZADOR_SINTACTICO_PRUEBAS/sal_$file.txt"
+		diff <($BDIR/main_3_sintactico $ANALIZADOR_SINTACTICO_PRUEBAS/ej_$file.alf 2> /dev/null)  "$ANALIZADOR_SINTACTICO_PRUEBAS/sal_$file.txt"
 
 	done
 
@@ -158,50 +170,64 @@ practica4() {
 compilador() {
 	title 'Pruebas compilador - pruebas propias'
 
-	i=0
+	(( i = 0 ))
 	for file in $(ls $COMPILADOR_PRUEBAS/*.alf); do
-		file=$(cut -d "/" -f 3 <<< "$file" | cut -d '_' -f 2- | cut -f 1 -d '.' )
-		i=$(expr $i + 1)
+		(( i += 1 ))
+
+		file=$(basename -s .alf "$file")
+
+		# Borramos los generados de la prueba anterior
+		rm -f "_$file" "_$file.nasm" "$ODIR/_$file.o"
+
 
 		subtitle "Prueba 5.$i - $file"
 
-		$COMPILADOR "$COMPILADOR_PRUEBAS/$file.alf" "_$file.nasm"
-
-		nasm -f elf32 -o $ODIR/_$file.o _$file.nasm
-		gcc -m32 -o _$file $ODIR/_$file.o $ALFALIB
-
-
-		if [ -f $COMPILADOR_PRUEBAS/$file.in ]; then
-
-		    diff <(./_$file < $COMPILADOR_PRUEBAS/$file.in ) "$COMPILADOR_PRUEBAS/$file.out"
-		else
-
-			diff <(./_$file) "$COMPILADOR_PRUEBAS/$file.out"
+		# Si existe un fichero .err, tiene errores semanticos
+		if [[ -f "$COMPILADOR_PRUEBAS/$file.err" ]]; then
+			diff <($COMPILADOR "$COMPILADOR_PRUEBAS/$file.alf" "_$file.nasm") "$COMPILADOR_PRUEBAS/$file.err"
+			continue
 		fi
 
-		rm -v _$file _$file.nasm $ODIR/_$file.o
+		$COMPILADOR "$COMPILADOR_PRUEBAS/$file.alf" "_$file.nasm"
+		make_nasm_exe _$file.nasm
 
+		# Si hay un directorio .d, ejecutamos para cada par (in, out)
+		if [[ -d "$COMPILADOR_PRUEBAS/$file.d" ]]; then
+			# Buscamos por ficheros IN porque no tiene sentido comprobar salidas
+			# diferentes si no hay entrada/es la misma (los programas son deterministas).
+			for in_file in $(find "$COMPILADOR_PRUEBAS/$file.d" -iname '*.in' -type f); do
+				diff <(./_$file < "$in_file") "${in_file%.*}.out"
+			done
+
+		# En caso contrario, buscamos un out y opcionalmente un in
+		elif [[ -f "$COMPILADOR_PRUEBAS/$file.out" ]]; then
+			if [[ -f "$COMPILADOR_PRUEBAS/$file.in" ]]; then
+				diff <("./_$file" < "$COMPILADOR_PRUEBAS/$file.in") "$COMPILADOR_PRUEBAS/$file.out"
+			else
+				diff <(./_$file) "$COMPILADOR_PRUEBAS/$file.out"
+			fi
+
+		# Nos quejamos si no hay salida
+		else
+			echo "error: No existen $file.out ni $file.err"
+			exit 1
+		fi
 
 	done
-
 	echo
 }
 
-#compile
-#practica1
-#practica2
-#practica3
-#practica4
-
-
-# Comentadas resto de pruebas de momento por comodidad
-make
+compile
+practica1
+practica2
+practica3
+practica4
 compilador
 
 title 'Borrando ficheros generados'
 clean
 
 title "$n_pruebas/$n_pruebas pruebas completadas con exito"
-echo -e "${GREEN}OK$NC"
+echo
 exit 0
 
