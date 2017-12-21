@@ -275,7 +275,7 @@ asignacion                  : identificador_uso '=' exp
                                 ASSERT_SEMANTICO($3.tipo == info->tipo, "Asignacion incompatible", NULL);
 
                                 /* Caso variables globales */
-                                if(ambito_actual == 0) {
+                                if(NULL == uso_solo_local($1.lexema)) {
                                     asignar(pfasm, $1.lexema, $3.es_direccion);
 
                                 /* Caso parametros en funciones en funciones */
@@ -345,8 +345,8 @@ lectura                     : TOK_SCANF identificador_uso
                                 ASSERT_SEMANTICO(ESCALAR == info->clase, "Solo podemos leer escalares", NULL);
 
                                 /* Llamamos a scanf, restauramos la pila en funcion del tipo */
-                                if(0 == ambito_actual){
-                                leer(pfasm, info->lexema, info->tipo);
+                                if(NULL == uso_solo_local($2.lexema)){
+                                    leer(pfasm, info->lexema, info->tipo);
                                 } else if(PARAMETRO == info->categoria) {
                                     apilar_parametro(pfasm, 1, info->adicional2, num_parametros_actual);
                                     leer_ya_apilado(pfasm, info->tipo);
@@ -463,8 +463,10 @@ exp                         : exp '+' exp
                                 ASSERT_SEMANTICO(FUNCION != info->categoria, "El identificador es una funcion", NULL);
                                 ASSERT_SEMANTICO(VECTOR != info->clase, "El identificador es un vector", NULL);
 
+                                /* Miramos si la variable esta en solo local */
+
                                 /* Caso variable global */
-                                if(0 == ambito_actual){
+                                if(NULL == uso_solo_local($1.lexema)){
                                     escribir_valor_operando(pfasm, $1.lexema, 1);
                                     $$.tipo = info->tipo;
                                     $$.es_direccion = 0;
@@ -475,6 +477,7 @@ exp                         : exp '+' exp
                                     $$.tipo = info->tipo;
                                     $$.es_direccion = 0;
                                 } else {
+
                                     apilar_variable_local(pfasm, 0, info->adicional2);
                                     $$.tipo = info->tipo;
                                     $$.es_direccion = 0;
