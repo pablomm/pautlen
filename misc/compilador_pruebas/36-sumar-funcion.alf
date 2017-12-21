@@ -1,0 +1,13 @@
+main {
+	int x;
+
+	function int sumar(int y) {
+		int z;
+		z = 1;
+
+		return x+y+z+1;
+	}
+
+	x = 5;
+	printf sumar(2);
+}
