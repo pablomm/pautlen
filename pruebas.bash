@@ -192,7 +192,7 @@ compilador() {
 		if [[ -f "$COMPILADOR_PRUEBAS/${file}_1.input" ]]; then
 			# Buscamos por ficheros IN porque no tiene sentido comprobar salidas
 			# diferentes si no hay entrada/es la misma (los programas son deterministas).
-			for in_file in $(find "$COMPILADOR_PRUEBAS" -iname "{$file}_?.input" -type f); do
+			for in_file in $(find "$COMPILADOR_PRUEBAS" -iname "${file}_?.input" -type f); do
 				diff <(./_$file < "$in_file") "${in_file%.*}.output"
 			done
 
