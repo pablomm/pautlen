@@ -1,20 +1,18 @@
 main {
-int x;
+//Ejemplo de las transparencias
+int z;
 
-function int identidad (int x) {
+function int doble (int arg) {
 
-	int a;
+	int argAux;
 
-	return x;
-	printf 123;
-     }
+	
+	argAux = arg;
+	return 2* argAux;
+}
 
-function int identidad2 (int x; int y) {
+	scanf z;
 
-	int a;
+	printf  doble(z);
 
-	return x;
-     }
-
-	printf identidad2(3,4);
 }

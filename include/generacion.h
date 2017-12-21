@@ -58,6 +58,7 @@ En el final del programa se debe:
 */
 
 void escribir_operando(FILE* fpasm, char* nombre, int es_var);
+void escribir_valor_operando(FILE* fpasm, char* nombre, int es_var);
 /*
    Función que debe ser invocada cuando se sabe un operando de una operación aritmético-lógica y se necesita introducirlo en la pila.
 nombre es la cadena de caracteres del operando tal y como debería aparecer en el fuente NASM
@@ -137,5 +138,16 @@ void generar_prologo_funcion(FILE* fpasm, const char* nombre, int num_locales);
 void generar_retorno_funcion(FILE* fpasm);
 void generar_llamada_funcion(FILE* fpasm, const char* nombre, int aridad);
 void apilar_valor(FILE* fpasm, int es_referencia);
+
+void asignar_parametro(FILE *fpasm, int es_referencia, int posicion_parametro, int numero_parametro);
+
+
+void apilar_variable_local(FILE *fpasm, int direccion, int posicion_variable);
+void apilar_parametro(FILE *fpasm, int direccion, int posicion_parametro, int numero_parametro);
+
+void asignar_variable_local(FILE *fpasm, int es_referencia, int posicion_variable);
+
+
+void leer_ya_apilado(FILE* fpasm, int tipo);
 
 #endif

@@ -270,7 +270,20 @@ asignacion                  : identificador_uso '=' exp
                                 ASSERT_SEMANTICO(FUNCION != info->categoria, "Asignacion incompatible", NULL);
                                 ASSERT_SEMANTICO(VECTOR != info->clase, "Asignacion incompatible", NULL);
                                 ASSERT_SEMANTICO($3.tipo == info->tipo, "Asignacion incompatible", NULL);
-                                asignar(pfasm, $1.lexema, $3.es_direccion);
+
+                                /* Caso variables globales */
+                                if(ambito_actual == 0) {
+                                    asignar(pfasm, $1.lexema, $3.es_direccion);
+
+                                /* Caso parametros en funciones en funciones */
+                                } else if (PARAMETRO == info->categoria){
+                                    asignar_parametro(pfasm, $3.es_direccion, info->adicional2, num_parametros_actual);
+                                /* El ultimo caso son variables locales */
+                                } else {
+                                    asignar_variable_local(pfasm, $3.es_direccion, info->adicional2);
+                                }
+
+                                
                               }
                             | elemento_vector '=' exp { REGLA(44,"<asignacion> ::= <elemento_vector> = <exp>"); }
                             ;
@@ -329,7 +342,17 @@ lectura                     : TOK_SCANF identificador_uso
                                 ASSERT_SEMANTICO(ESCALAR == info->clase, "Solo podemos leer escalares", NULL);
 
                                 /* Llamamos a scanf, restauramos la pila en funcion del tipo */
+                                if(0 == ambito_actual){
                                 leer(pfasm, info->lexema, info->tipo);
+                                } else if(PARAMETRO == info->categoria) {
+                                    apilar_parametro(pfasm, 1, info->adicional2, num_parametros_actual);
+                                    leer_ya_apilado(pfasm, info->tipo);
+                                } else {
+                                    apilar_variable_local(pfasm, 1, info->adicional2);
+                                    leer_ya_apilado(pfasm, info->tipo);
+                                }
+
+
                               }
                             ;
 escritura                   : TOK_PRINTF exp
@@ -436,9 +459,24 @@ exp                         : exp '+' exp
                                 ASSERT_SEMANTICO(NULL != info, "Acceso a variable no declarada", $1.lexema);
                                 ASSERT_SEMANTICO(FUNCION != info->categoria, "El identificador es una funcion", NULL);
                                 ASSERT_SEMANTICO(VECTOR != info->clase, "El identificador es un vector", NULL);
-                                $$.tipo = info->tipo;
-                                $$.es_direccion = 1;
-                                escribir_operando(pfasm, $1.lexema, 1);
+
+                                /* Caso variable global */
+                                if(0 == ambito_actual){
+                                    escribir_valor_operando(pfasm, $1.lexema, 1);
+                                    $$.tipo = info->tipo;
+                                    $$.es_direccion = 0;
+                                } else if(PARAMETRO == info->categoria) {
+
+                                /* Queremos apilar el valor del parametro */
+                                    apilar_parametro(pfasm, 0, info->adicional2, num_parametros_actual);
+                                    $$.tipo = info->tipo;
+                                    $$.es_direccion = 0;
+                                } else {
+                                    apilar_variable_local(pfasm, 0, info->adicional2);
+                                    $$.tipo = info->tipo;
+                                    $$.es_direccion = 0;
+                                }
+                                
                               }
 
                             | constante
@@ -471,8 +509,8 @@ exp                         : exp '+' exp
                                 INFO_SIMBOLO* info = uso_local($1.lexema);
                                 ASSERT_SEMANTICO(NULL != info, "Funcion no declarada", $1.lexema);
                                 ASSERT_SEMANTICO(FUNCION == info->categoria, "No es una funcion", $1.lexema);
-                                ASSERT_SEMANTICO(num_parametros_actual == info->adicional1, "Numero de argumentos incorrecto", $1.lexema);
-                                generar_llamada_funcion(pfasm, $1.lexema, num_parametros_actual);
+                                ASSERT_SEMANTICO(num_parametros_llamada_actual == info->adicional1, "Numero de argumentos incorrecto", $1.lexema);
+                                generar_llamada_funcion(pfasm, $1.lexema, num_parametros_llamada_actual);
                                 en_explist = 0;
                                 $$.tipo = info->tipo;
                                 $$.es_direccion = 0;
@@ -601,7 +639,9 @@ identificador_nuevo         : TOK_IDENTIFICADOR
                                 if (0 == ambito_actual) {
                                   declarar_global($1.lexema, tipo_actual, clase_actual, 0);
                                 } else {
-                                  declarar_local($1.lexema, 0, tipo_actual, clase_actual, 0, 0);
+                                  declarar_local($1.lexema, 0, tipo_actual, clase_actual, 0, pos_variable_local_actual);
+                                  num_variables_locales_actual++;
+                                pos_variable_local_actual++;
                                 }
                               }
                             ;
