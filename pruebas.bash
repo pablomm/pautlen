@@ -181,7 +181,7 @@ compilador() {
 
 		# Si existe un fichero .err, tiene errores semanticos
 		if [[ -f "$COMPILADOR_PRUEBAS/$file.err" ]]; then
-			diff <($COMPILADOR "$COMPILADOR_PRUEBAS/$file.alf" "_$file.nasm") "$COMPILADOR_PRUEBAS/$file.err"
+			diff -B <($COMPILADOR "$COMPILADOR_PRUEBAS/$file.alf" "_$file.nasm") "$COMPILADOR_PRUEBAS/$file.err"
 			continue
 		fi
 
@@ -193,15 +193,15 @@ compilador() {
 			# Buscamos por ficheros IN porque no tiene sentido comprobar salidas
 			# diferentes si no hay entrada/es la misma (los programas son deterministas).
 			for in_file in $(find "$COMPILADOR_PRUEBAS" -iname "${file}_?.input" -type f); do
-				diff <(./_$file < "$in_file") "${in_file%.*}.output"
+				diff -B <(./_$file < "$in_file") "${in_file%.*}.output"
 			done
 
 		# En caso contrario, buscamos un out y opcionalmente un in
 		elif [[ -f "$COMPILADOR_PRUEBAS/$file.output" ]]; then
 			if [[ -f "$COMPILADOR_PRUEBAS/$file.input" ]]; then
-				diff <("./_$file" < "$COMPILADOR_PRUEBAS/$file.input") "$COMPILADOR_PRUEBAS/$file.output"
+				diff -B <("./_$file" < "$COMPILADOR_PRUEBAS/$file.input") "$COMPILADOR_PRUEBAS/$file.output"
 			else
-				diff <(./_$file) "$COMPILADOR_PRUEBAS/$file.output"
+				diff -B <(./_$file) "$COMPILADOR_PRUEBAS/$file.output"
 			fi
 
 		# Nos quejamos si no hay salida
