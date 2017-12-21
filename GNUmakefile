@@ -86,7 +86,7 @@ CCNASMFLAGS := -m32
 ALFALIB     := $(ODIR)/alfalib.o
 
 ## Mains objetivos de make all
-EXES := compilador.c
+EXES := alfa.c
 
 EXES := $(patsubst %,$(EDIR)/%,$(EXES))
 EOBJ := $(patsubst $(EDIR)/%.c,$(ODIR)/%.o,$(EXES))

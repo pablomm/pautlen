@@ -7,7 +7,7 @@ BDIR="."                  # Carpeta con binarios
 ODIR="obj"                # Carpeta con objetos
 MDIR="misc"               # Carpeta con otros recursos
 ALFALIB="$ODIR/alfalib.o" # Objeto alfalib
-COMPILADOR="$BDIR/compilador"   # Binario del compilador
+COMPILADOR="$BDIR/alfa"   # Binario del compilador
 
 
 TABLA_SIMBOLOS_PRUEBAS="$MDIR/tabla_simbolos_pruebas"
