@@ -438,7 +438,7 @@ void apilar_constante(FILE* fpasm, int valor)
 
 void apilar_valor(FILE* fpasm, int es_referencia)
 {
-    if(es_referencia) {
+    if (es_referencia) {
         PUT_COMMENT("Apilar el valor para pasar parametro a funcion");
         PUT_ASM("pop dword ebx");
         PUT_ASM("mov ebx, [ebx]");
@@ -707,7 +707,7 @@ void generar_retorno_funcion(FILE* fpasm, int es_referencia)
     PUT_COMMENT("Retorno de la funcion");
 
     PUT_ASM("pop eax");
-    if(es_referencia)
+    if (es_referencia)
         PUT_ASM("mov eax, [eax]");
 
     // Reestablecemos los punteros de pila
@@ -729,35 +729,36 @@ void generar_llamada_funcion(FILE* fpasm, const char* nombre, int aridad)
 }
 
 
-void apilar_variable_local(FILE *fpasm, int direccion, int posicion_variable)
+void apilar_variable_local(FILE* fpasm, int direccion, int posicion_variable)
 {
 
     PUT_COMMENT("Apilando %s de variable local %d", (direccion) ? "direccion" : "valor", posicion_variable);
     /* Usamos la formula que  el parametro se localiza en
      [ebp - <4*posición de la variable en declaración>] */
-    
-    if(direccion){
+
+    if (direccion) {
         PUT_ASM("lea eax, [ebp - %d]",  4*posicion_variable);
         PUT_ASM("push dword eax");
-     } else {
+    }
+    else {
 
         PUT_ASM("mov eax, dword [ebp - %d]", 4*posicion_variable);
         PUT_ASM("push eax");
     }
-/*
-    PUT_ASM("lea eax, [ebp - %d]", 4*posicion_variable);
-    PUT_ASM("push dword %s", (direccion) ? "eax" : "[eax]");*/
+    /*
+        PUT_ASM("lea eax, [ebp - %d]", 4*posicion_variable);
+        PUT_ASM("push dword %s", (direccion) ? "eax" : "[eax]");*/
 
 }
 
-void apilar_parametro(FILE *fpasm, int direccion, int posicion_parametro, int numero_parametro)
+void apilar_parametro(FILE* fpasm, int direccion, int posicion_parametro, int numero_parametro)
 {
     PUT_COMMENT("Apilando %s de parametro %d de %d parametros", (direccion) ? "direccion" : "valor", posicion_parametro, numero_parametro);
 
     /* Usamos la formula que  el parametro se localiza en
      [ebp + <4 + 4*(numero de parametros -posicion del parametro en declaracion)>] */
-    
-    if(direccion) {
+
+    if (direccion) {
         PUT_ASM("lea eax, [ebp + %d]", 4 + 4*(numero_parametro - posicion_parametro));
         PUT_ASM("push dword eax");
     }
@@ -765,19 +766,19 @@ void apilar_parametro(FILE *fpasm, int direccion, int posicion_parametro, int nu
         PUT_ASM("mov eax, dword [ebp + %d]", 4 + 4*(numero_parametro - posicion_parametro));
         PUT_ASM("push dword eax");
     }
-/*
-    PUT_ASM("lea eax, [ebp + %d]", 4 + 4*(numero_parametro - posicion_parametro));
-    PUT_ASM("push dword %s", (direccion) ? "eax" : "[eax]");*/
-    
+    /*
+        PUT_ASM("lea eax, [ebp + %d]", 4 + 4*(numero_parametro - posicion_parametro));
+        PUT_ASM("push dword %s", (direccion) ? "eax" : "[eax]");*/
+
 }
 
 
-void asignar_parametro(FILE *fpasm, int es_referencia, int posicion_parametro, int numero_parametro)
+void asignar_parametro(FILE* fpasm, int es_referencia, int posicion_parametro, int numero_parametro)
 {
     PUT_COMMENT("Asignacionando valor al parametro %d", posicion_parametro);
 
     /* Obtenemos valor de la expresion */
-        /* Lo desreferenciamos si hace falta */
+    /* Lo desreferenciamos si hace falta */
     PUT_ASM("pop dword eax");
 
 
@@ -787,10 +788,10 @@ void asignar_parametro(FILE *fpasm, int es_referencia, int posicion_parametro, i
     /* Calculamos la direccion del parametro */
     PUT_ASM("lea ebx, [ebp + %d]", 4 + 4*(numero_parametro - posicion_parametro));
 
-    PUT_ASM("mov [ebx], eax", 4 + 4*(numero_parametro - posicion_parametro) );
+    PUT_ASM("mov [ebx], eax", 4 + 4*(numero_parametro - posicion_parametro));
 }
 
-void asignar_variable_local(FILE *fpasm, int es_referencia, int posicion_variable)
+void asignar_variable_local(FILE* fpasm, int es_referencia, int posicion_variable)
 {
     PUT_COMMENT("Asignacionando valor a variable local %d", posicion_variable);
 
@@ -805,12 +806,13 @@ void asignar_variable_local(FILE *fpasm, int es_referencia, int posicion_variabl
     PUT_ASM("mov [ebx], eax",  4*posicion_variable);
 }
 
-void comprobar_acceso_vector(FILE *fpasm, int longitud, const char *nombre, int es_referencia) {
+void comprobar_acceso_vector(FILE* fpasm, int longitud, const char* nombre, int es_referencia)
+{
 
     PUT_COMMENT("Comprobando acceso a vector de longitud %d", longitud);
     PUT_ASM("pop eax");
 
-    if(es_referencia)
+    if (es_referencia)
         PUT_ASM("mov eax, [eax]");
 
     PUT_ASM("cmp eax, 0");
@@ -844,7 +846,8 @@ void asignar_elemento_vector(FILE* fpasm, int es_referencia)
     PUT_ASM("mov dword [ebx], eax");
 }
 
-void apilar_valor_vector(FILE *fpasm) {
+void apilar_valor_vector(FILE* fpasm)
+{
 
     PUT_COMMENT("Apilando valor del vector");
     PUT_ASM("pop dword eax");

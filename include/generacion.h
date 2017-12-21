@@ -139,20 +139,20 @@ void generar_retorno_funcion(FILE* fpasm, int es_referencia);
 void generar_llamada_funcion(FILE* fpasm, const char* nombre, int aridad);
 void apilar_valor(FILE* fpasm, int es_referencia);
 
-void asignar_parametro(FILE *fpasm, int es_referencia, int posicion_parametro, int numero_parametro);
+void asignar_parametro(FILE* fpasm, int es_referencia, int posicion_parametro, int numero_parametro);
 
 
-void apilar_variable_local(FILE *fpasm, int direccion, int posicion_variable);
-void apilar_parametro(FILE *fpasm, int direccion, int posicion_parametro, int numero_parametro);
+void apilar_variable_local(FILE* fpasm, int direccion, int posicion_variable);
+void apilar_parametro(FILE* fpasm, int direccion, int posicion_parametro, int numero_parametro);
 
-void asignar_variable_local(FILE *fpasm, int es_referencia, int posicion_variable);
+void asignar_variable_local(FILE* fpasm, int es_referencia, int posicion_variable);
 
 
 void leer_ya_apilado(FILE* fpasm, int tipo);
 
-void comprobar_acceso_vector(FILE *fpasm, int longitud, const char *nombre, int es_referencia);
+void comprobar_acceso_vector(FILE* fpasm, int longitud, const char* nombre, int es_referencia);
 void asignar_elemento_vector(FILE* fpasm, int es_referencia);
-void apilar_valor_vector(FILE *fpasm);
+void apilar_valor_vector(FILE* fpasm);
 
 
 #endif
