@@ -111,7 +111,7 @@
 %%
 
 
-programa                    : TOK_MAIN '{' _inicio declaraciones _escritura1 funciones _escritura2 sentencias _final '}' 
+programa                    : TOK_MAIN '{' _inicio declaraciones _escritura1 funciones _escritura2 sentencias _final '}'
                               { // Axioma de nuestra gramatica
                                 REGLA(1,"<programa> ::= main { <declaraciones> <funciones> <sentencias> }");
                               }
@@ -163,7 +163,8 @@ funciones                   : funcion funciones { REGLA(20,"<funciones> ::= <fun
 
 
 
-fn_name : TOK_FUNCTION tipo TOK_IDENTIFICADOR {
+fn_name : TOK_FUNCTION tipo identificador_uso {
+
         INFO_SIMBOLO* info = uso_global($3.lexema);
         ASSERT_SEMANTICO(NULL == info, "Declaracion duplicada", NULL);
 
@@ -188,7 +189,6 @@ fn_name : TOK_FUNCTION tipo TOK_IDENTIFICADOR {
         };
 
 fn_declaration : fn_name '(' parametros_funcion ')' '{' declaraciones_funcion {
-	
 	INFO_SIMBOLO* info = uso_global($1.lexema);
 	info->adicional1 = num_parametros_actual;
 	info->adicional2 = num_variables_locales_actual;
@@ -204,12 +204,12 @@ fn_declaration : fn_name '(' parametros_funcion ')' '{' declaraciones_funcion {
 };
 
 funcion : fn_declaration sentencias '}' {
-	
+    REGLA(22,"<funcion> ::= function <tipo> <identificador> ( <parametros_funcion> ) { <declaraciones_funcion> <sentencias> }");
+
 	ambito_actual = 0;
 	cerrar_scope_local();
 
 	ASSERT_SEMANTICO(fn_return != 0, "Funcion sin sentencia de retorno", $1.lexema);
-
 };
 
 
@@ -218,22 +218,22 @@ parametros_funcion          : parametro_funcion resto_parametros_funcion { REGLA
                             | /* empty  regla 24*/ { REGLA(24, "<parametros_funcion> ::="); }
                             ;
 
-resto_parametros_funcion    : ';' parametro_funcion resto_parametros_funcion 
+resto_parametros_funcion    : ';' parametro_funcion resto_parametros_funcion
                             { REGLA(25,"<resto_parametros_funcion> ::= ; <parametro_funcion> <resto_parametros_funcion>"); }
                             | /* empty regla 26 */ { REGLA(26,"<resto_parametros_funcion> ::="); }
                             ;
 
 
-idpf : TOK_IDENTIFICADOR   {    
+idpf : identificador_uso   {    
                              $$ = $1;   
                             }
                             ;
 
-parametro_funcion           : tipo idpf { 
+parametro_funcion           : tipo idpf {
 
                                 REGLA(27,"<parametro_funcion> ::= <tipo> <identificador>");
 
-                                /* Declaracion de un parametro al declarar la funcion */ 
+                                /* Declaracion de un parametro al declarar la funcion */
                                 INFO_SIMBOLO* info = uso_solo_local($2.lexema);
                                 ASSERT_SEMANTICO(NULL == info, "Declaracion duplicada", NULL);
 
@@ -322,7 +322,7 @@ bucle                       : while_exp sentencias '}'
                                 generar_endwhile(pfasm, $1.etiqueta);
                               }
                             ;
-while_exp                   : while '(' exp ')' '{' 
+while_exp                   : while '(' exp ')' '{'
                               {
                                 ASSERT_SEMANTICO(BOOLEANO == $3.tipo, "Bucle con condicion de tipo int", NULL);
                                 generar_do(pfasm, $3.es_direccion, $$.etiqueta);
@@ -370,13 +370,13 @@ retorno_funcion             : TOK_RETURN exp
                                 ASSERT_SEMANTICO(ambito_actual, "Sentencia de retorno fuera del cuerpo de una funcion", NULL);
 
                                 generar_retorno_funcion(pfasm, $2.es_direccion);
-                                fn_return++; 
+                                fn_return++;
 
                               }
                             ;
 exp                         : exp '+' exp
                               {
-                                REGLA(72,"<exp> ::= <exp> + <exp>"); 
+                                REGLA(72,"<exp> ::= <exp> + <exp>");
 
                                 /* Solo podemos sumar enteros  */
                                 ASSERT_SEMANTICO($1.tipo == $3.tipo && $1.tipo == ENTERO, "Operacion aritmetica con operandos boolean", NULL);
@@ -388,7 +388,7 @@ exp                         : exp '+' exp
                               }
                             | exp '-' exp
                               {
-                                REGLA(73,"<exp> ::= <exp> - <exp>"); 
+                                REGLA(73,"<exp> ::= <exp> - <exp>");
 
                                 /* Solo podemos restar enteros  */
                                 ASSERT_SEMANTICO($1.tipo == $3.tipo && $1.tipo == ENTERO, "Operacion aritmetica con operandos boolean", NULL);
@@ -399,7 +399,7 @@ exp                         : exp '+' exp
                               }
                             | exp '/' exp
                               {
-                                REGLA(74,"<exp> ::= <exp> / <exp>"); 
+                                REGLA(74,"<exp> ::= <exp> / <exp>");
                                 /* Solo podemos dividir enteros  */
                                 ASSERT_SEMANTICO($1.tipo == $3.tipo && $1.tipo == ENTERO, "Operacion aritmetica con operandos boolean", NULL);
                                 dividir(pfasm, $1.es_direccion, $3.es_direccion);
@@ -409,7 +409,7 @@ exp                         : exp '+' exp
                               }
                             | exp '*' exp
                               {
-                                REGLA(75,"<exp> ::= <exp> * <exp>"); 
+                                REGLA(75,"<exp> ::= <exp> * <exp>");
                                 /* Solo podemos multiplicar enteros  */
                                 ASSERT_SEMANTICO($1.tipo == $3.tipo && $1.tipo == ENTERO, "Operacion aritmetica con operandos boolean", NULL);
                                 multiplicar(pfasm, $1.es_direccion, $3.es_direccion);
@@ -419,7 +419,7 @@ exp                         : exp '+' exp
                               }
                             | '-'  %prec NEG exp
                               {
-                                REGLA(76,"<exp> ::= - <exp>"); 
+                                REGLA(76,"<exp> ::= - <exp>");
                                 ASSERT_SEMANTICO($2.tipo == ENTERO, "Operacion aritmetica con operandos boolean", NULL);
                                 cambiar_signo(pfasm, $2.es_direccion);
                                 /* Propaga correctamente los atributos */
@@ -428,7 +428,7 @@ exp                         : exp '+' exp
                               }
                             | exp TOK_AND exp
                               {
-                                REGLA(77,"<exp> ::= <exp> && <exp>"); 
+                                REGLA(77,"<exp> ::= <exp> && <exp>");
                                 /* Solo podemos ahcer ands de booleanos  */
                                 ASSERT_SEMANTICO($1.tipo == $3.tipo && $1.tipo == BOOLEANO, "Operacion logica con operandos int", NULL);
                                 y(pfasm, $1.es_direccion, $3.es_direccion);
@@ -438,7 +438,7 @@ exp                         : exp '+' exp
                               }
                             | exp TOK_OR exp
                               {
-                                REGLA(78,"<exp> ::= <exp> || <exp>"); 
+                                REGLA(78,"<exp> ::= <exp> || <exp>");
                                 /* Solo podemos ahcer ands de booleanos  */
                                 ASSERT_SEMANTICO($1.tipo == $3.tipo && $1.tipo == BOOLEANO, "Operacion logica con operandos int", NULL);
                                 o(pfasm, $1.es_direccion, $3.es_direccion);
@@ -448,7 +448,7 @@ exp                         : exp '+' exp
                               }
                             | '!' exp
                               {
-                                REGLA(79,"<exp> ::= ! <exp>"); 
+                                REGLA(79,"<exp> ::= ! <exp>");
                                 ASSERT_SEMANTICO($2.tipo == BOOLEANO, "Operacion logica con operandos int", NULL);
                                 no(pfasm, $2.es_direccion, etiqueta++);
                                 $$.tipo = BOOLEANO;
@@ -456,7 +456,6 @@ exp                         : exp '+' exp
                               }
                             | identificador_uso
                               {
-                                //REGLA(108, "<identificador> ::= TOK_IDENTIFICADOR"); 
                                 REGLA(80,"<exp> ::= <identificador>");
                                 INFO_SIMBOLO* info = uso_local($1.lexema);
                                 ASSERT_SEMANTICO(NULL != info, "Acceso a variable no declarada", $1.lexema);
@@ -487,20 +486,20 @@ exp                         : exp '+' exp
 
                             | constante
                               {
-                                REGLA(81,"<exp> ::= <constante>"); 
-                                $$.tipo = $1.tipo; 
-                                $$.es_direccion = $1.es_direccion; 
+                                REGLA(81,"<exp> ::= <constante>");
+                                $$.tipo = $1.tipo;
+                                $$.es_direccion = $1.es_direccion;
                               }
                             
                             | '(' exp ')'
                               {
-                                REGLA(82,"<exp> ::= ( <exp> )"); 
+                                REGLA(82,"<exp> ::= ( <exp> )");
                                 $$.tipo = $2.tipo;
                                 $$.es_direccion = $2.es_direccion;
                               }
                             | '(' comparacion ')'
                               {
-                                REGLA(83,"<exp> ::= ( <comparacion> )"); 
+                                REGLA(83,"<exp> ::= ( <comparacion> )");
                                 $$.tipo = $2.tipo;
                                 $$.es_direccion = $2.es_direccion;
                               }
@@ -523,7 +522,7 @@ exp                         : exp '+' exp
                               }
                             ;
 
-idf_llamada_funcion : TOK_IDENTIFICADOR {
+idf_llamada_funcion : identificador_uso {
 
 		ASSERT_SEMANTICO(en_explist == 0, "No esta permitido el uso de llamadas a funciones como parametros de otras funciones", NULL);
 
@@ -537,14 +536,14 @@ idf_llamada_funcion : TOK_IDENTIFICADOR {
 
 
 lista_expresiones           : exp resto_lista_expresiones { REGLA(89,"<lista_expresiones> ::= <exp> <resto_lista_expresiones>");
-								num_parametros_llamada_actual++; 
+								num_parametros_llamada_actual++;
 								apilar_valor(pfasm, $1.es_direccion);
 
 							}
                             | /* empty regla 90 */ { REGLA(90,"<lista_expresiones> ::="); }
                             ;
-resto_lista_expresiones     : ',' exp resto_lista_expresiones { 
-								REGLA(91,"<resto_lista_expresiones> ::= , <exp> <resto_lista_expresiones>"); 
+resto_lista_expresiones     : ',' exp resto_lista_expresiones {
+								REGLA(91,"<resto_lista_expresiones> ::= , <exp> <resto_lista_expresiones>");
 								num_parametros_llamada_actual++;
 								apilar_valor(pfasm, $2.es_direccion);
 							}
@@ -553,7 +552,7 @@ resto_lista_expresiones     : ',' exp resto_lista_expresiones {
                             ;
 comparacion                 : exp TOK_IGUAL exp /* == */
                               {
-                                REGLA(93, "<comparacion> ::= <exp> == <exp>"); 
+                                REGLA(93, "<comparacion> ::= <exp> == <exp>");
                                 ASSERT_SEMANTICO ($1.tipo == ENTERO && $3.tipo == ENTERO, "Comparacion con operandos boolean", NULL);
                                 igual(pfasm, $1.es_direccion, $3.es_direccion, etiqueta++);
                                 $$.tipo = BOOLEANO;
@@ -561,7 +560,7 @@ comparacion                 : exp TOK_IGUAL exp /* == */
                               }
                             | exp TOK_DISTINTO exp /* != */
                               {
-                                REGLA(94, "<comparacion> ::= <exp> != <exp>"); 
+                                REGLA(94, "<comparacion> ::= <exp> != <exp>");
                                 ASSERT_SEMANTICO($1.tipo == ENTERO && $3.tipo == ENTERO, "Comparacion con operandos boolean", NULL);
                                 distinto(pfasm, $1.es_direccion, $3.es_direccion, etiqueta++);
                                 $$.tipo = BOOLEANO;
@@ -609,7 +608,7 @@ constante                   : constante_logica { REGLA(99, "<constante> ::= <con
                                                  $$.es_direccion = $1.es_direccion;
                                                }
                             ;
-constante_logica            : TOK_TRUE { REGLA(101, "<constante_logica> ::= true"); 
+constante_logica            : TOK_TRUE { REGLA(101, "<constante_logica> ::= true");
                                                      $$.tipo = BOOLEANO;
                                                      $$.es_direccion = 0;
                                                      $$.valor_entero = 1;
@@ -632,13 +631,13 @@ constante_entera            : TOK_CONSTANTE_ENTERA { REGLA(104, "<constante_ente
                             ;
 identificador_uso           : TOK_IDENTIFICADOR
                               {
-                                REGLA(108, "<identificador> ::= TOK_IDENTIFICADOR"); 
+                                REGLA(108, "<identificador> ::= TOK_IDENTIFICADOR");
                                 $$ = $1;
                               }
                             ;
 identificador_nuevo         : TOK_IDENTIFICADOR
                               {
-                                REGLA(108, "<identificador> ::= TOK_IDENTIFICADOR"); 
+                                REGLA(108, "<identificador> ::= TOK_IDENTIFICADOR");
                                 /* Añadimos al ambito actual */
                                 INFO_SIMBOLO* info = uso_local($1.lexema);
                                 ASSERT_SEMANTICO(NULL == info, "Declaracion duplicada", NULL);
