@@ -162,9 +162,12 @@ practica4() {
 }
 
 compilador() {
-	title 'Pruebas compilador - pruebas propias'
+	title "Pruebas compilador - $2"
 
-	i=0
+	local COMPILADOR_PRUEBAS
+	COMPILADOR_PRUEBAS=$3
+
+	local i=0
 	for file in $(ls $COMPILADOR_PRUEBAS/*.alf); do
 		i=$(expr $i + 1)
 
@@ -174,7 +177,7 @@ compilador() {
 		rm -f "_$file" "_$file.nasm" "$ODIR/_$file.o"
 
 
-		subtitle "Prueba 5.$i - $file"
+		subtitle "Prueba $1.$i - $file"
 
 		# Si existe un fichero .err, tiene errores semanticos
 		if [[ -f "$COMPILADOR_PRUEBAS/$file.err" ]]; then
@@ -185,20 +188,20 @@ compilador() {
 		$COMPILADOR "$COMPILADOR_PRUEBAS/$file.alf" "_$file.nasm"
 		make_nasm_exe _$file.nasm
 
-		# Si hay un directorio .d, ejecutamos para cada par (in, out)
-		if [[ -d "$COMPILADOR_PRUEBAS/$file.d" ]]; then
+		# Si hay ficheros que acaben en _N, ejecutamos para cada par (in, out)
+		if [[ -f "$COMPILADOR_PRUEBAS/${file}_1.input" ]]; then
 			# Buscamos por ficheros IN porque no tiene sentido comprobar salidas
 			# diferentes si no hay entrada/es la misma (los programas son deterministas).
-			for in_file in $(find "$COMPILADOR_PRUEBAS/$file.d" -iname '*.in' -type f); do
-				diff <(./_$file < "$in_file") "${in_file%.*}.out"
+			for in_file in $(find "$COMPILADOR_PRUEBAS" -iname "{$file}_?.input" -type f); do
+				diff <(./_$file < "$in_file") "${in_file%.*}.output"
 			done
 
 		# En caso contrario, buscamos un out y opcionalmente un in
-		elif [[ -f "$COMPILADOR_PRUEBAS/$file.out" ]]; then
-			if [[ -f "$COMPILADOR_PRUEBAS/$file.in" ]]; then
-				diff <("./_$file" < "$COMPILADOR_PRUEBAS/$file.in") "$COMPILADOR_PRUEBAS/$file.out"
+		elif [[ -f "$COMPILADOR_PRUEBAS/$file.output" ]]; then
+			if [[ -f "$COMPILADOR_PRUEBAS/$file.input" ]]; then
+				diff <("./_$file" < "$COMPILADOR_PRUEBAS/$file.input") "$COMPILADOR_PRUEBAS/$file.output"
 			else
-				diff <(./_$file) "$COMPILADOR_PRUEBAS/$file.out"
+				diff <(./_$file) "$COMPILADOR_PRUEBAS/$file.output"
 			fi
 
 		# Nos quejamos si no hay salida
@@ -212,11 +215,12 @@ compilador() {
 }
 
 compile
-#practica1
-#practica2
-#practica3
-#practica4
-compilador
+practica1
+practica2
+practica3
+practica4
+compilador 5 'Pruebas propias' "$COMPILADOR_PRUEBAS"
+compilador 6 'Ficheros de correccion' "$MDIR/ficheros_correccion"
 
 title 'Borrando ficheros generados'
 echo

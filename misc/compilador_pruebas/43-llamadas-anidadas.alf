@@ -1,0 +1,9 @@
+main {
+	int x;
+
+	function int f(int x) {
+		return x;
+	}
+
+	printf f(f(f(3)));
+}

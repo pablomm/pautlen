@@ -1,0 +1,42 @@
+main {
+	int x, y, numLlamada, val;
+	
+	function int Ackermann(int m; int n) {
+		int aux;
+
+		numLlamada = numLlamada + 1;
+		//printf numLlamada;
+
+		if ((m == 0)) {
+			return n + 1;
+		}
+		if ((m > 0) && (n == 0)) {
+			return Ackermann(m - 1, 1);
+		}
+		else {
+			if ((m > 0) && (n > 0)) {
+				aux = Ackermann(m, n - 1);
+				return Ackermann(m - 1, aux);
+			}
+			return -10;
+		}
+	}
+
+	x = 0;
+	y = 0;
+	while ((x <= 3)) {
+		y = 0;
+		while (( y <= 4 )) {
+			//printf -1;
+			//printf x;
+			//printf y;
+			numLlamada = 0;
+			val = Ackermann(x, y);
+			//printf -1;
+
+			printf val;
+			y = y + 1;
+		}
+		x = x + 1;
+	}
+}

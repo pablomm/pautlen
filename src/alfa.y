@@ -515,7 +515,7 @@ exp                         : exp '+' exp
                                 INFO_SIMBOLO* info = uso_local($1.lexema);
                                 ASSERT_SEMANTICO(NULL != info, "Funcion no declarada", $1.lexema);
                                 ASSERT_SEMANTICO(FUNCION == info->categoria, "No es una funcion", $1.lexema);
-                                ASSERT_SEMANTICO(num_parametros_llamada_actual == info->adicional1, "Numero de argumentos incorrecto", $1.lexema);
+                                ASSERT_SEMANTICO(num_parametros_llamada_actual == info->adicional1, "Numero incorrecto de parametros en llamada a funcion", $1.lexema);
                                 generar_llamada_funcion(pfasm, $1.lexema, num_parametros_llamada_actual);
                                 en_explist = 0;
                                 $$.tipo = info->tipo;
@@ -525,7 +525,7 @@ exp                         : exp '+' exp
 
 idf_llamada_funcion : TOK_IDENTIFICADOR {
 
-		ASSERT_SEMANTICO(en_explist == 0, "No se permiten lladas de funciones en paso de parametros", $1.lexema);
+		ASSERT_SEMANTICO(en_explist == 0, "No esta permitido el uso de llamadas a funciones como parametros de otras funciones", NULL);
 
 		en_explist = 1;
 		num_parametros_llamada_actual = 0;
