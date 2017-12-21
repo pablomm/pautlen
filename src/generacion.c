@@ -76,6 +76,7 @@ void escribir_subseccion_data(FILE* fpasm)
     fputc('\n', fpasm);
     PUT_DIRECTIVE("segment .data");
     PUT_ASM("__msg_error_division\tdb \"Error division por 0\", 0");
+    PUT_ASM("__msg_error_vector\tdb \"Error acceso a vector fuera de rango\", 0");
 
 }
 /**********************************************************************************/
@@ -129,15 +130,23 @@ void escribir_inicio_main(FILE* fpasm)
 void escribir_fin(FILE* fpasm)
 {
     PUT_COMMENT("Fin del programa");
-
     PUT_ASM("jmp near fin");
-    PUT_LABEL("error_division");
 
+    /* Error division por 0 */
+    PUT_LABEL("error_division");
     PUT_ASM("push __msg_error_division");
+    PUT_ASM("jmp near __salida_mensaje_error");
+
+    PUT_LABEL("__error_vector");
+    PUT_ASM("push __msg_error_vector");
+
+    PUT_LABEL("__salida_mensaje_error");
     PUT_ASM("call print_string");
+    PUT_ASM("call print_endofline");
+
     /* No balanceamos la pila, se restaura a continuacion */
 
-    PUT_ASM("call print_endofline");
+
 
 
     PUT_LABEL("fin");
@@ -794,4 +803,51 @@ void asignar_variable_local(FILE *fpasm, int es_referencia, int posicion_variabl
 
     PUT_ASM("lea ebx, [ebp - %d]", 4*posicion_variable);
     PUT_ASM("mov [ebx], eax",  4*posicion_variable);
+}
+
+void comprobar_acceso_vector(FILE *fpasm, int longitud, const char *nombre, int es_referencia) {
+
+    PUT_COMMENT("Comprobando acceso a vector de longitud %d", longitud);
+    PUT_ASM("pop eax");
+
+    if(es_referencia)
+        PUT_ASM("mov eax, [eax]");
+
+    PUT_ASM("cmp eax, 0");
+    PUT_ASM("jl __error_vector");
+
+    PUT_ASM("cmp eax, %d", longitud);
+    PUT_ASM("jge __error_vector");
+
+    PUT_ASM("lea eax, [4*eax + _%s]", nombre);
+    PUT_ASM("push eax");
+
+}
+
+
+void asignar_elemento_vector(FILE* fpasm, int es_referencia)
+{
+    PUT_COMMENT("Asignacion a elemento del vector");
+
+    /* B.4.156 MOV : Move Data */
+    /* Caso MOV r/m32,reg32  */
+
+    /* Pop del valor a asignar */
+    PUT_ASM("pop dword eax");
+
+    if (es_referencia)
+        PUT_ASM("mov eax,dword [eax]");
+
+    /* Posicion del vector */
+    PUT_ASM("pop dword ebx");
+
+    PUT_ASM("mov dword [ebx], eax");
+}
+
+void apilar_valor_vector(FILE *fpasm) {
+
+    PUT_COMMENT("Apilando valor del vector");
+    PUT_ASM("pop dword eax");
+    PUT_ASM("mov eax, dword [eax]");
+    PUT_ASM("push dword eax");
 }

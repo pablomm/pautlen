@@ -51,7 +51,7 @@
 	static int fn_return = 0;
 	static int 	en_explist = 0;
 	static int num_parametros_llamada_actual;
-
+    static int tamanio_vector_actual = 0;
 %}
 
 
@@ -152,7 +152,15 @@ clase_escalar               : tipo { REGLA(9,"<clase_escalar> ::= <tipo>"); }
 tipo                        : TOK_INT  { REGLA(10,"<tipo> ::= int"); tipo_actual = ENTERO; }
                             | TOK_BOOLEAN { REGLA(11,"<tipo> ::= boolean"); tipo_actual = BOOLEANO; }
                             ;
-clase_vector                : TOK_ARRAY tipo '[' constante_entera ']' { REGLA(15,"<clase_vector> ::= array <tipo> [ <constante_entera> ]"); }
+clase_vector                : TOK_ARRAY tipo '[' constante_entera ']' { 
+           REGLA(15,"<clase_vector> ::= array <tipo> [ <constante_entera> ]"); 
+           tamanio_vector_actual = $4.valor_entero;
+            ASSERT_SEMANTICO(tamanio_vector_actual > 0, "La longitud del vector debe ser positiva", NULL);
+            ASSERT_SEMANTICO(tamanio_vector_actual <= MAX_TAMANIO_VECTOR, "Longitud maxima de vector es "MAX_TAMANIO_VECTOR_STR, NULL);
+
+
+
+}
                             ;
 identificadores             : identificador_nuevo { REGLA(18,"<identificadores> ::= <identificador>"); }
                             | identificador_nuevo ',' identificadores { REGLA(19,"<identificadores> ::= <identificador> , <identificadores>"); }
@@ -179,6 +187,7 @@ fn_name : TOK_FUNCTION tipo identificador_uso {
 		num_parametros_actual = 0;
 		pos_parametro_actual = 0;
 		fn_return = 0;
+        tamanio_vector_actual = 0;
 
 		/* Propagamos el nombre de la funcion */
 
@@ -226,6 +235,7 @@ resto_parametros_funcion    : ';' parametro_funcion resto_parametros_funcion
 
 idpf : identificador_uso   {    
                              $$ = $1;   
+                             clase_actual = ESCALAR;
                             }
                             ;
 
@@ -288,9 +298,25 @@ asignacion                  : identificador_uso '=' exp
 
                                 
                               }
-                            | elemento_vector '=' exp { REGLA(44,"<asignacion> ::= <elemento_vector> = <exp>"); }
+                            | elemento_vector '=' exp { REGLA(44,"<asignacion> ::= <elemento_vector> = <exp>"); 
+
+
+                            asignar_elemento_vector(pfasm, $3.es_direccion);
+
+
+
+                        }
                             ;
-elemento_vector             : identificador_uso '[' exp ']' { REGLA(48,"<elemento_vector> ::= <identificador> [ <exp> ]"); }
+elemento_vector             : identificador_uso '[' exp ']' { REGLA(48,"<elemento_vector> ::= <identificador> [ <exp> ]"); 
+
+                                INFO_SIMBOLO * info = uso_global($1.lexema);
+
+                                ASSERT_SEMANTICO(info != NULL,"Identificador de vector declarado", $1.lexema);
+                                ASSERT_SEMANTICO(VECTOR == info->clase, "Debe ser un vector", $1.lexema);
+                                comprobar_acceso_vector(pfasm, info->adicional1, $1.lexema, $3.es_direccion);
+                                $$.tipo = info->tipo;
+                                $$.es_direccion = 0;
+}
                             ;
 condicional                 : if_exp_sentencias
                               {
@@ -460,7 +486,7 @@ exp                         : exp '+' exp
                                 INFO_SIMBOLO* info = uso_local($1.lexema);
                                 ASSERT_SEMANTICO(NULL != info, "Acceso a variable no declarada", $1.lexema);
                                 ASSERT_SEMANTICO(FUNCION != info->categoria, "El identificador es una funcion", NULL);
-                                ASSERT_SEMANTICO(VECTOR != info->clase, "El identificador es un vector", NULL);
+                                ASSERT_SEMANTICO(VECTOR != info->clase, "El identificador es un vector", $1.lexema);
 
                                 /* Miramos si la variable esta en solo local */
 
@@ -489,6 +515,7 @@ exp                         : exp '+' exp
                                 REGLA(81,"<exp> ::= <constante>");
                                 $$.tipo = $1.tipo;
                                 $$.es_direccion = $1.es_direccion;
+                                apilar_constante(pfasm, $1.valor_entero);
                               }
                             
                             | '(' exp ')'
@@ -506,7 +533,9 @@ exp                         : exp '+' exp
                             | elemento_vector
                               {
                                 REGLA(85,"<exp> ::= <elemento_vector>");
-                                $$ = $1; // Copiamos todo
+                                apilar_valor_vector(pfasm);
+                                $$.tipo = $1.tipo;
+                                $$.es_direccion = 0;
                               }
                             | idf_llamada_funcion '(' lista_expresiones ')'
                               {
@@ -602,6 +631,7 @@ comparacion                 : exp TOK_IGUAL exp /* == */
 constante                   : constante_logica { REGLA(99, "<constante> ::= <constante_logica>");
                                                  $$.tipo = $1.tipo;
                                                  $$.es_direccion = $1.es_direccion;
+                                                 $$.valor_entero = $1.valor_entero;
                             }
                             | constante_entera { REGLA(100, "<constante> ::= <constante_entera>");
                                                  $$.tipo = $1.tipo;
@@ -612,21 +642,17 @@ constante_logica            : TOK_TRUE { REGLA(101, "<constante_logica> ::= true
                                                      $$.tipo = BOOLEANO;
                                                      $$.es_direccion = 0;
                                                      $$.valor_entero = 1;
-                                                     apilar_constante(pfasm, 1);
-
                             }
                             | TOK_FALSE { REGLA(102, "<constante_logica> ::= false");
                                                      $$.tipo = BOOLEANO;
                                                      $$.es_direccion = 0;
                                                      $$.valor_entero = 0;
-                                                     apilar_constante(pfasm, 0);
                              }
                             ;
 constante_entera            : TOK_CONSTANTE_ENTERA { REGLA(104, "<constante_entera> ::= TOK_CONSTANTE_ENTERA");
                                                      $$.tipo = ENTERO;
                                                      $$.es_direccion = 0;
                                                      $$.valor_entero = $1.valor_entero;
-                                                     apilar_constante(pfasm, $1.valor_entero);
                                                    }
                             ;
 identificador_uso           : TOK_IDENTIFICADOR
@@ -642,8 +668,10 @@ identificador_nuevo         : TOK_IDENTIFICADOR
                                 INFO_SIMBOLO* info = uso_local($1.lexema);
                                 ASSERT_SEMANTICO(NULL == info, "Declaracion duplicada", NULL);
                                 if (0 == ambito_actual) {
-                                  declarar_global($1.lexema, tipo_actual, clase_actual, 0);
+                                  declarar_global($1.lexema, tipo_actual, clase_actual, tamanio_vector_actual);
+                                  tamanio_vector_actual = 0;
                                 } else {
+                                    ASSERT_SEMANTICO(clase_actual != VECTOR,"No esta permitida la declaracion de vectores en funciones", $1.lexema);
                                   declarar_local($1.lexema, 0, tipo_actual, clase_actual, 0, pos_variable_local_actual);
                                   num_variables_locales_actual++;
                                  pos_variable_local_actual++;

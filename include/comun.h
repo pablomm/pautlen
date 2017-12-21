@@ -9,6 +9,9 @@
 
 #define MAX_LONG_ID 100
 
+#define MAX_TAMANIO_VECTOR 64
+#define MAX_TAMANIO_VECTOR_STR "64"
+
 /**************** DECLARACIONES DE TIPOS ****************/
 
 /* Retorno de función error/ok */
