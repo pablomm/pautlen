@@ -1,18 +1,14 @@
 main {
-//Ejemplo de las transparencias
-int z;
 
-function int doble (int arg) {
+	int foo;
 
-	int argAux;
+	function int factorial(int n) {
 
-	
-	argAux = arg;
-	return 2* argAux;
-}
 
-	scanf z;
 
-	printf  doble(z);
+
+	}
+
+	scanf 
 
 }

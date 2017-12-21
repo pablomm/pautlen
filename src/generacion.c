@@ -42,82 +42,10 @@ static void _put_asm(FILE* fpasm, const char* prefix, const char* suffix, const 
     va_end(ap);
 }
 
-static int align_stack =
-#if defined(__APPLE__) || defined(_WIN32)
-    1
-#else
-    0
-#endif
-    ;
 
 #define es_ref_to_str(es_ref)   ((es_ref) ? "variable" : "constante")
 
-static void stack_align_begin(FILE* fpasm, unsigned arity)
-{
-    if (!align_stack) return;
 
-    // Vamos a alinear la pila de modo que ESP acabe en 0 cuando se ejecute el call.
-    // Como vamos a modificar el puntero de pila, primero nos guardamos los
-    // argumentos en registros para tener acceso a ellos. No nos importa machacar
-    // esos registros porque nuestro ABI usa exclusivamente la pila.
-    // pila
-    // (ojo: no hay breaks)
-    switch (arity) {
-        case 4:
-            PUT_ASM("mov dword edx, [esp-0xC]");
-        case 3:
-            PUT_ASM("mov dword ecx, [esp-0x8]");
-        case 2:
-            PUT_ASM("mov dword ebx, [esp-0x4]");
-        case 1:
-            PUT_ASM("mov dword eax, [esp-0x0]");
-        case 0:
-        default:
-            break; /* No hace falta copiar nada  */
-    }
-
-    // Guardamos el valor del puntero de pila en el frame pointer ebp.
-    // No podemos apilarlo porque estamos modificando la pila.
-    PUT_ASM("push dword ebp");
-
-    // Guardamos el valor de esp en ebp
-    PUT_ASM("mov dword ebp, esp");
-
-    // Alineamos la pila al siguiente multiplo de 16
-    PUT_ASM("and dword esp, ~0xF");
-
-    // Si es necesario, hacemos hueco a los argumentos
-    if (0 != arity % 4) {
-        PUT_ASM("sub dword esp, %i", 16 - 4*arity);
-    }
-
-    // Los copiamos de vuelta a la pila (ojo: no hay breaks para los casos 4-1)
-    switch (arity) {
-        default:
-            while (arity --> 0) {
-                PUT_ASM("mov dword eax, [ebp-%i]");
-                PUT_ASM("push eax");
-            }
-
-        case 4:
-            PUT_ASM("push dword edx");
-        case 3:
-            PUT_ASM("push dword ecx");
-        case 2:
-            PUT_ASM("push dword ebx");
-        case 1:
-            PUT_ASM("push dword eax");
-        case 0:
-            break; /* No hace falta copiar nada */
-    }
-
-}
-static void stack_align_end(FILE* fpasm)
-{
-    if (!align_stack) return;
-    PUT_ASM("mov dword esp, ebp");
-    PUT_ASM("pop dword ebp");
-}
 
 /**********************************************************************************/
 
@@ -177,7 +105,7 @@ void escribir_segmento_codigo(FILE* fpasm)
 
     fputc('\n', fpasm);
     PUT_DIRECTIVE("segment .text");
-    PUT_DIRECTIVE("global main");
+    PUT_ASM("global main");
 
     /* Declaracion de funciones externas libreria alfalib */
     PUT_ASM("extern scan_int, print_int, scan_float, print_float, scan_boolean, print_boolean");
@@ -204,13 +132,13 @@ void escribir_fin(FILE* fpasm)
 
     PUT_ASM("jmp near fin");
     PUT_LABEL("error_division");
-    stack_align_begin(fpasm, 1);
+
     PUT_ASM("push __msg_error_division");
     PUT_ASM("call print_string");
     /* No balanceamos la pila, se restaura a continuacion */
 
     PUT_ASM("call print_endofline");
-    stack_align_end(fpasm);
+
 
     PUT_LABEL("fin");
     PUT_ASM("mov dword esp, [__esp]");
@@ -319,9 +247,9 @@ void leer(FILE* fpasm, char* nombre, int tipo)
     PUT_ASM("push dword _%s",nombre);
 
     /* Si tipo no es ENTERO o BOLEANO habria error, pero simplemente llama a scan_boolean */
-    stack_align_begin(fpasm, 1);
+
     PUT_ASM("call %s", (tipo == ENTERO) ? "scan_int" : "scan_boolean");
-    stack_align_end(fpasm);
+
 
     PUT_ASM("add esp, 4");
 }
@@ -331,9 +259,9 @@ void leer_ya_apilado(FILE* fpasm, int tipo)
     PUT_COMMENT("Lectura de un %s a direccion ya apilada", (tipo == ENTERO) ? "entero" : "booleano");
 
     /* Si tipo no es ENTERO o BOLEANO habria error, pero simplemente llama a scan_boolean */
-    stack_align_begin(fpasm, 1);
+
     PUT_ASM("call %s", (tipo == ENTERO) ? "scan_int" : "scan_boolean");
-    stack_align_end(fpasm);
+
 
     PUT_ASM("add esp, 4");
 }
@@ -349,11 +277,11 @@ void escribir(FILE* fpasm, int es_referencia, int tipo)
         PUT_ASM("push dword [eax]");
     }
 
-    stack_align_begin(fpasm, 1);
+
     /* Si tipo no es ENTERO o BOLEANO habria error, pero simplemente llama a print_boolean */
     PUT_ASM("call %s", (tipo == ENTERO) ? "print_int" : "print_boolean");
     PUT_ASM("call print_endofline");
-    stack_align_end(fpasm);
+
 
     PUT_ASM("add esp, 4");
 }
@@ -765,11 +693,13 @@ void generar_prologo_funcion(FILE* fpasm, const char* nombre, int num_locales)
     // Los argumentos estan en ebp[-1:-aridad:-1]
 }
 
-void generar_retorno_funcion(FILE* fpasm)
+void generar_retorno_funcion(FILE* fpasm, int es_referencia)
 {
     PUT_COMMENT("Retorno de la funcion");
 
     PUT_ASM("pop eax");
+    if(es_referencia)
+        PUT_ASM("mov eax, [eax]");
 
     // Reestablecemos los punteros de pila
     PUT_ASM("mov esp, ebp");
@@ -796,15 +726,19 @@ void apilar_variable_local(FILE *fpasm, int direccion, int posicion_variable)
     PUT_COMMENT("Apilando %s de variable local %d", (direccion) ? "direccion" : "valor", posicion_variable);
     /* Usamos la formula que  el parametro se localiza en
      [ebp - <4*posición de la variable en declaración>] */
+    
     if(direccion){
         PUT_ASM("lea eax, [ebp - %d]",  4*posicion_variable);
         PUT_ASM("push dword eax");
      } else {
 
-        /* Obtenemos el valor de la memoria */
         PUT_ASM("mov eax, dword [ebp - %d]", 4*posicion_variable);
         PUT_ASM("push eax");
     }
+/*
+    PUT_ASM("lea eax, [ebp - %d]", 4*posicion_variable);
+    PUT_ASM("push dword %s", (direccion) ? "eax" : "[eax]");*/
+
 }
 
 void apilar_parametro(FILE *fpasm, int direccion, int posicion_parametro, int numero_parametro)
@@ -813,7 +747,7 @@ void apilar_parametro(FILE *fpasm, int direccion, int posicion_parametro, int nu
 
     /* Usamos la formula que  el parametro se localiza en
      [ebp + <4 + 4*(numero de parametros -posicion del parametro en declaracion)>] */
-    /*
+    
     if(direccion) {
         PUT_ASM("lea eax, [ebp + %d]", 4 + 4*(numero_parametro - posicion_parametro));
         PUT_ASM("push dword eax");
@@ -821,10 +755,10 @@ void apilar_parametro(FILE *fpasm, int direccion, int posicion_parametro, int nu
     else {
         PUT_ASM("mov eax, dword [ebp + %d]", 4 + 4*(numero_parametro - posicion_parametro));
         PUT_ASM("push dword eax");
-    }*/
-
+    }
+/*
     PUT_ASM("lea eax, [ebp + %d]", 4 + 4*(numero_parametro - posicion_parametro));
-    PUT_ASM("push dword %s", (direccion) ? "eax" : "[eax]");
+    PUT_ASM("push dword %s", (direccion) ? "eax" : "[eax]");*/
     
 }
 
@@ -834,13 +768,17 @@ void asignar_parametro(FILE *fpasm, int es_referencia, int posicion_parametro, i
     PUT_COMMENT("Asignacionando valor al parametro %d", posicion_parametro);
 
     /* Obtenemos valor de la expresion */
+        /* Lo desreferenciamos si hace falta */
     PUT_ASM("pop dword eax");
 
-    /* Lo desreferenciamos si hace falta */
+
     if (es_referencia)
         PUT_ASM("mov eax, dword [eax]");
 
-    PUT_ASM("mov [ebp + %d], eax", 4 + 4*(numero_parametro - posicion_parametro) );
+    /* Calculamos la direccion del parametro */
+    PUT_ASM("lea ebx, [ebp + %d]", 4 + 4*(numero_parametro - posicion_parametro));
+
+    PUT_ASM("mov [ebx], eax", 4 + 4*(numero_parametro - posicion_parametro) );
 }
 
 void asignar_variable_local(FILE *fpasm, int es_referencia, int posicion_variable)
@@ -854,5 +792,6 @@ void asignar_variable_local(FILE *fpasm, int es_referencia, int posicion_variabl
     if (es_referencia)
         PUT_ASM("mov eax, dword [eax]");
 
-    PUT_ASM("mov [ebp - %d], eax",  4*posicion_variable);
+    PUT_ASM("lea ebx, [ebp - %d]", 4*posicion_variable);
+    PUT_ASM("mov [ebx], eax",  4*posicion_variable);
 }

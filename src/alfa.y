@@ -236,12 +236,15 @@ parametro_funcion           : tipo idpf {
                                 /* Declaracion de un parametro al declarar la funcion */ 
                                 INFO_SIMBOLO* info = uso_solo_local($2.lexema);
                                 ASSERT_SEMANTICO(NULL == info, "Declaracion duplicada", NULL);
-                                pos_parametro_actual++;
-                                num_parametros_actual++;
+
 
                                 /* Declaramos el parametro en la tabla local */
                                 /* Adicional 2 indica la posicion del parametro en llamada a funcion */
                                 declarar_local($2.lexema, PARAMETRO, tipo_actual, clase_actual, 0, pos_parametro_actual);
+
+                                /* Se debe incrementar tras insertar en la tabla para que el primer parametro comience en 0 */
+                                pos_parametro_actual++;
+                                num_parametros_actual++;
 
                             }
                             ;
@@ -366,7 +369,7 @@ retorno_funcion             : TOK_RETURN exp
                                 REGLA(61, "<retorno_funcion> ::= return <exp>");
                                 ASSERT_SEMANTICO(ambito_actual, "Sentencia de retorno fuera del cuerpo de una funcion", NULL);
 
-                                generar_retorno_funcion(pfasm);
+                                generar_retorno_funcion(pfasm, $2.es_direccion);
                                 fn_return++; 
 
                               }
@@ -641,7 +644,7 @@ identificador_nuevo         : TOK_IDENTIFICADOR
                                 } else {
                                   declarar_local($1.lexema, 0, tipo_actual, clase_actual, 0, pos_variable_local_actual);
                                   num_variables_locales_actual++;
-                                pos_variable_local_actual++;
+                                 pos_variable_local_actual++;
                                 }
                               }
                             ;

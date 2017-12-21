@@ -1,0 +1,23 @@
+main {
+//Ejemplo de las transparencias
+int z;
+
+function int doble (int arg) {
+
+	int argAux;
+
+	argAux = arg;
+	
+	return 2* argAux;
+}
+
+	z = 0;
+
+	while( (z != -1) ) {
+	scanf z;
+
+	printf  doble(z);
+
+	}
+
+}
