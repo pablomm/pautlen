@@ -47,10 +47,9 @@
     static int pos_parametro_actual = -1;
     static int num_parametros_actual = 0;
     static int num_variables_locales_actual = 0;
-	static int pos_variable_local_actual = 1;
-	static int fn_return = 0;
-	static int 	en_explist = 0;
-	static int num_parametros_llamada_actual;
+    static int pos_variable_local_actual = 1;
+    static int fn_return = 0;
+    static int 	en_explist = 0;
     static int tamanio_vector_actual = 0;
 %}
 
@@ -103,6 +102,7 @@
 %type <atributos> constante_logica
 %type <atributos> identificador_nuevo identificador_uso idpf fn_name fn_declaration funcion
 %type <atributos> idf_llamada_funcion
+%type <atributos> lista_expresiones resto_lista_expresiones
 
 /* Manejo de las sentencias IF y ELSE */
 %type <atributos> if_exp if_exp_sentencias
@@ -544,8 +544,8 @@ exp                         : exp '+' exp
                                 INFO_SIMBOLO* info = uso_local($1.lexema);
                                 ASSERT_SEMANTICO(NULL != info, "Funcion no declarada", $1.lexema);
                                 ASSERT_SEMANTICO(FUNCION == info->categoria, "No es una funcion", $1.lexema);
-                                ASSERT_SEMANTICO(num_parametros_llamada_actual == info->adicional1, "Numero incorrecto de parametros en llamada a funcion", $1.lexema);
-                                generar_llamada_funcion(pfasm, $1.lexema, num_parametros_llamada_actual);
+                                ASSERT_SEMANTICO($3.num_parametros_llamada_actual == info->adicional1, "Numero incorrecto de parametros en llamada a funcion", $1.lexema);
+                                generar_llamada_funcion(pfasm, $1.lexema, $3.num_parametros_llamada_actual);
                                 en_explist = 0;
                                 $$.tipo = info->tipo;
                                 $$.es_direccion = 0;
@@ -553,32 +553,25 @@ exp                         : exp '+' exp
                             ;
 
 idf_llamada_funcion : identificador_uso {
-
-		ASSERT_SEMANTICO(en_explist == 0, "No esta permitido el uso de llamadas a funciones como parametros de otras funciones", NULL);
-
 		en_explist = 1;
-		num_parametros_llamada_actual = 0;
-
-
-
 
 };
 
 
 lista_expresiones           : exp resto_lista_expresiones { REGLA(89,"<lista_expresiones> ::= <exp> <resto_lista_expresiones>");
-								num_parametros_llamada_actual++;
+								$$.num_parametros_llamada_actual = $2.num_parametros_llamada_actual + 1;
 								apilar_valor(pfasm, $1.es_direccion);
 
 							}
-                            | /* empty regla 90 */ { REGLA(90,"<lista_expresiones> ::="); }
+                            | /* empty regla 90 */ { REGLA(90,"<lista_expresiones> ::="); $$.num_parametros_llamada_actual = 0; }
                             ;
 resto_lista_expresiones     : ',' exp resto_lista_expresiones {
 								REGLA(91,"<resto_lista_expresiones> ::= , <exp> <resto_lista_expresiones>");
-								num_parametros_llamada_actual++;
+								$$.num_parametros_llamada_actual = $3.num_parametros_llamada_actual + 1;
 								apilar_valor(pfasm, $2.es_direccion);
 							}
 
-                            | /* empty regla 92 */ { REGLA(92,"<resto_lista_expresiones> ::="); }
+                            | /* empty regla 92 */ { REGLA(92,"<resto_lista_expresiones> ::="); $$.num_parametros_llamada_actual = 0; }
                             ;
 comparacion                 : exp TOK_IGUAL exp /* == */
                               {
