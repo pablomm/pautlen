@@ -313,6 +313,7 @@ elemento_vector             : identificador_uso '[' exp ']' { REGLA(48,"<element
 
                                 ASSERT_SEMANTICO(info != NULL,"Identificador de vector declarado", $1.lexema);
                                 ASSERT_SEMANTICO(VECTOR == info->clase, "Debe ser un vector", $1.lexema);
+                                ASSERT_SEMANTICO(ENTERO == $3.tipo, "El indice debe ser un entero", NULL);
                                 comprobar_acceso_vector(pfasm, info->adicional1, $1.lexema, $3.es_direccion);
                                 $$.tipo = info->tipo;
                                 $$.es_direccion = 0;

@@ -214,6 +214,25 @@ compilador() {
 	echo
 }
 
+errores_semanticos() {
+	title "Pruebas compilador - Ficheros de coreccion errores"
+
+	local i=0
+	for file_path in "$MDIR/ficheros_correccion/errores/"*; do
+		i=$(expr $i + 1)
+		file=$(basename -s .alf "$file_path")
+
+		subtitle "Prueba 6bis.$i - $file"
+
+		if ! $COMPILADOR "$file_path" "_$file.nasm" > /dev/null; then
+			echo -en "${GREEN}OK${NC} "
+		else
+			echo -en "${RED}ERR$NC "
+		fi
+	done
+			echo
+}
+
 compile
 practica1
 practica2
@@ -221,6 +240,7 @@ practica3
 practica4
 compilador 5 'Pruebas propias' "$COMPILADOR_PRUEBAS"
 compilador 6 'Ficheros de correccion' "$MDIR/ficheros_correccion"
+errores_semanticos
 
 title 'Borrando ficheros generados'
 echo

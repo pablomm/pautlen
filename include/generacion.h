@@ -150,4 +150,9 @@ void asignar_variable_local(FILE *fpasm, int es_referencia, int posicion_variabl
 
 void leer_ya_apilado(FILE* fpasm, int tipo);
 
+void comprobar_acceso_vector(FILE *fpasm, int longitud, const char *nombre, int es_referencia);
+void asignar_elemento_vector(FILE* fpasm, int es_referencia);
+void apilar_valor_vector(FILE *fpasm);
+
+
 #endif
