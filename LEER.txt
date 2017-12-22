@@ -1,0 +1,22 @@
+# paulen-2017
+
+Para compilar el ejecutable alfa basta con hacer make (o make all)
+Si se compila con make debug el código nasm que generará el compilador alfa contendrá comentarios
+de todas las instrucciones, muy útil para debuguear.
+
+Si se ejecuta el script pruebas.bash incluido en la entrega se llamarán a todas las pruebas incluidas en la carpeta misc
+Hemos adaptado el compilador para que siga siendo compatible con todas las entregas anteriores, realiza pruebas de todos los
+ficheros de correción proporcionados en moodle las prácticas anteriores.
+Además para probar el correcto funcionamiento del compilador final hemos creado pruebas extensivas de todas las operaciones
+que soporta y hemos añadido los ficheros de pruebas de correción utilizados otros años.
+
+Teníamos otra versión del compilador la cual soporta llamadas anidadas del estilo f(3, g(2,g(2,x))) y que utiliza un
+árbol de lexemas en lugar de la tabla hash, con el cual se pueden desarrollar funcionalidades interesantes como en caso de
+de utilizar una variable sin declarar, en la que es posible devolver un mensaje de error con una sugerencia de que otra
+variable declarada tiene un nombre muy similar. Pero hemos decidido no entregarlo porque no hemos tenido tiempo de probarlo
+adecuadamente y aun quedaban cosa por pulir que podían fallar.
+
+
+Autores:
+   Manuel Blanc y Pablo Marcos
+   
