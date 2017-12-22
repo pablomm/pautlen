@@ -1,0 +1,9 @@
+main {
+	array int[3] vector;
+
+	function int devuelveVector() {
+		return vector;
+	}
+
+	printf devuelveVector();
+}

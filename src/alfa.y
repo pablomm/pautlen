@@ -130,7 +130,7 @@ _escritura1                 : { // Declaramos en el segmento bss todas las varia
 
                                   if (VARIABLE == simbolos->categoria)
                                     declarar_variable(pfasm, simbolos->lexema, simbolos->tipo, (VECTOR == simbolos->clase) ? simbolos->adicional1 : 1);
-                                  
+
                                 }
                                 escribir_segmento_codigo(pfasm);
                               }
@@ -152,11 +152,11 @@ clase_escalar               : tipo { REGLA(9,"<clase_escalar> ::= <tipo>"); }
 tipo                        : TOK_INT  { REGLA(10,"<tipo> ::= int"); tipo_actual = ENTERO; }
                             | TOK_BOOLEAN { REGLA(11,"<tipo> ::= boolean"); tipo_actual = BOOLEANO; }
                             ;
-clase_vector                : TOK_ARRAY tipo '[' constante_entera ']' { 
-           REGLA(15,"<clase_vector> ::= array <tipo> [ <constante_entera> ]"); 
+clase_vector                : TOK_ARRAY tipo '[' constante_entera ']' {
+           REGLA(15,"<clase_vector> ::= array <tipo> [ <constante_entera> ]");
            tamanio_vector_actual = $4.valor_entero;
-            ASSERT_SEMANTICO(tamanio_vector_actual > 0, "La longitud del vector debe ser positiva", NULL);
-            ASSERT_SEMANTICO(tamanio_vector_actual <= MAX_TAMANIO_VECTOR, "Longitud maxima de vector es "MAX_TAMANIO_VECTOR_STR, NULL);
+            ASSERT_SEMANTICO(tamanio_vector_actual >= 1, "El tamanyo del vector excede los limites permitidos (1,"MAX_TAMANIO_VECTOR_STR")", NULL);
+            ASSERT_SEMANTICO(tamanio_vector_actual <= MAX_TAMANIO_VECTOR, "El tamanyo del vector excede los limites permitidos (1,"MAX_TAMANIO_VECTOR_STR")", NULL);
 
 
 
@@ -233,8 +233,8 @@ resto_parametros_funcion    : ';' parametro_funcion resto_parametros_funcion
                             ;
 
 
-idpf : identificador_uso   {    
-                             $$ = $1;   
+idpf : identificador_uso   {
+                             $$ = $1;
                              clase_actual = ESCALAR;
                             }
                             ;
@@ -296,9 +296,9 @@ asignacion                  : identificador_uso '=' exp
                                     asignar_variable_local(pfasm, $3.es_direccion, info->adicional2);
                                 }
 
-                                
+
                               }
-                            | elemento_vector '=' exp { REGLA(44,"<asignacion> ::= <elemento_vector> = <exp>"); 
+                            | elemento_vector '=' exp { REGLA(44,"<asignacion> ::= <elemento_vector> = <exp>");
 
 
                             asignar_elemento_vector(pfasm, $3.es_direccion);
@@ -307,13 +307,13 @@ asignacion                  : identificador_uso '=' exp
 
                         }
                             ;
-elemento_vector             : identificador_uso '[' exp ']' { REGLA(48,"<elemento_vector> ::= <identificador> [ <exp> ]"); 
+elemento_vector             : identificador_uso '[' exp ']' { REGLA(48,"<elemento_vector> ::= <identificador> [ <exp> ]");
 
                                 INFO_SIMBOLO * info = uso_global($1.lexema);
 
                                 ASSERT_SEMANTICO(info != NULL,"Identificador de vector declarado", $1.lexema);
-                                ASSERT_SEMANTICO(VECTOR == info->clase, "Debe ser un vector", $1.lexema);
-                                ASSERT_SEMANTICO(ENTERO == $3.tipo, "El indice debe ser un entero", NULL);
+                                ASSERT_SEMANTICO(VECTOR == info->clase, "Intento de indexacion de una variable que no es de tipo vector", NULL);
+                                ASSERT_SEMANTICO(ENTERO == $3.tipo, "El indice en una operacion de indexacion tiene que ser de tipo entero", NULL);
                                 comprobar_acceso_vector(pfasm, info->adicional1, $1.lexema, $3.es_direccion);
                                 $$.tipo = info->tipo;
                                 $$.es_direccion = 0;
@@ -508,7 +508,7 @@ exp                         : exp '+' exp
                                     $$.tipo = info->tipo;
                                     $$.es_direccion = 0;
                                 }
-                                
+
                               }
 
                             | constante
@@ -518,7 +518,7 @@ exp                         : exp '+' exp
                                 $$.es_direccion = $1.es_direccion;
                                 apilar_constante(pfasm, $1.valor_entero);
                               }
-                            
+
                             | '(' exp ')'
                               {
                                 REGLA(82,"<exp> ::= ( <exp> )");
@@ -672,7 +672,7 @@ identificador_nuevo         : TOK_IDENTIFICADOR
                                   declarar_global($1.lexema, tipo_actual, clase_actual, tamanio_vector_actual);
                                   tamanio_vector_actual = 0;
                                 } else {
-                                    ASSERT_SEMANTICO(clase_actual != VECTOR,"No esta permitida la declaracion de vectores en funciones", $1.lexema);
+                                    ASSERT_SEMANTICO(clase_actual != VECTOR, "Variable local de tipo no escalar", NULL);
                                   declarar_local($1.lexema, 0, tipo_actual, clase_actual, 0, pos_variable_local_actual);
                                   num_variables_locales_actual++;
                                  pos_variable_local_actual++;

@@ -75,8 +75,8 @@ void escribir_subseccion_data(FILE* fpasm)
     /* Variables auxiliares para mensajes de errores en tiempo de ejecución */
     fputc('\n', fpasm);
     PUT_DIRECTIVE("segment .data");
-    PUT_ASM("__msg_error_division\tdb \"Error division por 0\", 0");
-    PUT_ASM("__msg_error_vector\tdb \"Error acceso a vector fuera de rango\", 0");
+    PUT_ASM("__msg_error_division\tdb \"****Error de ejecuccion: Division por cero.\", 0");
+    PUT_ASM("__msg_error_vector\tdb \"****Error de ejecuccion: Indice fuera de rango.\", 0");
 
 }
 /**********************************************************************************/

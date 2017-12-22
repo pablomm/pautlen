@@ -1,0 +1,12 @@
+main {
+	int a;
+
+	function int prueba() {
+		int a;
+		int a;
+
+		return a;
+	}
+
+	printf prueba(1, 2);
+}

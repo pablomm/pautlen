@@ -1,0 +1,14 @@
+main {
+	int x;
+	function int prueba(int y) {
+		array int[3] z;
+
+		z[0] = x;
+		z[1] = 1;
+		z[2] = y;
+		printf true;
+		return 0;
+	}
+
+	printf prueba(2);
+}

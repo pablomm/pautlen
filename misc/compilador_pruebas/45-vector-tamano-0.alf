@@ -1,0 +1,5 @@
+main {
+	array int[0] malo;
+
+	printf true;
+}
