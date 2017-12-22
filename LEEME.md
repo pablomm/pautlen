@@ -2,7 +2,7 @@
 
 ## Compilación y ejecucción
 
-Basta con ejecutar
+Basta con ejecutar:
 
     make all
 
@@ -12,29 +12,30 @@ Si se compila con `make debug`, el código nasm que generará el compilador alfa
 El ejecutable `alfa` recibe hasta 3 argumentos:
 1. El fichero de entrada de código ALFA (por defecto: entrada estandar)
 2. El fichero de salida del código NASM (por defecto: salida estandar)
-3. El fichero de errores (morfológicos, sintacticos y semanticos) (por defecto: salida estandar)
+3. La salida de errores morfológicos, sintácticos y semánticos (por defecto: salida estandar)
 
 Este formato conforma con del enunciado, pero tiene la ventaja de que nos permitio probar facilmente el compilador durante el desarrollo.
 
 ## Pruebas
-
 Hemos escrito una serie de pruebas para probar todos los componentes de nuestro compilador.
+Para ejecutarlas:
 
-Si se ejecuta el script `pruebas.bash` incluido en la entrega se llamarán a todas las pruebas incluidas en la carpeta misc
-Hemos adaptado el compilador para que siga siendo compatible con todas las entregas anteriores, realiza pruebas de todos los
-ficheros de correción proporcionados en moodle las prácticas anteriores.
-Además para probar el correcto funcionamiento del compilador final hemos creado pruebas extensivas de todas las operaciones
-que soporta y hemos añadido los ficheros de pruebas de correción utilizados otros años.
+    ./pruebas.sh
+
+Se llamarán a todas las pruebas incluidas en la carpeta misc. Hemos adaptado el compilador para que siga siendo compatible con todas las entregas anteriores, y realizamos pruebas con todos los
+ficheros de correción proporcionados en moodle de las prácticas anteriores. Además para probar el correcto funcionamiento del compilador final hemos creado pruebas extensivas de todas las operaciones
+que soporta y hemos añadido los ficheros de pruebas de correción utilizados en otros años.
 
 ## Contenidos no entregados
+Teníamos otra versión del compilador con funcionalidad adicional. Sin embargo, finalmente decidimos no entregarlo porque no hemos tenido tiempo de probarlos a fondo y hemos preferido centrar nuestro esfuerzo en los objetivos del guión.
 
-Teníamos otra versión del compilador la cual soporta llamadas anidadas del estilo `f(3, g(2,g(2,x)))` y que utiliza un
-árbol de lexemas en lugar de la tabla hash, con el cual se pueden desarrollar funcionalidades interesantes como en caso de
-de utilizar una variable sin declarar, en la que es posible devolver un mensaje de error con una sugerencia de que otra
-variable declarada tiene un nombre muy similar. Pero hemos decidido no entregarlo porque no hemos tenido tiempo de probarlo
-adecuadamente y aun quedaban cosa por pulir que podían fallar.
+### Soporte de llamadas anidadas
+Hemos conseguido soportar llamadas anidadas del estilo `f(3, g(2,g(2,x)))` usando propagación de atributos para la lista de argumentos en vez de una variable global.
 
+### Trie en vez de tabla hash
+Está versiónd el compilador utiliza un arbol de lexemas en lugar de la tabla hash, con el cual se pueden desarrollar funcionalidades interesantes como en caso de
+de utilizar una variable sin declarar, en la que es posible devolver un mensaje de error con una sugerencia de que otra variable declarada tiene un nombre muy similar.
 
-### Autores
+## Autores
 - Manuel Blanc
 - Pablo Marcos
