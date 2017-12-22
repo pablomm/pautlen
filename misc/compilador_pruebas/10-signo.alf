@@ -1,0 +1,17 @@
+main {
+	
+	int x, y;
+
+	printf -1;
+
+	x = 8;
+
+	printf x;
+
+	printf - x;
+
+	x = - x;
+
+	printf x;
+
+}

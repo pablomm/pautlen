@@ -1,0 +1,27 @@
+main {
+	
+
+	boolean x,y;
+
+	x = true;
+
+	printf true;
+
+	printf false;
+
+	printf true && true;
+
+	printf false && true;
+
+	printf false && false;
+
+	x = x && true;
+
+	printf x;
+
+	y = true;
+
+	printf x && y;
+
+
+}

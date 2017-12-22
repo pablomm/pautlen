@@ -41,6 +41,7 @@ INFO_SIMBOLO* crear_info_simbolo(const char* lexema, CATEGORIA categ, TIPO tipo,
         is->clase = clase;
         is->adicional1 = adic1;
         is->adicional2 = adic2;
+        is->siguiente = NULL;
     }
     return is;
 }
@@ -124,6 +125,7 @@ TABLA_HASH* crear_tabla(int tam)
             return NULL;
         }
         th->tam = tam;
+        th->simbolos = NULL;
     }
     return th;
 }
@@ -245,6 +247,12 @@ STATUS insertar_simbolo(TABLA_HASH* th, const char* lexema, CATEGORIA categ, TIP
     /* Insertar al principio de la lista enlazada para ahorrar tiempo */
     n->siguiente = th->tabla[ind];
     th->tabla[ind] = n;
+
+    /* Insertamos al inicio de la lista enlazada de todos los simbolos */
+    is->siguiente = th->simbolos;
+    th->simbolos = is;
+
+
     return OK;
 }
 
@@ -277,10 +285,27 @@ void borrar_simbolo(TABLA_HASH* th, const char* lexema)
     if (!prev) {
         /* Caso especial: el nodo a borrar es el primero */
         th->tabla[ind] = n->siguiente;
-    } else {
+    }
+    else {
         /* Caso normal: el nodo a borrar es cualquier otro */
         prev->siguiente = n->siguiente;
     }
     liberar_nodo(n);
     return;
+}
+
+
+
+/*
+ * Devuelve el primer info_simbolo de la lista enlazada de simbolos
+ *
+ * Entrada:
+ *      th: tabla hash donde buscar.
+ *
+ * Salida:
+ *      INFO_SIMBOLO *: puntero a la información del símbolo, NULL si la tabla esta vacia
+ */
+INFO_SIMBOLO* lista_simbolos(const TABLA_HASH* th)
+{
+    return th ? th->simbolos : NULL;
 }

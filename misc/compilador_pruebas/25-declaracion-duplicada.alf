@@ -1,0 +1,5 @@
+main {
+    int triplicado, triplicado, triplicado;
+    triplicado = 8;
+    printf triplicado;
+}

@@ -1,0 +1,1 @@
+****Error en [lin 9, col 5]: simbolo no permitido (&)

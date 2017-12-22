@@ -1,0 +1,14 @@
+main {
+	boolean x;
+	int a;
+	
+	function boolean f(int x; int y; boolean a; int z) {
+		if (a) {
+			return x;
+		}
+	}
+
+	x = true;
+	a = 1;
+	printf f(5, a, x, -1);
+}

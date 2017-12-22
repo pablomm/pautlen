@@ -1,0 +1,10 @@
+main {
+	int x;
+
+	function int mala() {
+		int y;
+		printf x;
+	}
+
+	printf mala();
+}

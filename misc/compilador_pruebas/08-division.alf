@@ -1,0 +1,37 @@
+
+main {
+	
+	int x, y, z;
+
+	printf 4 / 2;
+
+	printf 10 / 2;
+
+	printf 100 / 3;
+
+	// Da 10, se opera de izq a derecha
+	printf 100 / 2 / 5;
+
+	x = 9;
+
+	y = 3;
+
+	z = 9 / 3;
+
+	printf z;
+
+	printf z / 2;
+
+	y = 0;
+
+	printf y / z;
+
+	printf 10 / 100;
+
+	// Dara error
+	printf z / y;
+
+	// Este 1 no saldra por que para el programa
+	printf 1;
+
+}

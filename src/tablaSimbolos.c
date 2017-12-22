@@ -89,3 +89,24 @@ INFO_SIMBOLO* uso_local(const char* id)
 
     return uso_global(id);
 }
+
+INFO_SIMBOLO* uso_solo_local(const char* id)
+{
+    if (NULL != scope_local) {
+        return buscar_simbolo(scope_local, id);
+    }
+
+    return NULL;
+}
+
+
+INFO_SIMBOLO* simbolos_globales(void)
+{
+    return (scope_global) ? lista_simbolos(scope_global) : NULL;
+}
+
+
+INFO_SIMBOLO* simbolos_locales(void)
+{
+    return (scope_local) ? lista_simbolos(scope_local) : NULL;
+}

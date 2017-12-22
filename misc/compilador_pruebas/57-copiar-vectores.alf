@@ -1,0 +1,6 @@
+main {
+	array int[2] vec1;
+	array int[2] vec2;
+
+	vec1 = vec2;
+}

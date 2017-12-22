@@ -7,6 +7,8 @@
 #ifndef TABLAHASH_H
 #define TABLAHASH_H
 
+
+#include "comun.h"
 #include <stdio.h>
 
 /**************** CONSTANTES ****************/
@@ -18,28 +20,16 @@
 #define HASH_FACTOR 33
 
 
-/**************** DECLARACIONES DE TIPOS ****************/
-
-/* Retorno de función error/ok */
-typedef enum { ERR = 0, OK = 1 } STATUS;
-
-/* Categoría de un símbolo: variable, parámetro de función o función */
-typedef enum { VARIABLE, PARAMETRO, FUNCION } CATEGORIA;
-
-/* Tipo de un símbolo: sólo se trabajará con enteros y booleanos */
-typedef enum { ENTERO, BOOLEANO } TIPO;
-
-/* Clase de un símbolo: pueden ser variables atómicas (escalares) o listas/arrays (vectores) */
-typedef enum { ESCALAR, VECTOR } CLASE;
-
 /* Información de un símbolo */
-typedef struct {
+typedef struct  info_simbolo {
     char* lexema;           /* identificador */
     CATEGORIA categoria;    /* categoría */
     TIPO tipo;              /* tipo */
     CLASE clase;            /* clase */
     int adicional1;    /* valor si escalar, longitud si vector, número de parámetros si función */
     int adicional2;    /* posición en llamada a función si parámetro, posición de declaración si variable local de función, número de variables locales si función */
+    struct info_simbolo* siguiente; /* Lista enlazada con todos los simbolos de la tabla */
+
 } INFO_SIMBOLO;
 
 /* Nodo de la tabla hash */
@@ -52,6 +42,7 @@ typedef struct nodo_hash {
 typedef struct {
     int tam;            /* tamaño de la tabla hash */
     NODO_HASH** tabla;  /* tabla en sí (array de tam punteros a nodo) */
+    INFO_SIMBOLO* simbolos; /* Lista enlazada con todos los info_simbolos */
 } TABLA_HASH;
 
 
@@ -67,5 +58,6 @@ unsigned long hash(const char* str);
 INFO_SIMBOLO* buscar_simbolo(const TABLA_HASH* th, const char* lexema);
 STATUS insertar_simbolo(TABLA_HASH* th, const char* lexema, CATEGORIA categ, TIPO tipo, CLASE clase, int adic1, int adic2);
 void borrar_simbolo(TABLA_HASH* th, const char* lexema);
+INFO_SIMBOLO* lista_simbolos(const TABLA_HASH* th);
 
 #endif  /* TABLAHASH_H */

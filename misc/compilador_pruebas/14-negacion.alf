@@ -1,0 +1,33 @@
+main {
+	boolean t,f;
+
+	t = true;
+
+	f = false;
+
+	printf !t;
+
+	printf !f;
+
+	printf !true;
+
+	printf !false;
+
+	printf !(true && false);
+
+	// Da true
+	printf ! (!(true || false) && !(true && !true));
+
+	printf !!true && !!t;
+
+	printf !!!true;
+
+	// EL numero es impar asi que da true
+	printf !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!f;
+
+	// Dan true, varian constante y variable
+	printf ! (!(t || f) && !(t && !f));
+
+	printf ! (!(true || f) && !(t && !false));
+
+}

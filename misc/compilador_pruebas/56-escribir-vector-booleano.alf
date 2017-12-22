@@ -1,0 +1,9 @@
+main {
+	array int[3] vector;
+
+	vector[0] = 3;
+	vector[true] = 4;
+	vector[2] = 5;
+
+	printf vector[1];
+}
