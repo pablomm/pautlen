@@ -1,6 +1,6 @@
 # Proyecto de Autómatas y Lenguajes 2017 (paulen-2017)
 
-## Compilación y ejecucción
+## Compilación y ejecución
 
 Basta con ejecutar:
 
