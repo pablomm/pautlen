@@ -12,7 +12,7 @@ Si se compila con `make debug`, el código nasm que generará el compilador alfa
 El ejecutable `alfa` recibe hasta 3 argumentos:
 1. El fichero de entrada de código ALFA (por defecto: entrada estándar)
 2. El fichero de salida del código NASM (por defecto: salida estándar)
-3. Información de la reducción de reglas de flex y bison (por defecto deshabilitado)
+3. El fichero de salida de los errores de compilación (por defecto: stdout)
 
 Este formato conforma con del enunciado, pero tiene la ventaja de que nos permitió probar facilmente el compilador durante el desarrollo y ser compatible con todas las prácticas anteriores.
 
