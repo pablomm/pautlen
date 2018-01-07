@@ -172,4 +172,6 @@ void generar_salto_greater(FILE *fpasm, int etiqueta);
 
 void generar_fin_compare(FILE *fpasm, int etiqueta);
 
+void inicializar_vector(FILE *fpasm, const char * nombre, int num, int tam);
+
 #endif

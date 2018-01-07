@@ -62,10 +62,11 @@
 
 "+="        {  DESPLAZAMIENTO(); return TOK_MASIGUAL; }
 "compare"   {  DESPLAZAMIENTO(); return TOK_COMPARE; }
-"with"   {  DESPLAZAMIENTO(); return TOK_WITH; }
-"less"   {  DESPLAZAMIENTO(); return TOK_LESS; }
-"equal"   {  DESPLAZAMIENTO(); return TOK_EQUAL; }
+"with"      {  DESPLAZAMIENTO(); return TOK_WITH; }
+"less"      {  DESPLAZAMIENTO(); return TOK_LESS; }
+"equal"     {  DESPLAZAMIENTO(); return TOK_EQUAL; }
 "greater"   {  DESPLAZAMIENTO(); return TOK_GREATER; }
+"init"      {  DESPLAZAMIENTO(); return TOK_INIT; }
 
 
 [0-9]+      {  DESPLAZAMIENTO();

@@ -47,9 +47,10 @@
     static int pos_parametro_actual = -1;
     static int num_parametros_actual = 0;
     static int num_variables_locales_actual = 0;
-    static int pos_variable_local_actual = 1;
-    static int fn_return = 0;
-    static int 	en_explist = 0;
+	static int pos_variable_local_actual = 1;
+	static int fn_return = 0;
+	static int en_explist = 0;
+	static int num_parametros_llamada_actual;
     static int tamanio_vector_actual = 0;
 %}
 
@@ -90,6 +91,7 @@
 %token TOK_LESS
 %token TOK_EQUAL
 %token TOK_GREATER
+%token TOK_INIT
 
 
 %token <atributos> TOK_CONSTANTE_ENTERA
@@ -117,6 +119,7 @@
 %type <atributos> while_exp while
 
 %type <atributos> compare_with compare_less compare_equal compare_greater
+%type <atributos> inicializacion_vector lista_inicializaciones
 
 
 %%
@@ -283,8 +286,9 @@ sentencia_simple            : asignacion { REGLA(34,"<sentencia_simple> ::= <asi
                             | escritura { REGLA(36,"<sentencia_simple> ::= <escritura>"); }
                             | retorno_funcion { REGLA(38,"<sentencia_simple> ::= <retorno_funcion>"); }
                             | auto_incremento { REGLA(0,"<sentencia_simple> ::= <auto_incremento>"); }
-
+                            | inicializacion_vector { REGLA(0, "<sentencia_simple> ::= <inicializacion_vector>"); }
                             ;
+
 bloque                      : condicional { REGLA(40,"<bloque> ::= <condicional>"); }
                             | bucle { REGLA(41,"<bloque> ::= <bucle>"); }
                             ;
@@ -629,6 +633,36 @@ exp                         : exp '+' exp
                                 $$.es_direccion = 0;
                               }
                             ;
+
+
+
+inicializacion_vector : TOK_INIT identificador_uso '{' lista_inicializaciones '}' {
+
+    /* los vectores solo pueden ser de tipo global */
+    INFO_SIMBOLO * info = uso_global($2.lexema);
+    ASSERT_SEMANTICO(info != NULL, "Acceso a variable no declarada", $2.lexema);
+    ASSERT_SEMANTICO(VECTOR == info->clase, "Intento de inicializacion de una variable que no es de tipo vector", $2.lexema);
+    ASSERT_SEMANTICO($4.valor_entero <= info->adicional1, "Lista de inicializacion de longitud incorrecta", NULL );
+    inicializar_vector(pfasm, $2.lexema, $4.valor_entero, info->adicional1);
+    
+};
+
+
+lista_inicializaciones : exp ';' lista_inicializaciones {
+    ASSERT_SEMANTICO($1.tipo == $3.tipo,"Lista de inicializacion con expresion de tipo incorrecto", NULL);
+    $$.tipo = $1.tipo;
+    $$.valor_entero = 1 + $3.valor_entero;
+
+}
+                       | exp {
+
+                $$.tipo = $1.tipo;
+                $$.valor_entero = 1;
+}
+
+
+
+
 
 idf_llamada_funcion : identificador_uso {
 		en_explist = 1;
