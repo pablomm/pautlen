@@ -85,6 +85,13 @@
 %token TOK_MASIGUAL
 
 
+%token TOK_COMPARE
+%token TOK_WITH
+%token TOK_LESS
+%token TOK_EQUAL
+%token TOK_GREATER
+
+
 %token <atributos> TOK_CONSTANTE_ENTERA
 %token <atributos> TOK_CONSTANTE_REAL
 %token <atributos> TOK_IDENTIFICADOR
@@ -108,6 +115,9 @@
 /* Manejo de las sentencias IF y ELSE */
 %type <atributos> if_exp if_exp_sentencias
 %type <atributos> while_exp while
+
+%type <atributos> compare_with compare_less compare_equal compare_greater
+
 
 %%
 
@@ -361,6 +371,11 @@ condicional                 : if_exp_sentencias
                                 REGLA(51,"<condicional> ::= if ( <exp> ) { <sentencias> } else { <sentencias> }");
                                 generar_endif(pfasm, $1.etiqueta);
                               }
+
+                            | compare_greater {
+                                REGLA(0,"<condicional> ::= compare <exp> with <exp> { less ... }");
+                                 generar_fin_compare(pfasm, $1.etiqueta);
+                            }
                             ;
 if_exp_sentencias           : if_exp sentencias '}'
                               {
@@ -393,6 +408,37 @@ while                       : TOK_WHILE
                                 generar_while(pfasm, $$.etiqueta);
                               }
                             ;
+
+
+compare_with : TOK_COMPARE exp TOK_WITH exp '{' TOK_LESS {
+    $$.etiqueta = etiqueta++;
+    ASSERT_SEMANTICO($2.tipo == ENTERO, "se esperaba una expresion de tipo entero", NULL);
+    ASSERT_SEMANTICO($4.tipo == ENTERO, "se esperaba una expresion de tipo entero", NULL);
+    generar_compare_with(pfasm, $2.es_direccion, $4.es_direccion, $$.etiqueta);
+    generar_salto_less(pfasm, $$.etiqueta);
+};
+
+compare_less : compare_with sentencias TOK_EQUAL {
+    $$.etiqueta = $1.etiqueta;
+    generar_salto_equal(pfasm, $$.etiqueta);
+
+
+};
+
+compare_equal : compare_less sentencias TOK_GREATER {
+    $$.etiqueta = $1.etiqueta;
+    generar_salto_greater(pfasm, $$.etiqueta);
+};
+
+compare_greater : compare_equal sentencias '}' {
+    $$.etiqueta = $1.etiqueta;
+
+};
+
+
+
+
+
 lectura                     : TOK_SCANF identificador_uso
                               {
                                 REGLA(54,"<lectura> ::= scanf <identificador>");

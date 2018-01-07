@@ -947,3 +947,46 @@ void incremento_vector(FILE* fpasm, int es_referencia, const char * nombre, int 
     		PUT_ASM("add ebx, 4");
     } 
 }
+
+
+void generar_compare_with(FILE *fpasm, int es_referencia1, int es_referencia2, int etiqueta) {
+
+
+    PUT_COMMENT("Inicio compare with %d", etiqueta);
+
+    /* Sacamos los valores a comparar */
+    PUT_ASM("pop dword eax");
+    if(es_referencia2)
+        PUT_ASM("mov eax, [eax]");
+
+    PUT_ASM("pop dword ebx");
+    if(es_referencia1)
+        PUT_ASM("mov ebx, [ebx]");
+
+    PUT_ASM("cmp ebx, eax");
+    PUT_ASM("jl __less_%d", etiqueta);
+    PUT_ASM("je __equal_%d", etiqueta);
+    PUT_ASM("jmp __greater_%d", etiqueta);
+}
+
+void generar_salto_less(FILE *fpasm, int etiqueta) {
+    PUT_COMMENT("LESS %d", etiqueta);
+    PUT_LABEL("__less_%d", etiqueta);
+}
+
+void generar_salto_equal(FILE *fpasm, int etiqueta) {
+    PUT_COMMENT("EQUAL %d", etiqueta);
+    PUT_ASM("jmp __fin_compare_%d", etiqueta);
+    PUT_LABEL("__equal_%d", etiqueta);
+}
+
+void generar_salto_greater(FILE *fpasm, int etiqueta) {
+    PUT_COMMENT("GREATER %d", etiqueta);
+    PUT_ASM("jmp __fin_compare_%d", etiqueta);
+    PUT_LABEL("__greater_%d", etiqueta);
+}
+
+void generar_fin_compare(FILE *fpasm, int etiqueta) {
+    PUT_COMMENT("Fin de compare with %d", etiqueta);
+    PUT_LABEL("__fin_compare_%d", etiqueta);
+}
