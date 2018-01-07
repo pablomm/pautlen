@@ -241,6 +241,7 @@ practica4
 compilador 5 'Pruebas propias' "$COMPILADOR_PRUEBAS"
 compilador 6 'Ficheros de correccion' "$MDIR/ficheros_correccion"
 errores_semanticos
+compilador 7 'Examenes anteriores' "$MDIR/pruebas_examen"
 
 title 'Borrando ficheros generados'
 echo

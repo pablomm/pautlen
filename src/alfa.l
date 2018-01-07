@@ -60,6 +60,8 @@
 "<="        {  DESPLAZAMIENTO(); return TOK_MENORIGUAL; }
 ">="        {  DESPLAZAMIENTO(); return TOK_MAYORIGUAL; }
 
+"+="        {  DESPLAZAMIENTO(); return TOK_MASIGUAL; }
+
 
 [0-9]+      {  DESPLAZAMIENTO();
                yylval.atributos.valor_entero=atoi(yytext); 

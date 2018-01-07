@@ -1,0 +1,7 @@
+main {
+	int x,y;
+	x = 2;
+	y = 20;
+	x += y;
+	printf x;
+}

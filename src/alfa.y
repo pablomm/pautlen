@@ -82,6 +82,7 @@
 %token TOK_DISTINTO
 %token TOK_MENORIGUAL
 %token TOK_MAYORIGUAL
+%token TOK_MASIGUAL
 
 
 %token <atributos> TOK_CONSTANTE_ENTERA
@@ -271,6 +272,8 @@ sentencia_simple            : asignacion { REGLA(34,"<sentencia_simple> ::= <asi
                             | lectura { REGLA(35,"<sentencia_simple> ::= <lectura>"); }
                             | escritura { REGLA(36,"<sentencia_simple> ::= <escritura>"); }
                             | retorno_funcion { REGLA(38,"<sentencia_simple> ::= <retorno_funcion>"); }
+                            | auto_incremento { REGLA(0,"<sentencia_simple> ::= <auto_incremento>"); }
+
                             ;
 bloque                      : condicional { REGLA(40,"<bloque> ::= <condicional>"); }
                             | bucle { REGLA(41,"<bloque> ::= <bucle>"); }
@@ -307,6 +310,35 @@ asignacion                  : identificador_uso '=' exp
 
                         }
                             ;
+
+auto_incremento: identificador_uso TOK_MASIGUAL exp {
+
+	INFO_SIMBOLO* info = uso_local($1.lexema);
+    ASSERT_SEMANTICO(NULL != info, "Asignacion incompatible", NULL);
+    ASSERT_SEMANTICO(FUNCION != info->categoria, "Asignacion incompatible", NULL);
+    ASSERT_SEMANTICO($3.tipo == info->tipo, "Asignacion incompatible", NULL);
+    ASSERT_SEMANTICO($3.tipo == ENTERO, "Asignacion incompatible", NULL);
+
+
+    if(VECTOR == info->clase) {
+		incremento_vector(pfasm, $3.es_direccion, $1.lexema, info->adicional1);
+	/* Caso variables globales */
+    } else if(NULL == uso_solo_local($1.lexema)) {
+        incremento_variable_global(pfasm, $1.lexema, $3.es_direccion);
+
+    /* Caso parametros en funciones en funciones */
+    } else if (PARAMETRO == info->categoria){
+        incremento_parametro(pfasm, $3.es_direccion, info->adicional2, num_parametros_actual);
+    /* El ultimo caso son variables locales */
+    } else {
+        incremento_variable_local(pfasm, $3.es_direccion, info->adicional2);
+    }
+
+};
+
+
+
+
 elemento_vector             : identificador_uso '[' exp ']' { REGLA(48,"<elemento_vector> ::= <identificador> [ <exp> ]");
 
                                 INFO_SIMBOLO * info = uso_global($1.lexema);

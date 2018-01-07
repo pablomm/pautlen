@@ -155,4 +155,9 @@ void asignar_elemento_vector(FILE* fpasm, int es_referencia);
 void apilar_valor_vector(FILE* fpasm);
 
 
+void incremento_variable_global(FILE* fpasm, const char* nombre, int es_referencia);
+void incremento_variable_local(FILE* fpasm, int es_referencia, int posicion_variable);
+void incremento_parametro(FILE* fpasm, int es_referencia, int posicion_parametro, int numero_parametro);
+void incremento_vector(FILE* fpasm, int es_referencia, const char * nombre, int tam);
+
 #endif

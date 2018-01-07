@@ -1,0 +1,5 @@
+main
+{
+	boolean y;
+	y += 90;
+}

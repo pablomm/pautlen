@@ -1,0 +1,16 @@
+main {
+	array int[5] v5;
+	v5[0] = 10;
+	v5[1] = 20;
+	v5[2] = 30;
+	v5[3] = 40;
+	v5[4] = 50;
+
+	v5 += 8;
+
+	printf v5[0];
+	printf v5[1];
+	printf v5[2];
+	printf v5[3];
+	printf v5[4];
+}

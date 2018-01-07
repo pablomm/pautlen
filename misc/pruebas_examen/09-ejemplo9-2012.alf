@@ -1,0 +1,6 @@
+main
+{
+	boolean y;
+	int x;
+	x += y;
+}
