@@ -1,0 +1,17 @@
+main {
+	
+	// Variable global x
+	int x;
+
+	function int foo() {
+		// Variable local x
+		int x;
+
+		x = 2;
+		return x;
+	}
+
+
+	x = 1;
+	printf foo();
+}

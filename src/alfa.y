@@ -666,12 +666,15 @@ identificador_nuevo         : TOK_IDENTIFICADOR
                               {
                                 REGLA(108, "<identificador> ::= TOK_IDENTIFICADOR");
                                 /* Añadimos al ambito actual */
-                                INFO_SIMBOLO* info = uso_local($1.lexema);
-                                ASSERT_SEMANTICO(NULL == info, "Declaracion duplicada", NULL);
+
                                 if (0 == ambito_actual) {
+                                  INFO_SIMBOLO* info = uso_global($1.lexema);
+                                  ASSERT_SEMANTICO(NULL == info, "Declaracion duplicada", NULL);
                                   declarar_global($1.lexema, tipo_actual, clase_actual, tamanio_vector_actual);
                                   tamanio_vector_actual = 0;
                                 } else {
+                                    INFO_SIMBOLO* info = uso_solo_local($1.lexema);
+                                    ASSERT_SEMANTICO(NULL == info, "Declaracion duplicada", NULL);
                                     ASSERT_SEMANTICO(clase_actual != VECTOR, "Variable local de tipo no escalar", NULL);
                                   declarar_local($1.lexema, 0, tipo_actual, clase_actual, 0, pos_variable_local_actual);
                                   num_variables_locales_actual++;
