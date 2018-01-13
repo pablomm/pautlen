@@ -74,6 +74,7 @@ typedef struct {
     TIPO tipo;
     int es_direccion;
     int etiqueta;
+    int num_parametros_llamada_actual;
 } tipo_atributos;
 
 FILE* fopen_or_die(const char* path, const char* mode);
