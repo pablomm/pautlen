@@ -50,7 +50,6 @@
 	static int pos_variable_local_actual = 1;
 	static int fn_return = 0;
 	static int en_explist = 0;
-	static int num_parametros_llamada_actual;
     static int tamanio_vector_actual = 0;
 %}
 
