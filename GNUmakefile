@@ -1,5 +1,5 @@
 .DEFAULT_GOAL = all
-.PHONY: all test debug clean zip help graph nasm astyle
+.PHONY: all test debug clean zip help graph nasm astyle pruebas
 .SUFFIXES:
 
 ##########################################################
@@ -67,8 +67,11 @@ NDIR := .
 # Respeta la variable de entorno en caso de estar definida
 ARTISTIC_STYLE_OPTIONS ?= .astylerc
 
+# Script para ejecutar pruebas
+PRUEBAS_SCRIPT := pruebas.bash
+
 ## Nombre fichero compresion
-ZIP := ../BlancManuel_MarcosPablo_sintactico.zip
+ZIP := ../BlancManuel_MarcosPablo_alfa.zip
 
 ## Configuracion de las herramientas
 CC       ?= gcc
@@ -217,8 +220,9 @@ help:
 	@echo "    test     - genera los ejecutables para las pruebas situados en $(TDIR)/"
 	@echo "    debug    - compila todo usando con simbolos de depuracion"
 	@echo "    clean    - borra todos los ficheros generados"
-	@echo "    zip      - comprime la rama activa del repositorio en el archivo $(ZIP)"
-	@echo "    astyle   - estiliza el codigo utilizando el programa astyle y el fichero $(ARTISTIC_STYLE_OPTIONS)"
+	@echo "    pruebas  - ejecuta el script de pruebas $(PRUEBAS_SCRIPT)"
+	@echo "    zip      - comprime la rama activa del repositorio"
+	@echo "    astyle   - estiliza el codigo acorde al fichero fichero $(ARTISTIC_STYLE_OPTIONS)"
 	@echo "    graph    - genera un diagrama utilizando $(DOT) a partir de la salida de bison"
 	@echo "    nasm     - compila los nasm junto con alfalib situados en la carpeta $(NDIR)/"
 	@echo "    help     - muestra esta ayuda"
@@ -228,6 +232,9 @@ astyle:
 
 graph: $(BISON_GENERATED_FILES)
 	$(DOT) $(DOTFLAGS) $(BISON_GRAPH)
+
+pruebas: $(PRUEBAS_SCRIPT)
+	bash $(PRUEBAS_SCRIPT)
 
 ## Deteccion de dependencias automatica, v2
 CFLAGS += -MMD
