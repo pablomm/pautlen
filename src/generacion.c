@@ -204,8 +204,7 @@ void sumar(FILE* fpasm, int es_referencia_1, int es_referencia_2)
         PUT_ASM("add eax, [ebx]");
 
         /* Caso ambos referencia, solo el segundo o ninguno */
-    }
-    else {
+    } else {
 
         PUT_ASM("pop dword ebx");
 
@@ -381,8 +380,7 @@ void o(FILE* fpasm, int es_referencia_1, int es_referencia_2)
         PUT_ASM("or eax, [ebx]");
 
         /* Caso ambos referencia, solo el segundo o ninguno */
-    }
-    else {
+    } else {
 
         PUT_ASM("pop dword ebx");
 
@@ -415,8 +413,7 @@ void y(FILE* fpasm, int es_referencia_1, int es_referencia_2)
         PUT_ASM("and eax, [ebx]");
 
         /* Caso ambos referencia, solo el segundo o ninguno */
-    }
-    else {
+    } else {
 
         PUT_ASM("pop dword ebx");
 
@@ -458,8 +455,7 @@ void igual(FILE* fpasm, int es_referencia_1, int es_referencia_2, int etiqueta)
         PUT_ASM("cmp eax, [ebx]");
 
         /* Caso ambos referencia, solo el segundo o ninguno */
-    }
-    else {
+    } else {
 
         PUT_ASM("pop dword ebx");
 
@@ -493,8 +489,7 @@ void distinto(FILE* fpasm, int es_referencia_1, int es_referencia_2, int etiquet
         PUT_ASM("cmp eax, [ebx]");
 
         /* Caso ambos referencia, solo el segundo o ninguno */
-    }
-    else {
+    } else {
 
         PUT_ASM("pop dword ebx");
 
@@ -739,8 +734,7 @@ void apilar_variable_local(FILE* fpasm, int direccion, int posicion_variable)
     if (direccion) {
         PUT_ASM("lea eax, [ebp - %d]",  4*posicion_variable);
         PUT_ASM("push dword eax");
-    }
-    else {
+    } else {
 
         PUT_ASM("mov eax, dword [ebp - %d]", 4*posicion_variable);
         PUT_ASM("push eax");
@@ -761,8 +755,7 @@ void apilar_parametro(FILE* fpasm, int direccion, int posicion_parametro, int nu
     if (direccion) {
         PUT_ASM("lea eax, [ebp + %d]", 4 + 4*(numero_parametro - posicion_parametro));
         PUT_ASM("push dword eax");
-    }
-    else {
+    } else {
         PUT_ASM("mov eax, dword [ebp + %d]", 4 + 4*(numero_parametro - posicion_parametro));
         PUT_ASM("push dword eax");
     }
@@ -862,8 +855,8 @@ void incremento_variable_global(FILE* fpasm, const char* nombre, int es_referenc
 
     /* Leemos en eax el valor del vector */
     PUT_ASM("pop dword eax");
-    if(es_referencia)
-    	PUT_ASM("mov eax, dword [eax]");
+    if (es_referencia)
+        PUT_ASM("mov eax, dword [eax]");
 
     /* Guardamos en ebx el valor de la variable global */
     PUT_ASM("mov ebx, dword [_%s]", nombre);
@@ -914,9 +907,9 @@ void incremento_parametro(FILE* fpasm, int es_referencia, int posicion_parametro
     PUT_ASM("mov [ebx], eax");
 }
 
-void incremento_vector(FILE* fpasm, int es_referencia, const char * nombre, int tam)
+void incremento_vector(FILE* fpasm, int es_referencia, const char* nombre, int tam)
 {
-	int i;
+    int i;
     PUT_COMMENT("Incrementando el vector %s", nombre);
 
     /* Obtenemos valor de la expresion */
@@ -933,34 +926,35 @@ void incremento_vector(FILE* fpasm, int es_referencia, const char * nombre, int 
     /* Calculamos la direccion del parametro */
     PUT_ASM("mov ebx, _%s", nombre);
 
-    for(i=0; i<tam; i++){
+    for (i=0; i<tam; i++) {
 
-    	/* Sumamos el valor anteriormente contenido */
-    	if(i != 0)
-    		PUT_ASM("mov eax, edx");
+        /* Sumamos el valor anteriormente contenido */
+        if (i != 0)
+            PUT_ASM("mov eax, edx");
 
-    	PUT_ASM("add eax, [ebx]");
-    	PUT_ASM("mov [ebx], eax");
+        PUT_ASM("add eax, [ebx]");
+        PUT_ASM("mov [ebx], eax");
 
-		/* Incrementamos el puntero del vector */
-    	if(i != (tam -1))
-    		PUT_ASM("add ebx, 4");
-    } 
+        /* Incrementamos el puntero del vector */
+        if (i != (tam -1))
+            PUT_ASM("add ebx, 4");
+    }
 }
 
 
-void generar_compare_with(FILE *fpasm, int es_referencia1, int es_referencia2, int etiqueta) {
+void generar_compare_with(FILE* fpasm, int es_referencia1, int es_referencia2, int etiqueta)
+{
 
 
     PUT_COMMENT("Inicio compare with %d", etiqueta);
 
     /* Sacamos los valores a comparar */
     PUT_ASM("pop dword eax");
-    if(es_referencia2)
+    if (es_referencia2)
         PUT_ASM("mov eax, [eax]");
 
     PUT_ASM("pop dword ebx");
-    if(es_referencia1)
+    if (es_referencia1)
         PUT_ASM("mov ebx, [ebx]");
 
     PUT_ASM("cmp ebx, eax");
@@ -969,56 +963,60 @@ void generar_compare_with(FILE *fpasm, int es_referencia1, int es_referencia2, i
     PUT_ASM("jmp __greater_%d", etiqueta);
 }
 
-void generar_salto_less(FILE *fpasm, int etiqueta) {
+void generar_salto_less(FILE* fpasm, int etiqueta)
+{
     PUT_COMMENT("LESS %d", etiqueta);
     PUT_LABEL("__less_%d", etiqueta);
 }
 
-void generar_salto_equal(FILE *fpasm, int etiqueta) {
+void generar_salto_equal(FILE* fpasm, int etiqueta)
+{
     PUT_COMMENT("EQUAL %d", etiqueta);
     PUT_ASM("jmp __fin_compare_%d", etiqueta);
     PUT_LABEL("__equal_%d", etiqueta);
 }
 
-void generar_salto_greater(FILE *fpasm, int etiqueta) {
+void generar_salto_greater(FILE* fpasm, int etiqueta)
+{
     PUT_COMMENT("GREATER %d", etiqueta);
     PUT_ASM("jmp __fin_compare_%d", etiqueta);
     PUT_LABEL("__greater_%d", etiqueta);
 }
 
-void generar_fin_compare(FILE *fpasm, int etiqueta) {
+void generar_fin_compare(FILE* fpasm, int etiqueta)
+{
     PUT_COMMENT("Fin de compare with %d", etiqueta);
     PUT_LABEL("__fin_compare_%d", etiqueta);
 }
 
-void inicializar_vector(FILE *fpasm, const char * nombre, int num, int tam)
+void inicializar_vector(FILE* fpasm, const char* nombre, int num, int tam)
 {
-	int i=0;
+    int i=0;
 
-	PUT_COMMENT("Inicializando vector %s", nombre);
+    PUT_COMMENT("Inicializando vector %s", nombre);
 
-	/* Guardamos en ebx la dirección del vector */
-	PUT_ASM("mov ebx, _%s", nombre);
+    /* Guardamos en ebx la dirección del vector */
+    PUT_ASM("mov ebx, _%s", nombre);
 
-	/* Nos situamos al final del vector */
-	PUT_ASM("add ebx, %d", 4 * (tam -1));
+    /* Nos situamos al final del vector */
+    PUT_ASM("add ebx, %d", 4 * (tam -1));
 
 
-	/* Inicializamos los ultimos elementos a 0 */
-	for(i = tam ; i > num; i--) {
-		PUT_ASM("mov dword [ebx], 0");
-		PUT_ASM("sub ebx, 4");
-	}
+    /* Inicializamos los ultimos elementos a 0 */
+    for (i = tam ; i > num; i--) {
+        PUT_ASM("mov dword [ebx], 0");
+        PUT_ASM("sub ebx, 4");
+    }
 
-	/* Inicializamos los elementos pasados al init */
-	for( ; i > 0; i--) {
+    /* Inicializamos los elementos pasados al init */
+    for (; i > 0; i--) {
 
-		PUT_ASM("pop dword eax");
-		PUT_ASM("mov [ebx], eax");
+        PUT_ASM("pop dword eax");
+        PUT_ASM("mov [ebx], eax");
 
-		if(i != 1)
-			PUT_ASM("sub ebx, 4");
-	}
+        if (i != 1)
+            PUT_ASM("sub ebx, 4");
+    }
 
 
 }
