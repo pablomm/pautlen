@@ -47,9 +47,9 @@
     static int pos_parametro_actual = -1;
     static int num_parametros_actual = 0;
     static int num_variables_locales_actual = 0;
-    static int pos_variable_local_actual = 1;
-    static int fn_return = 0;
-    static int 	en_explist = 0;
+	static int pos_variable_local_actual = 1;
+	static int fn_return = 0;
+	static int en_explist = 0;
     static int tamanio_vector_actual = 0;
 %}
 
@@ -82,6 +82,15 @@
 %token TOK_DISTINTO
 %token TOK_MENORIGUAL
 %token TOK_MAYORIGUAL
+%token TOK_MASIGUAL
+
+
+%token TOK_COMPARE
+%token TOK_WITH
+%token TOK_LESS
+%token TOK_EQUAL
+%token TOK_GREATER
+%token TOK_INIT
 
 
 %token <atributos> TOK_CONSTANTE_ENTERA
@@ -107,6 +116,10 @@
 /* Manejo de las sentencias IF y ELSE */
 %type <atributos> if_exp if_exp_sentencias
 %type <atributos> while_exp while
+
+%type <atributos> compare_with compare_less compare_equal compare_greater
+%type <atributos> inicializacion_vector lista_inicializaciones
+
 
 %%
 
@@ -271,7 +284,10 @@ sentencia_simple            : asignacion { REGLA(34,"<sentencia_simple> ::= <asi
                             | lectura { REGLA(35,"<sentencia_simple> ::= <lectura>"); }
                             | escritura { REGLA(36,"<sentencia_simple> ::= <escritura>"); }
                             | retorno_funcion { REGLA(38,"<sentencia_simple> ::= <retorno_funcion>"); }
+                            | auto_incremento { REGLA(0,"<sentencia_simple> ::= <auto_incremento>"); }
+                            | inicializacion_vector { REGLA(0, "<sentencia_simple> ::= <inicializacion_vector>"); }
                             ;
+
 bloque                      : condicional { REGLA(40,"<bloque> ::= <condicional>"); }
                             | bucle { REGLA(41,"<bloque> ::= <bucle>"); }
                             ;
@@ -307,6 +323,35 @@ asignacion                  : identificador_uso '=' exp
 
                         }
                             ;
+
+auto_incremento: identificador_uso TOK_MASIGUAL exp {
+
+	INFO_SIMBOLO* info = uso_local($1.lexema);
+    ASSERT_SEMANTICO(NULL != info, "Asignacion incompatible", NULL);
+    ASSERT_SEMANTICO(FUNCION != info->categoria, "Asignacion incompatible", NULL);
+    ASSERT_SEMANTICO($3.tipo == info->tipo, "Asignacion incompatible", NULL);
+    ASSERT_SEMANTICO($3.tipo == ENTERO, "Asignacion incompatible", NULL);
+
+
+    if(VECTOR == info->clase) {
+		incremento_vector(pfasm, $3.es_direccion, $1.lexema, info->adicional1);
+	/* Caso variables globales */
+    } else if(NULL == uso_solo_local($1.lexema)) {
+        incremento_variable_global(pfasm, $1.lexema, $3.es_direccion);
+
+    /* Caso parametros en funciones en funciones */
+    } else if (PARAMETRO == info->categoria){
+        incremento_parametro(pfasm, $3.es_direccion, info->adicional2, num_parametros_actual);
+    /* El ultimo caso son variables locales */
+    } else {
+        incremento_variable_local(pfasm, $3.es_direccion, info->adicional2);
+    }
+
+};
+
+
+
+
 elemento_vector             : identificador_uso '[' exp ']' { REGLA(48,"<elemento_vector> ::= <identificador> [ <exp> ]");
 
                                 INFO_SIMBOLO * info = uso_global($1.lexema);
@@ -329,6 +374,11 @@ condicional                 : if_exp_sentencias
                                 REGLA(51,"<condicional> ::= if ( <exp> ) { <sentencias> } else { <sentencias> }");
                                 generar_endif(pfasm, $1.etiqueta);
                               }
+
+                            | compare_greater {
+                                REGLA(0,"<condicional> ::= compare <exp> with <exp> { less ... }");
+                                 generar_fin_compare(pfasm, $1.etiqueta);
+                            }
                             ;
 if_exp_sentencias           : if_exp sentencias '}'
                               {
@@ -361,6 +411,37 @@ while                       : TOK_WHILE
                                 generar_while(pfasm, $$.etiqueta);
                               }
                             ;
+
+
+compare_with : TOK_COMPARE exp TOK_WITH exp '{' TOK_LESS {
+    $$.etiqueta = etiqueta++;
+    ASSERT_SEMANTICO($2.tipo == ENTERO, "se esperaba una expresion de tipo entero", NULL);
+    ASSERT_SEMANTICO($4.tipo == ENTERO, "se esperaba una expresion de tipo entero", NULL);
+    generar_compare_with(pfasm, $2.es_direccion, $4.es_direccion, $$.etiqueta);
+    generar_salto_less(pfasm, $$.etiqueta);
+};
+
+compare_less : compare_with sentencias TOK_EQUAL {
+    $$.etiqueta = $1.etiqueta;
+    generar_salto_equal(pfasm, $$.etiqueta);
+
+
+};
+
+compare_equal : compare_less sentencias TOK_GREATER {
+    $$.etiqueta = $1.etiqueta;
+    generar_salto_greater(pfasm, $$.etiqueta);
+};
+
+compare_greater : compare_equal sentencias '}' {
+    $$.etiqueta = $1.etiqueta;
+
+};
+
+
+
+
+
 lectura                     : TOK_SCANF identificador_uso
                               {
                                 REGLA(54,"<lectura> ::= scanf <identificador>");
@@ -551,6 +632,36 @@ exp                         : exp '+' exp
                                 $$.es_direccion = 0;
                               }
                             ;
+
+
+
+inicializacion_vector : TOK_INIT identificador_uso '{' lista_inicializaciones '}' {
+
+    /* los vectores solo pueden ser de tipo global */
+    INFO_SIMBOLO * info = uso_global($2.lexema);
+    ASSERT_SEMANTICO(info != NULL, "Acceso a variable no declarada", $2.lexema);
+    ASSERT_SEMANTICO(VECTOR == info->clase, "Intento de inicializacion de una variable que no es de tipo vector", $2.lexema);
+    ASSERT_SEMANTICO($4.valor_entero <= info->adicional1, "Lista de inicializacion de longitud incorrecta", NULL );
+    inicializar_vector(pfasm, $2.lexema, $4.valor_entero, info->adicional1);
+    
+};
+
+
+lista_inicializaciones : exp ';' lista_inicializaciones {
+    ASSERT_SEMANTICO($1.tipo == $3.tipo,"Lista de inicializacion con expresion de tipo incorrecto", NULL);
+    $$.tipo = $1.tipo;
+    $$.valor_entero = 1 + $3.valor_entero;
+
+}
+                       | exp {
+
+                $$.tipo = $1.tipo;
+                $$.valor_entero = 1;
+}
+
+
+
+
 
 idf_llamada_funcion : identificador_uso {
 		en_explist = 1;

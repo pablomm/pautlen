@@ -1,0 +1,10 @@
+main
+{
+	int y;
+	function int cero() {
+		int x;
+		x = 0;
+		return x;
+	}
+	cero += 88;
+}

@@ -1,0 +1,32 @@
+main {
+	array int[6] v;
+	array boolean[6] w;
+	int x, y;
+
+	function int numero() {
+		int z;
+
+		z = 2;
+		return z + 1;
+	}
+
+	x =2;
+	y = x+1;
+
+	init v {-10; 10; y+5; (numero()*x)/3; 9};
+	init w {true; false; (2 == (2+ numero())); (9 > y)};
+	
+	printf v[0];
+	printf v[1];
+	printf v[2];
+	printf v[3];
+	printf v[4];
+	printf v[5];
+
+	printf w[0];
+	printf w[1];
+	printf w[2];
+	printf w[3];
+	printf w[4];
+	printf w[5];
+}

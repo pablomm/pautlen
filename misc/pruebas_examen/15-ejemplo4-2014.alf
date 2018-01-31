@@ -1,0 +1,29 @@
+main {
+	int a,b;
+
+	scanf a;
+	scanf b;
+
+	compare a with b {
+		less
+			printf (a-b);
+			printf (-1);
+
+		equal
+			printf (a-b);
+			printf (0);
+		greater
+			printf (a-b);
+			printf (1);
+	}
+
+	compare b with a {
+	less
+		printf (-100);
+
+	equal
+		printf (0);
+	greater
+		printf (100);
+	}
+}

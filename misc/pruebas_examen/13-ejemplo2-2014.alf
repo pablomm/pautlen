@@ -1,0 +1,20 @@
+main {
+	int a,b, c;
+
+	scanf a;
+	scanf b;
+	scanf c;
+
+	compare a with (b<c) {
+		less
+			printf (b);
+			printf (-1);
+
+		equal
+			printf (b);
+			printf (0);
+		greater
+			printf (b);
+			printf (1);
+	}
+}
