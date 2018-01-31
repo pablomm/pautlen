@@ -133,7 +133,7 @@ void escribir_fin(FILE* fpasm)
     PUT_ASM("jmp near fin");
 
     /* Error division por 0 */
-    PUT_LABEL("error_division");
+    PUT_LABEL("__error_division");
     PUT_ASM("push __msg_error_division");
     PUT_ASM("jmp near __salida_mensaje_error");
 
@@ -240,12 +240,12 @@ void no(FILE* fpasm, int es_referencia, int cuantos_no)
 
     PUT_ASM("pop eax");
     PUT_ASM("cmp dword %s, 0", es_referencia ? "[eax]" : "eax");
-    PUT_ASM("je _one_%d", cuantos_no);
+    PUT_ASM("je __one_%d", cuantos_no);
     PUT_ASM("push dword 0");
-    PUT_ASM("jmp _end_not_%d", cuantos_no);
-    PUT_LABEL("_one_%d", cuantos_no);
+    PUT_ASM("jmp __end_not_%d", cuantos_no);
+    PUT_LABEL("__one_%d", cuantos_no);
     PUT_ASM("push dword 1");
-    PUT_LABEL("_end_not_%d", cuantos_no);
+    PUT_LABEL("__end_not_%d", cuantos_no);
 }
 
 
@@ -355,7 +355,7 @@ void dividir(FILE* fpasm, int es_referencia_1, int es_referencia_2)
         PUT_ASM("mov ebx, dword [ebx]");
 
     PUT_ASM("cmp ebx, 0");
-    PUT_ASM("je error_division");
+    PUT_ASM("je __error_division");
 
     PUT_ASM("cdq");
     PUT_ASM("idiv ebx");
@@ -471,15 +471,15 @@ void igual(FILE* fpasm, int es_referencia_1, int es_referencia_2, int etiqueta)
     }
 
     /* Comprobamos igualdad */
-    PUT_ASM("je _igual_%d", etiqueta);
+    PUT_ASM("je __igual_%d", etiqueta);
 
     /* Caso no se cumple la condicion */
     PUT_ASM("push dword 0");
-    PUT_ASM("jmp _end_igual_%d", etiqueta);
+    PUT_ASM("jmp __end_igual_%d", etiqueta);
 
-    PUT_LABEL("_igual_%d", etiqueta);
+    PUT_LABEL("__igual_%d", etiqueta);
     PUT_ASM("push dword 1");
-    PUT_LABEL("_end_igual_%d", etiqueta);
+    PUT_LABEL("__end_igual_%d", etiqueta);
 }
 
 void distinto(FILE* fpasm, int es_referencia_1, int es_referencia_2, int etiqueta)
@@ -506,15 +506,15 @@ void distinto(FILE* fpasm, int es_referencia_1, int es_referencia_2, int etiquet
     }
 
     /* Comprobamos igualdad */
-    PUT_ASM("je _distinto_%d", etiqueta);
+    PUT_ASM("je __distinto_%d", etiqueta);
 
     /* Caso se cumple la condicion */
     PUT_ASM("push dword 1");
-    PUT_ASM("jmp _end_distinto_%d", etiqueta);
+    PUT_ASM("jmp __end_distinto_%d", etiqueta);
 
-    PUT_LABEL("_distinto_%d", etiqueta);
+    PUT_LABEL("__distinto_%d", etiqueta);
     PUT_ASM("push dword 0");
-    PUT_LABEL("_end_distinto_%d", etiqueta);
+    PUT_LABEL("__end_distinto_%d", etiqueta);
 }
 
 
@@ -535,15 +535,15 @@ void menorigual(FILE* fpasm, int es_referencia_1, int es_referencia_2, int etiqu
 
     /* Comprobamos menor o igual */
     /* JLE Jump Less or equal para signed */
-    PUT_ASM("jle _menorigual_%d", etiqueta);
+    PUT_ASM("jle __menorigual_%d", etiqueta);
 
     /* Caso se cumple la condicion */
     PUT_ASM("push dword 0");
-    PUT_ASM("jmp _end_menorigual_%d", etiqueta);
+    PUT_ASM("jmp __end_menorigual_%d", etiqueta);
 
-    PUT_LABEL("_menorigual_%d", etiqueta);
+    PUT_LABEL("__menorigual_%d", etiqueta);
     PUT_ASM("push dword 1");
-    PUT_LABEL("_end_menorigual_%d", etiqueta);
+    PUT_LABEL("__end_menorigual_%d", etiqueta);
 }
 
 void mayorigual(FILE* fpasm, int es_referencia_1, int es_referencia_2, int etiqueta)
@@ -563,15 +563,15 @@ void mayorigual(FILE* fpasm, int es_referencia_1, int es_referencia_2, int etiqu
 
     /* Comprobamos menor o igual */
     /* JGE Jump greater or equal para signed */
-    PUT_ASM("jge _mayorigual_%d", etiqueta);
+    PUT_ASM("jge __mayorigual_%d", etiqueta);
 
     /* Caso se cumple la condicion */
     PUT_ASM("push dword 0");
-    PUT_ASM("jmp _end_mayorigual_%d", etiqueta);
+    PUT_ASM("jmp __end_mayorigual_%d", etiqueta);
 
-    PUT_LABEL("_mayorigual_%d", etiqueta);
+    PUT_LABEL("__mayorigual_%d", etiqueta);
     PUT_ASM("push dword 1");
-    PUT_LABEL("_end_mayorigual_%d", etiqueta);
+    PUT_LABEL("__end_mayorigual_%d", etiqueta);
 }
 
 void menor(FILE* fpasm, int es_referencia_1, int es_referencia_2, int etiqueta)
@@ -591,15 +591,15 @@ void menor(FILE* fpasm, int es_referencia_1, int es_referencia_2, int etiqueta)
 
     /* Comprobamos menor o igual */
     /* JL Jump Less para signed */
-    PUT_ASM("jl _menor_%d", etiqueta);
+    PUT_ASM("jl __menor_%d", etiqueta);
 
     /* Caso se cumple la condicion */
     PUT_ASM("push dword 0");
-    PUT_ASM("jmp _end_menor_%d", etiqueta);
+    PUT_ASM("jmp __end_menor_%d", etiqueta);
 
-    PUT_LABEL("_menor_%d", etiqueta);
+    PUT_LABEL("__menor_%d", etiqueta);
     PUT_ASM("push dword 1");
-    PUT_LABEL("_end_menor_%d", etiqueta);
+    PUT_LABEL("__end_menor_%d", etiqueta);
 }
 
 void mayor(FILE* fpasm, int es_referencia_1, int es_referencia_2, int etiqueta)
@@ -619,15 +619,15 @@ void mayor(FILE* fpasm, int es_referencia_1, int es_referencia_2, int etiqueta)
 
     /* Comprobamos menor o igual */
     /* JG Jump Less or equal para signed */
-    PUT_ASM("jg _mayor_%d", etiqueta);
+    PUT_ASM("jg __mayor_%d", etiqueta);
 
     /* Caso se cumple la condicion */
     PUT_ASM("push dword 0");
-    PUT_ASM("jmp _end_mayor_%d", etiqueta);
+    PUT_ASM("jmp __end_mayor_%d", etiqueta);
 
-    PUT_LABEL("_mayor_%d", etiqueta);
+    PUT_LABEL("__mayor_%d", etiqueta);
     PUT_ASM("push dword 1");
-    PUT_LABEL("_end_mayor_%d", etiqueta);
+    PUT_LABEL("__end_mayor_%d", etiqueta);
 }
 
 void generar_if_then(FILE* fpasm, int es_referencia, int etiqueta)
@@ -641,7 +641,7 @@ void generar_if_then(FILE* fpasm, int es_referencia, int etiqueta)
     PUT_ASM("cmp eax, 0");
 
     // Si es igual a 0, es falso y saltamos al else
-    PUT_ASM("je near _else_%d", etiqueta);
+    PUT_ASM("je __else_%d", etiqueta);
 
     // En caso contrario, caemos al then
     PUT_COMMENT("then (%i)", etiqueta);
@@ -650,20 +650,20 @@ void generar_if_then(FILE* fpasm, int es_referencia, int etiqueta)
 void generar_else(FILE* fpasm, int etiqueta)
 {
     PUT_COMMENT("else (%i)", etiqueta);
-    PUT_ASM("jmp near _endif_%d", etiqueta);
-    PUT_LABEL("_else_%d", etiqueta);
+    PUT_ASM("jmp near __endif_%d", etiqueta);
+    PUT_LABEL("__else_%d", etiqueta);
 }
 
 void generar_endif(FILE* fpasm, int etiqueta)
 {
     PUT_COMMENT("endif (%i)", etiqueta);
-    PUT_LABEL("_endif_%d", etiqueta);
+    PUT_LABEL("__endif_%d", etiqueta);
 }
 
 void generar_while(FILE* fpasm, int etiqueta)
 {
     PUT_COMMENT("while (%i)", etiqueta);
-    PUT_LABEL("_while_%d", etiqueta);
+    PUT_LABEL("__while_%d", etiqueta);
 }
 
 void generar_do(FILE* fpasm, int es_referencia, int etiqueta)
@@ -677,7 +677,7 @@ void generar_do(FILE* fpasm, int es_referencia, int etiqueta)
     PUT_ASM("cmp eax, 0");
 
     // Si es igual a 0, es falso y terminamos el bucle
-    PUT_ASM("je near _endwhile_%d", etiqueta);
+    PUT_ASM("je near __endwhile_%d", etiqueta);
 
     // En caso contrario, caemos al then
 }
@@ -685,8 +685,8 @@ void generar_do(FILE* fpasm, int es_referencia, int etiqueta)
 void generar_endwhile(FILE* fpasm, int etiqueta)
 {
     PUT_COMMENT("endwhile (%i)", etiqueta);
-    PUT_ASM("jmp near _while_%d", etiqueta);
-    PUT_LABEL("_endwhile_%d", etiqueta);
+    PUT_ASM("jmp __while_%d", etiqueta);
+    PUT_LABEL("__endwhile_%d", etiqueta);
 }
 
 void generar_prologo_funcion(FILE* fpasm, const char* nombre, int num_locales)

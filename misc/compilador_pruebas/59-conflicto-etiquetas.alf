@@ -1,0 +1,15 @@
+main {
+
+	int x;
+
+	function int error_division(int a) {
+
+		return a;
+	}
+
+	function int one_1(int x){
+		return x;
+	}
+
+	printf !true;
+}
